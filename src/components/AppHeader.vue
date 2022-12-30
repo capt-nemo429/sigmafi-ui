@@ -27,14 +27,14 @@ const ergBalance = computed(() => {
           >SigmaFi <span class="badge badge-outline font-normal">testnet</span></a
         >
 
-        <ul class="menu menu-horizontal px-1">
+        <!-- <ul class="menu menu-horizontal px-1">
           <li>
             <a>Market</a>
           </li>
           <li>
             <a>Dashboard</a>
           </li>
-        </ul>
+        </ul> -->
       </div>
 
       <div class="flex-1r"></div>

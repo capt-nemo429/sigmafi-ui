@@ -19,7 +19,7 @@ const props = defineProps({
 const logo = computed(() => {
   const logoFile = assetIconMap[props.tokenId];
   if (logoFile) {
-    return `/asset-icons/${logoFile}`;
+    return `./asset-icons/${logoFile}`;
   }
 
   return undefined;
