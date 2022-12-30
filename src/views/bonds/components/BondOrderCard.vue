@@ -215,7 +215,7 @@ async function cancelOrder() {
           class="btn btn-sm btn-primary flex-grow"
           :disabled="!wallet.connected || loadingBox"
         >
-          Borrow
+          Lend
         </button>
       </div>
     </div>
