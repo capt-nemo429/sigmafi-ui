@@ -23,7 +23,10 @@ const ergBalance = computed(() => {
   >
     <div class="navbar w-full px-4 flex">
       <div class="flex-1 gap-2">
-        <a class="btn btn-ghost normal-case text-xl">SigmaFi</a>
+        <a class="btn btn-ghost normal-case text-xl gap-2"
+          >SigmaFi <span class="badge badge-outline font-normal">testnet</span></a
+        >
+
         <ul class="menu menu-horizontal px-1">
           <li>
             <a>Market</a>
@@ -34,7 +37,7 @@ const ergBalance = computed(() => {
         </ul>
       </div>
 
-      <div class="flex-1"></div>
+      <div class="flex-1r"></div>
 
       <div class="flex-2">
         <ul class="menu menu-horizontal px-1 gap-2">
