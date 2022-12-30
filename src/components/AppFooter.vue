@@ -1,0 +1,37 @@
+<template>
+  <footer class="footer p-10 bg-base-300 bg-opacity-50 z-30 text-base-content">
+    <div>
+      <img src="/nautilus.svg" width="50" height="50" />
+      <p>Nautilus Team</p>
+      <p class="opacity-70">Ad augusta per angusta</p>
+    </div>
+    <div>
+      <span class="footer-title">Open Source</span>
+      <a
+        href="https://github.com/K-Singh/Sigma-Finance"
+        class="link link-hover"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Contracts</a
+      >
+      <a class="link link-hover" target="_blank" rel="noopener noreferrer"
+        >User Interface</a
+      >
+      <a class="link link-hover" target="_blank" rel="noopener noreferrer"
+        >Off-chain Plugins</a
+      >
+    </div>
+    <div>
+      <span class="footer-title">Social</span>
+      <a class="link link-hover" target="_blank" rel="noopener noreferrer"
+        >Twitter</a
+      >
+      <a class="link link-hover" target="_blank" rel="noopener noreferrer"
+        >Telegram</a
+      >
+      <a class="link link-hover" target="_blank" rel="noopener noreferrer"
+        >GitHub</a
+      >
+    </div>
+  </footer>
+</template>

@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.stat {
+  @apply gap-0.5;
+}
+
+.stat .stat-value {
+  @apply text-xl font-semibold;
+}
+
+.asset-input {
+  @apply input input-bordered w-full cursor-text h-auto py-3 outline-2
+  outline-offset-2 outline-base-300/90 focus-within:outline focus:outline;
+}
+
+.asset-input input {
+  @apply bg-transparent;
+}
+
+.input,
+.select {
+  @apply bg-base-100 focus:outline-offset-2 focus:outline-2 focus:outline-base-300/90;
+}
+
+.input-group span {
+  @apply border border-base-content border-opacity-20 bg-base-100;
+}
+
+.form-control .label {
+  @apply pb-1 pt-4;
+}
+
+.form-control .label-text.big {
+  @apply text-lg;
+}
+
+.modal-box {
+  @apply z-30 !bg-base-200;
+}
+
+.modal-box .divider {
+  @apply -mx-6 opacity-60;
+}
+
+.dropdown .dropdown-content {
+  @apply visible opacity-100;
+}
+
+.skeleton .skeleton-fixed {
+  @apply bg-base-300 rounded-md animate-pulse text-transparent;
+}
+
+.skeleton .skeleton-placeholder {
+  @apply bg-base-300 rounded-md animate-pulse text-transparent w-8/12;
+}
+
+.skeleton-fixed.skeleton-circular,
+.skeleton-placeholder.skeleton-circular {
+  @apply rounded-full;
+}
