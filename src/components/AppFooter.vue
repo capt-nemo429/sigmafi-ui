@@ -14,24 +14,26 @@
         rel="noopener noreferrer"
         >Contracts</a
       >
-      <a class="link link-hover" target="_blank" rel="noopener noreferrer"
+      <a
+        href="https://github.com/capt-nemo429/sigmafi-ui"
+        class="link link-hover"
+        target="_blank"
+        rel="noopener noreferrer"
         >User Interface</a
       >
-      <a class="link link-hover" target="_blank" rel="noopener noreferrer"
+      <a
+        href="https://github.com/capt-nemo429/sigmafi-ui/blob/main/src/offchain/plugins.ts"
+        class="link link-hover"
+        target="_blank"
+        rel="noopener noreferrer"
         >Off-chain Plugins</a
       >
     </div>
     <div>
       <span class="footer-title">Social</span>
-      <a class="link link-hover" target="_blank" rel="noopener noreferrer"
-        >Twitter</a
-      >
-      <a class="link link-hover" target="_blank" rel="noopener noreferrer"
-        >Telegram</a
-      >
-      <a class="link link-hover" target="_blank" rel="noopener noreferrer"
-        >GitHub</a
-      >
+      <a class="link link-hover" target="_blank" rel="noopener noreferrer">Twitter</a>
+      <a class="link link-hover" target="_blank" rel="noopener noreferrer">Telegram</a>
+      <a class="link link-hover" target="_blank" rel="noopener noreferrer">GitHub</a>
     </div>
   </footer>
 </template>
