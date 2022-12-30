@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ERG_DECIMALS, ERG_TOKEN_ID } from "@/constants";
 import { useWalletStore } from "@/stories/walletStore";
-import { formatBigNumber, shortenString } from "@/utils";
+import { formatBigNumber, shortenString, showToast } from "@/utils";
 import { Box, decimalize, isDefined, Network } from "@fleet-sdk/common";
 import { ErgoAddress, SAFE_MIN_BOX_VALUE, SParse } from "@fleet-sdk/core";
 import { computed, PropType, ref, toRaw } from "vue";
@@ -135,13 +135,7 @@ async function cancelOrder() {
       message = "dApp Connector: " + e.info;
     }
 
-    const { oruga } = useProgrammatic();
-    oruga.notification.open({
-      duration: 5000,
-      message,
-      rootClass: "toast toast-top toast-center min-w-max bg-transparent",
-      contentClass: "alert alert-error"
-    });
+    showToast(message, "alert-error");
   }
 }
 </script>

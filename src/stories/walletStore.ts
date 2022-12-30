@@ -1,7 +1,9 @@
 import { ERG_DECIMALS, ERG_TOKEN_ID } from "@/constants";
 import { graphQLService } from "@/services/graphqlService";
 import { AssetInfo, AssetMetadata } from "@/types";
-import { isEmpty, isUndefined, some } from "@fleet-sdk/common";
+import { showToast } from "@/utils";
+import { isEmpty, isUndefined, Network, some } from "@fleet-sdk/common";
+import { ErgoAddress } from "@fleet-sdk/core";
 import { EIP12ErgoAPI } from "@nautilus-js/eip12-types";
 import { uniq } from "lodash-es";
 import { defineStore, acceptHMRUpdate } from "pinia";
@@ -48,15 +50,24 @@ export const useWalletStore = defineStore("wallet", () => {
 
       _loading.value = true;
 
-      _connected.value = await ergoConnector.nautilus.connect({
+      const granted = await ergoConnector.nautilus.connect({
         createErgoObject: false
       });
 
-      if (connected.value) {
-        localStorage.setItem("firstConnected", "true");
-
+      if (granted) {
         _context = await ergoConnector.nautilus.getContext();
+        const change = ErgoAddress.fromBase58(await _context.get_change_address());
+        if (change.network === Network.Testnet) {
+          showToast(
+            "Wrong network. This dApp is running on Testnet, but your wallet is a Mainnet wallet.",
+            "alert-error"
+          );
+          disconnect();
+          return;
+        }
 
+        _connected.value = true;
+        localStorage.setItem("firstConnected", "true");
         await _fetchData();
         if (some(balance.value)) {
           loadTokensMetadata(

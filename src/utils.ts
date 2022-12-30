@@ -1,4 +1,5 @@
 import { BigNumber } from "bignumber.js";
+import { useProgrammatic } from "@oruga-ui/oruga-next";
 
 export function setSystemTheme() {
   const isInDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -69,4 +70,17 @@ export function undecimalizeBN(number: BigNumber, decimals: number) {
 
 export function decimalizeBN(number: BigNumber, decimals: number) {
   return number.decimalPlaces(decimals).shiftedBy(decimals * -1);
+}
+
+export function showToast(
+  msg: string,
+  type: "alert-success" | "alert-error" | "alert-info" = "alert-info"
+) {
+  const { oruga } = useProgrammatic();
+  oruga.notification.open({
+    duration: 5000,
+    message: msg,
+    rootClass: "toast toast-top toast-center min-w-max bg-transparent",
+    contentClass: "alert " + type
+  });
 }

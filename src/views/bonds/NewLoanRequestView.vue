@@ -6,7 +6,7 @@ import { computed, reactive } from "vue";
 import { ERG_DECIMALS, ERG_TOKEN_ID } from "@/constants";
 import { decimalize, isDefined, isEmpty, TokenAmount } from "@fleet-sdk/common";
 import { BigNumber } from "bignumber.js";
-import { formatBigNumber, shortenString, undecimalizeBN } from "@/utils";
+import { formatBigNumber, shortenString, showToast, undecimalizeBN } from "@/utils";
 import SigDropdown from "@/components/SigDropdown.vue";
 import AssetIcon from "@/components/AssetIcon.vue";
 import { differenceBy, remove } from "lodash-es";
@@ -164,13 +164,7 @@ async function submit() {
       message = "dApp Connector: " + e.info;
     }
 
-    const { oruga } = useProgrammatic();
-    oruga.notification.open({
-      duration: 5000,
-      message,
-      rootClass: "toast toast-top toast-center min-w-max bg-transparent",
-      contentClass: "alert alert-error"
-    });
+    showToast(message, "alert-error");
   }
 }
 </script>
