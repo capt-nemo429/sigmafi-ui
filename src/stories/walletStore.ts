@@ -1,7 +1,7 @@
 import { ERG_DECIMALS, ERG_TOKEN_ID } from "@/constants";
 import { graphQLService } from "@/services/graphqlService";
 import { AssetInfo, AssetMetadata } from "@/types";
-import { showToast } from "@/utils";
+import { getNetworkType, showToast } from "@/utils";
 import { isEmpty, isUndefined, Network, some } from "@fleet-sdk/common";
 import { ErgoAddress } from "@fleet-sdk/core";
 import { EIP12ErgoAPI } from "@nautilus-js/eip12-types";
@@ -43,44 +43,45 @@ export const useWalletStore = defineStore("wallet", () => {
 
   // actions
   async function connect() {
-    if (ergoConnector?.nautilus) {
-      if (await ergoConnector.nautilus.isConnected()) {
+    if (typeof ergoConnector === "undefined" || !ergoConnector.nautilus) {
+      showToast("Nautilus wallet is not installed", "alert-error");
+
+      return;
+    }
+
+    if (await ergoConnector.nautilus.isConnected()) {
+      return;
+    }
+
+    _loading.value = true;
+
+    const granted = await ergoConnector.nautilus.connect({
+      createErgoObject: false
+    });
+
+    if (granted) {
+      _context = await ergoConnector.nautilus.getContext();
+      const change = ErgoAddress.fromBase58(await _context.get_change_address());
+      if (change.network !== getNetworkType()) {
+        disconnect();
+        showToast("Wrong wallet network.", "alert-error");
+
         return;
       }
 
-      _loading.value = true;
-
-      const granted = await ergoConnector.nautilus.connect({
-        createErgoObject: false
-      });
-
-      if (granted) {
-        _context = await ergoConnector.nautilus.getContext();
-        const change = ErgoAddress.fromBase58(await _context.get_change_address());
-        if (change.network !== Network.Testnet) {
-          disconnect();
-          showToast(
-            "Wrong network. This dApp is running on Testnet, but your wallet is a Mainnet wallet.",
-            "alert-error"
-          );
-
-          return;
-        }
-
-        _connected.value = true;
-        localStorage.setItem("firstConnected", "true");
-        await _fetchData();
-        if (some(balance.value)) {
-          loadTokensMetadata(
-            balance.value.filter((x) => isUndefined(x.metadata)).map((x) => x.tokenId)
-          );
-        }
-      } else {
-        localStorage.setItem("firstConnected", "false");
+      _connected.value = true;
+      localStorage.setItem("firstConnected", "true");
+      await _fetchData();
+      if (some(balance.value)) {
+        loadTokensMetadata(
+          balance.value.filter((x) => isUndefined(x.metadata)).map((x) => x.tokenId)
+        );
       }
-
-      _loading.value = false;
+    } else {
+      localStorage.setItem("firstConnected", "false");
     }
+
+    _loading.value = false;
   }
 
   async function disconnect() {

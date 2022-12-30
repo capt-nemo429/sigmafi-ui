@@ -4,7 +4,8 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev:mainnet": "VITE_NETWORK=mainnet vite",
+    "dev:testnet": "VITE_NETWORK=testnet vite",
     "build": "vue-tsc && vite build",
     "preview": "vite preview"
   },

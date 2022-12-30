@@ -6,7 +6,7 @@ import NewLoanRequestView from "@/views/bonds/NewLoanRequestView.vue";
 import { onMounted, reactive, ref } from "vue";
 import { graphQLService } from "@/services/graphqlService";
 import { ERG_ON_CLOSE_OPEN_ORDER_CONTRACT } from "@/offchain/plugins";
-import { Box } from "@fleet-sdk/common";
+import { Box, isEmpty } from "@fleet-sdk/common";
 
 const { oruga } = useProgrammatic();
 const wallet = useWalletStore();
@@ -50,7 +50,7 @@ onMounted(async () => {
     >
       <bond-order-card
         v-if="loading.boxes"
-        v-for="n in 8"
+        v-for="n in 4"
         :loading-box="loading.boxes"
         :loading-metadata="loading.metadata"
         :key="n"
@@ -63,6 +63,9 @@ onMounted(async () => {
         :loading-metadata="loading.metadata"
         :key="box.boxId"
       />
+    </div>
+    <div v-if="!loading.boxes && isEmpty(boxes)" class="text-7xl text-center w-full pb-20">
+      <div class="py-20">No open orders for now.</div>
     </div>
   </div>
 </template>

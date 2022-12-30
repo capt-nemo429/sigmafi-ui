@@ -1,12 +1,16 @@
 import { Client, createClient, gql } from "@urql/core";
 import { Box as GraphQLBox, Token } from "@ergo-graphql/types";
-import { chunk, Box, NonMandatoryRegisters } from "@fleet-sdk/common";
+import { chunk, Box, NonMandatoryRegisters, Network } from "@fleet-sdk/common";
+import { getNetworkType } from "@/utils";
 
 class GraphQLService {
   private _client: Client;
   constructor() {
     this._client = createClient({
-      url: "https://tn-ergo-explorer.anetabtc.io/graphql", // "https://graphql.erg.zelcore.io/", //, //
+      url:
+        getNetworkType() === Network.Mainnet
+          ? "https://graphql.erg.zelcore.io/"
+          : "https://tn-ergo-explorer.anetabtc.io/graphql",
       requestPolicy: "network-only"
     });
   }

@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { useDefaultStore } from "@/stories/defaultStore";
 import { useWalletStore } from "@/stories/walletStore";
-import { shortenString } from "@/utils";
-import { decimalize } from "@fleet-sdk/common";
+import { getNetworkType, shortenString } from "@/utils";
+import { decimalize, Network } from "@fleet-sdk/common";
 import { computed } from "vue";
 import { MoonIcon, SunIcon } from "@zhuowenli/vue-feather-icons";
 import { ERG_DECIMALS } from "@/constants";
 
 const defaultStore = useDefaultStore();
 const wallet = useWalletStore();
+const isTestnet = getNetworkType() === Network.Testnet;
 
 const ergBalance = computed(() => {
   const balance = wallet.balance.find((x) => x.tokenId === "ERG")?.amount || "0";
@@ -24,7 +25,7 @@ const ergBalance = computed(() => {
     <div class="navbar w-full px-4 flex">
       <div class="flex-1 gap-2">
         <a class="btn btn-ghost normal-case text-xl gap-2"
-          >SigmaFi <span class="badge badge-outline font-normal">testnet</span></a
+          >SigmaFi <span v-if="isTestnet" class="badge badge-outline font-normal">testnet</span></a
         >
 
         <!-- <ul class="menu menu-horizontal px-1">

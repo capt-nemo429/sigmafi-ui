@@ -1,5 +1,6 @@
 import { BigNumber } from "bignumber.js";
 import { useProgrammatic } from "@oruga-ui/oruga-next";
+import { Network } from "@fleet-sdk/common";
 
 export function setSystemTheme() {
   const isInDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -83,4 +84,12 @@ export function showToast(
     rootClass: "toast toast-top toast-center min-w-max bg-transparent",
     contentClass: "alert " + type
   });
+}
+
+export function getNetworkType(): Network {
+  if (import.meta.env.PROD) {
+    return Network.Mainnet;
+  }
+
+  return import.meta.env.VITE_NETWORK === "testnet" ? Network.Testnet : Network.Mainnet;
 }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ERG_DECIMALS, ERG_TOKEN_ID } from "@/constants";
 import { useWalletStore } from "@/stories/walletStore";
-import { formatBigNumber, shortenString, showToast } from "@/utils";
+import { formatBigNumber, getNetworkType, shortenString, showToast } from "@/utils";
 import { Box, decimalize, isDefined, Network } from "@fleet-sdk/common";
 import { ErgoAddress, SAFE_MIN_BOX_VALUE, SParse } from "@fleet-sdk/core";
 import { computed, PropType, ref, toRaw } from "vue";
@@ -55,7 +55,7 @@ const order = computed(() => {
   if (props.box.additionalRegisters.R4) {
     borrowerAddress = ErgoAddress.fromPublicKey(
       props.box.additionalRegisters.R4.substring(4)
-    ).encode(Network.Testnet);
+    ).encode(getNetworkType());
   }
 
   return {
