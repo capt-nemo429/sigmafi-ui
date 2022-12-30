@@ -57,12 +57,13 @@ export const useWalletStore = defineStore("wallet", () => {
       if (granted) {
         _context = await ergoConnector.nautilus.getContext();
         const change = ErgoAddress.fromBase58(await _context.get_change_address());
-        if (change.network === Network.Testnet) {
+        if (change.network !== Network.Testnet) {
+          disconnect();
           showToast(
             "Wrong network. This dApp is running on Testnet, but your wallet is a Mainnet wallet.",
             "alert-error"
           );
-          disconnect();
+
           return;
         }
 
