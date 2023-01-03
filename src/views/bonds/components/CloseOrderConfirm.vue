@@ -169,7 +169,7 @@ async function closeOrder() {
 
     <div class="modal-action">
       <button class="btn btn-ghost" @click="emit('close')">Cancel</button>
-      <button class="btn btn-primary" @click="closeOrder()">Confirm</button>
+      <button class="btn btn-primary" :class="{ loading }" @click="closeOrder()">Confirm</button>
     </div>
   </div>
 </template>
