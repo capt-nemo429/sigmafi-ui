@@ -11,6 +11,7 @@ setSystemTheme();
 
 const orugaSettings = {
   modal: {
+    trapFocus: true,
     overlayClass: "opacity-80",
     rootClass: "outline-none",
     contentClass: "modal-box"

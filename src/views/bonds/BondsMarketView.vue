@@ -5,7 +5,7 @@ import { useWalletStore } from "@/stories/walletStore";
 import NewLoanRequestView from "@/views/bonds/NewLoanRequestView.vue";
 import { onMounted, reactive, ref } from "vue";
 import { graphQLService } from "@/services/graphqlService";
-import { ERG_ON_CLOSE_OPEN_ORDER_CONTRACT } from "@/offchain/plugins";
+import { ORDER_ON_CLOSE_ERG_CONTRACT } from "@/offchain/plugins";
 import { Box, isEmpty } from "@fleet-sdk/common";
 
 const { oruga } = useProgrammatic();
@@ -18,14 +18,13 @@ function openModal() {
   oruga.modal.open({
     component: NewLoanRequestView,
     props: { msg: "test" },
-    trapFocus: true,
     width: "30rem"
   });
 }
 
 onMounted(async () => {
   loading.boxes = true;
-  boxes.value = await graphQLService.getBoxes([ERG_ON_CLOSE_OPEN_ORDER_CONTRACT]);
+  boxes.value = await graphQLService.getBoxes([ORDER_ON_CLOSE_ERG_CONTRACT]);
   loading.boxes = false;
 
   loading.metadata = true;

@@ -1,20 +1,22 @@
 <script setup lang="ts">
-import { ERG_DECIMALS, ERG_TOKEN_ID } from "@/constants";
+import { ERG_TOKEN_ID } from "@/constants";
 import { useWalletStore } from "@/stories/walletStore";
-import { formatBigNumber, getNetworkType, shortenString, showToast } from "@/utils";
-import { Box, decimalize, isDefined, Network } from "@fleet-sdk/common";
-import { ErgoAddress, SAFE_MIN_BOX_VALUE, SParse } from "@fleet-sdk/core";
+import { shortenString, showToast } from "@/utils";
+import { Box, decimalize, isDefined } from "@fleet-sdk/common";
 import { computed, PropType, ref, toRaw } from "vue";
 import AssetIcon from "@/components/AssetIcon.vue";
-import BigNumber from "bignumber.js";
 import { useProgrammatic } from "@oruga-ui/oruga-next";
 import { TransactionFactory } from "@/offchain/transactionFactory";
 import TxIdNotification from "@/components/TxIdNotification.vue";
+import { parseOpenOrderBox } from "@/utils/bondUtils";
+import CloseOrderConfirm from "./CloseOrderConfirm.vue";
 
+const { oruga } = useProgrammatic();
 const wallet = useWalletStore();
 
 const props = defineProps({
   box: { type: Object as PropType<Box<string>>, required: false },
+  hideActions: { type: Boolean, default: false },
   loadingBox: { type: Boolean, default: false },
   loadingMetadata: { type: Boolean, default: false }
 });
@@ -26,85 +28,15 @@ const order = computed(() => {
     return;
   }
 
-  const collateral = props.box.assets.map((token) => ({
-    tokenId: token.tokenId,
-    amount: token.amount,
-    metadata: wallet.metadata[token.tokenId]
-  }));
-
-  if (BigInt(props.box.value) > SAFE_MIN_BOX_VALUE) {
-    collateral.unshift({
-      tokenId: ERG_TOKEN_ID,
-      amount: props.box.value,
-      metadata: { decimals: ERG_DECIMALS, name: "ERG" }
-    });
-  }
-
-  const interest = new BigNumber(parseOr(props.box.additionalRegisters.R6, "0"))
-    .minus(parseOr(props.box.additionalRegisters.R5, "0"))
-    .dividedBy(parseOr(props.box.additionalRegisters.R5, "0"))
-    .multipliedBy(100)
-    .decimalPlaces(3);
-
-  const apr = interest
-    .dividedBy((parseOr(props.box.additionalRegisters.R7, 0) * 2) / 60 / 24)
-    .multipliedBy(365)
-    .decimalPlaces(3);
-
-  let borrowerAddress: string | undefined;
-  if (props.box.additionalRegisters.R4) {
-    borrowerAddress = ErgoAddress.fromPublicKey(
-      props.box.additionalRegisters.R4.substring(4)
-    ).encode(getNetworkType());
-  }
-
-  return {
-    amount: decimalizeDefault(parseOr(props.box.additionalRegisters.R5, "0"), ERG_DECIMALS),
-    term: blockToTime(parseOr(props.box.additionalRegisters.R7, 0)),
-    collateral,
-    interest: formatBigNumber(interest, 3),
-    apr: formatBigNumber(apr, 3),
-    cancellable: borrowerAddress ? wallet.usedAddresses.includes(borrowerAddress) : false
-  };
+  return parseOpenOrderBox(props.box, wallet.metadata, wallet.usedAddresses);
 });
 
-function blockToTime(blocks: number) {
-  const term = { interval: "", value: blocks * 2 };
-
-  if (term.value > 59) {
-    term.value /= 60;
-    term.interval = pluralize("hour", term.value);
-
-    if (term.value > 23) {
-      term.value /= 24;
-      term.interval = pluralize("day", term.value);
-
-      if (term.value > 29) {
-        term.value /= 30;
-        term.interval = pluralize("month", term.value);
-      }
-    }
-  } else {
-    term.interval = pluralize("minute", term.value);
-  }
-
-  return term;
-}
-
-function pluralize(word: string, val: number) {
-  if (val <= 1) {
-    return word;
-  }
-
-  return word + "s";
-}
-
-function decimalizeDefault(val: string, decimals: number) {
-  return decimalize(val, { decimals, thousandMark: "," });
-}
-
-function parseOr<T>(value: string | undefined, or: T) {
-  return value ? SParse<T>(value) : or;
+function openModal() {
+  oruga.modal.open({
+    component: CloseOrderConfirm,
+    props: { box: props.box },
+    width: "30rem"
+  });
 }
 
 async function cancelOrder() {
@@ -199,9 +131,12 @@ async function cancelOrder() {
 
     <div class="stat">
       <div class="stat-title">Interest</div>
-      <div class="stat-value skeleton-placeholder">{{ order?.interest }}%</div>
-      <div class="stat-desc skeleton-placeholder">{{ order?.apr }}% APR</div>
-      <div class="stat-actions text-center flex gap-2">
+      <div class="flex gap-2">
+        <div class="stat-value skeleton-placeholder flex-grow">{{ order?.interest.percent }}%</div>
+        <div class="skeleton-placeholder">{{ order?.interest.value }} <small>ERG</small></div>
+      </div>
+      <div class="stat-desc skeleton-placeholder">{{ order?.interest.apr }}% APR</div>
+      <div v-if="!props.hideActions" class="stat-actions text-center flex gap-2">
         <button
           v-if="order?.cancellable"
           @click="cancelOrder()"
@@ -212,6 +147,7 @@ async function cancelOrder() {
           Cancel
         </button>
         <button
+          @click="openModal()"
           class="btn btn-sm btn-primary flex-grow"
           :disabled="!wallet.connected || loadingBox"
         >

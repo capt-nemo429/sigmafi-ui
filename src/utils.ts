@@ -93,3 +93,34 @@ export function getNetworkType(): Network {
 
   return import.meta.env.VITE_NETWORK === "testnet" ? Network.Testnet : Network.Mainnet;
 }
+
+export function blockToTime(blocks: number) {
+  const term = { interval: "", value: blocks * 2 };
+
+  if (term.value > 59) {
+    term.value /= 60;
+    term.interval = pluralize("hour", term.value);
+
+    if (term.value > 23) {
+      term.value /= 24;
+      term.interval = pluralize("day", term.value);
+
+      if (term.value > 29) {
+        term.value /= 30;
+        term.interval = pluralize("month", term.value);
+      }
+    }
+  } else {
+    term.interval = pluralize("minute", term.value);
+  }
+
+  return term;
+}
+
+export function pluralize(word: string, val: number) {
+  if (val <= 1) {
+    return word;
+  }
+
+  return word + "s";
+}

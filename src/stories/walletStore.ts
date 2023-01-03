@@ -9,6 +9,8 @@ import { uniq } from "lodash-es";
 import { defineStore, acceptHMRUpdate } from "pinia";
 import { computed, onBeforeMount, ref } from "vue";
 
+export type StateAssetMetadata = { [tokenId: string]: AssetMetadata };
+
 export const useWalletStore = defineStore("wallet", () => {
   // private
   let _context: EIP12ErgoAPI | undefined;
@@ -19,7 +21,7 @@ export const useWalletStore = defineStore("wallet", () => {
   let _loading = ref(false);
   let _connected = ref(false);
   let _usedAddresses = ref<string[]>([]);
-  let _metadata = ref<{ [tokenId: string]: AssetMetadata }>({
+  let _metadata = ref<StateAssetMetadata>({
     [ERG_TOKEN_ID]: { name: "ERG", decimals: ERG_DECIMALS }
   });
 
