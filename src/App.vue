@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import AppHeader from "./components/AppHeader.vue";
 import AppFooter from "./components/AppFooter.vue";
-import BondsMarketView from "./views/bonds/BondsMarketView.vue";
 </script>
 
 <template>
@@ -9,7 +8,8 @@ import BondsMarketView from "./views/bonds/BondsMarketView.vue";
     <app-header />
 
     <main class="py-8 px-4 md:px-8 lg:px-16">
-      <bonds-market-view />
+      <router-view />
+      <!-- <bonds-market-view /> -->
     </main>
 
     <app-footer />

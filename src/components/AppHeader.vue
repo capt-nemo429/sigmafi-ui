@@ -24,18 +24,18 @@ const ergBalance = computed(() => {
   >
     <div class="navbar w-full px-4 flex">
       <div class="flex-1 gap-2">
-        <a class="btn btn-ghost normal-case text-xl gap-2"
-          >SigmaFi <span v-if="isTestnet" class="badge badge-outline font-normal">testnet</span></a
+        <router-link to="/" class="btn btn-ghost normal-case text-xl gap-2"
+          >SigmaFi
+          <span v-if="isTestnet" class="badge badge-outline font-normal">testnet</span></router-link
         >
-
-        <!-- <ul class="menu menu-horizontal px-1">
+        <ul class="menu menu-horizontal px-1 gap-2">
           <li>
-            <a>Market</a>
+            <router-link to="/" active-class="active-item">Market</router-link>
           </li>
           <li>
-            <a>Dashboard</a>
+            <router-link to="/dashboard" active-class="active-item">Dashboard</router-link>
           </li>
-        </ul> -->
+        </ul>
       </div>
 
       <div class="flex-1r"></div>
@@ -45,7 +45,7 @@ const ergBalance = computed(() => {
           <li></li>
           <li>
             <a
-              class="btn btn-ghost gap-1 bg-base-100 bg-opacity-60 no-animation h-2"
+              class="btn btn-ghost gap-1 bg-base-100 hover:bg-base-100 hover:bg-opacity-50 bg-opacity-50 no-animation h-2"
               :class="{ loading: wallet.loading }"
               @click="wallet.connect()"
             >
@@ -73,3 +73,13 @@ const ergBalance = computed(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.active-item {
+  @apply bg-base-100 bg-opacity-50;
+}
+
+.menu a {
+  @apply active:bg-base-100 active:text-base-content;
+}
+</style>

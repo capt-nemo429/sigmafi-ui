@@ -12,22 +12,25 @@ const { oruga } = useProgrammatic();
 const wallet = useWalletStore();
 
 const boxes = ref<Box<string>[]>();
-const loading = reactive({ boxes: false, metadata: true });
+const loading = reactive({ boxes: true, metadata: true });
 
-function openModal() {
+function openNewLoanModal() {
   oruga.modal.open({
     component: NewLoanRequestView,
-    props: { msg: "test" },
     width: "30rem"
   });
 }
 
 onMounted(async () => {
   loading.boxes = true;
-  boxes.value = await graphQLService.getBoxes([ORDER_ON_CLOSE_ERG_CONTRACT]);
+  loading.metadata = true;
+
+  boxes.value = await graphQLService.getBoxes({
+    ergoTrees: [ORDER_ON_CLOSE_ERG_CONTRACT],
+    spent: false
+  });
   loading.boxes = false;
 
-  loading.metadata = true;
   await wallet.loadTokensMetadata(boxes.value.flatMap((x) => x.assets.map((t) => t.tokenId)));
   loading.metadata = false;
 });
@@ -39,7 +42,7 @@ onMounted(async () => {
       <button
         class="btn btn-success shadow flex-col"
         :disabled="!wallet.connected"
-        @click="openModal()"
+        @click="openNewLoanModal()"
       >
         New loan request
       </button>

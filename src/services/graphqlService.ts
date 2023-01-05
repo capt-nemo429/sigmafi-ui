@@ -1,5 +1,5 @@
 import { Client, createClient, gql } from "@urql/core";
-import { Box as GraphQLBox, Token } from "@ergo-graphql/types";
+import { Box as GraphQLBox, QueryBoxesArgs, Token } from "@ergo-graphql/types";
 import { chunk, Box, NonMandatoryRegisters, Network } from "@fleet-sdk/common";
 import { getNetworkType } from "@/utils";
 
@@ -38,18 +38,22 @@ class GraphQLService {
     return [];
   }
 
-  public async getBoxes(
-    ergoTrees: string[],
-    spent = false,
-    take = 20,
-    skip = 0
-  ): Promise<Box<string>[]> {
-    const query = gql<
-      { boxes: GraphQLBox[] },
-      { ergoTrees: string[]; spent: boolean; skip: number; take: number }
-    >`
-      query Boxes($ergoTrees: [String!], $skip: Int, $take: Int, $spent: Boolean) {
-        boxes(ergoTrees: $ergoTrees, skip: $skip, take: $take, spent: $spent) {
+  public async getBoxes(args: QueryBoxesArgs): Promise<Box<string>[]> {
+    const query = gql<{ boxes: GraphQLBox[] }, QueryBoxesArgs>`
+      query Boxes(
+        $ergoTrees: [String!]
+        $registers: Registers
+        $spent: Boolean!
+        $skip: Int
+        $take: Int
+      ) {
+        boxes(
+          ergoTrees: $ergoTrees
+          registers: $registers
+          spent: $spent
+          skip: $skip
+          take: $take
+        ) {
           boxId
           transactionId
           value
@@ -65,7 +69,7 @@ class GraphQLService {
       }
     `;
 
-    const response = await this._client.query(query, { ergoTrees, spent, skip, take }).toPromise();
+    const response = await this._client.query(query, args).toPromise();
     return (
       response.data?.boxes.map((box) => ({
         ...box,

@@ -109,7 +109,7 @@ export const useWalletStore = defineStore("wallet", () => {
 
     _changeAddress.value = await _context.get_change_address();
     _usedAddresses.value = await _context.get_unused_addresses();
-    _usedAddresses.value.push(_changeAddress.value);
+    _usedAddresses.value.unshift(_changeAddress.value);
 
     _balance.value = (await _context.get_balance("all")).map((b) => ({
       tokenId: b.tokenId,
@@ -119,8 +119,9 @@ export const useWalletStore = defineStore("wallet", () => {
   }
 
   async function loadTokensMetadata(tokenIds: string[]) {
-    const metadataTokenIds = Object.keys(_metadata);
+    const metadataTokenIds = Object.keys(_metadata.value);
     tokenIds = tokenIds.filter((id) => !metadataTokenIds.includes(id));
+
     if (isEmpty(tokenIds)) {
       return;
     }
