@@ -47,7 +47,7 @@ const order = computed(() => {
   return parseOpenOrderBox(props.box, wallet.metadata, wallet.usedAddresses);
 });
 
-const explorerUrl = new URL(`addresses/${order.value?.borrowerAddress}`, EXPLORER_URL).href;
+const explorerUrl = new URL(`addresses/${order.value?.borrower}`, EXPLORER_URL).href;
 
 async function closeOrder() {
   if (!props.box) {
@@ -74,6 +74,10 @@ async function closeOrder() {
     if (e instanceof Error) {
       message = e.message;
     } else if (isDefined(e.info)) {
+      if (e.code === 2) {
+        return;
+      }
+
       message = "dApp Connector: " + e.info;
     }
 
@@ -152,7 +156,7 @@ async function closeOrder() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              {{ shortenString(order?.borrowerAddress, 20) }}
+              {{ shortenString(order?.borrower, 20) }}
               <external-link-icon class="inline pb-1" />
             </a>
           </div>

@@ -8,10 +8,8 @@ import AssetIcon from "@/components/AssetIcon.vue";
 import { useProgrammatic } from "@oruga-ui/oruga-next";
 import { TransactionFactory } from "@/offchain/transactionFactory";
 import TxIdNotification from "@/components/TxIdNotification.vue";
-import { parseOpenOrderBox } from "@/utils/bondUtils";
-import CloseOrderConfirm from "./CloseOrderConfirm.vue";
+import { parseBondBox } from "@/utils/bondUtils";
 
-const { oruga } = useProgrammatic();
 const wallet = useWalletStore();
 
 const props = defineProps({
@@ -20,43 +18,51 @@ const props = defineProps({
   loadingMetadata: { type: Boolean, default: false }
 });
 
-const cancelling = ref(false);
+const loading = ref(false);
 
-const order = computed(() => {
+const termProgress = computed(() => {
+  if (!props.box || !bond.value) {
+    return 0;
+  }
+
+  let blocks = bond.value.term.blocks;
+
+  if (blocks < 0) {
+    return 100;
+  }
+
+  const totalTerm = wallet.height - props.box.creationHeight;
+  return ((blocks / totalTerm) * 100).toFixed(1);
+});
+
+const bond = computed(() => {
   if (!props.box) {
     return;
   }
 
-  return parseOpenOrderBox(props.box, wallet.metadata, wallet.usedAddresses);
+  return parseBondBox(props.box, wallet.metadata, wallet.height, wallet.usedAddresses);
 });
 
-function openModal() {
-  oruga.modal.open({
-    component: CloseOrderConfirm,
-    props: { box: props.box },
-    width: "30rem"
-  });
-}
-
-async function cancelOrder() {
+async function liquidate() {
   if (!props.box) {
     return;
   }
 
   try {
-    cancelling.value = true;
-    const txId = await TransactionFactory.cancelOrder(toRaw(props.box));
+    loading.value = true;
+    const txId = await TransactionFactory.liquidate(toRaw(props.box));
 
+    const { oruga } = useProgrammatic();
     oruga.notification.open({
       duration: 5000,
       component: TxIdNotification,
       props: { txId }
     });
 
-    cancelling.value = false;
+    loading.value = false;
   } catch (e: any) {
     console.error(e);
-    cancelling.value = false;
+    loading.value = false;
 
     let message = "Unknown error.";
     if (e instanceof Error) {
@@ -80,12 +86,10 @@ async function cancelOrder() {
     :class="{ skeleton: loadingBox }"
   >
     <div class="stat">
-      <div class="stat-title skeleton-placeholder">
-        {{ order?.term.value }} {{ order?.term.interval }} loan
-      </div>
+      <div class="stat-title skeleton-placeholder">Repayment</div>
       <div class="stat-value text-success flex items-center gap-1">
         <div class="flex-grow">
-          <div class="skeleton-placeholder">{{ order?.amount }} <small>ERG</small></div>
+          <div class="skeleton-placeholder">{{ bond?.repayment }} <small>ERG</small></div>
         </div>
         <div v-if="loadingBox" class="skeleton-fixed h-8 w-8 skeleton-circular"></div>
         <asset-icon v-else class="h-8 w-8 opacity-70" :token-id="ERG_TOKEN_ID" />
@@ -100,7 +104,7 @@ async function cancelOrder() {
           <div class="flex-grow skeleton-fixed h-5"></div>
           <div class="skeleton-fixed h-5 w-1/3"></div>
         </div>
-        <div v-else v-for="collateral in order?.collateral" :key="collateral.tokenId">
+        <div v-else v-for="collateral in bond?.collateral" :key="collateral.tokenId">
           <div class="flex flex-row items-center gap-2" :class="{ skeleton: loadingMetadata }">
             <asset-icon
               class="h-8 w-8"
@@ -132,28 +136,37 @@ async function cancelOrder() {
     <div class="flex-grow opacity-0"></div>
 
     <div class="stat">
-      <div class="stat-title">Interest</div>
-      <div class="flex gap-2">
-        <div class="stat-value skeleton-placeholder flex-grow">{{ order?.interest.percent }}%</div>
-        <div class="skeleton-placeholder">{{ order?.interest.value }} <small>ERG</small></div>
+      <div class="flex">
+        <div class="flex-grow">
+          <div class="stat-title skeleton-placeholder">Term</div>
+          <div class="stat-value skeleton-placeholder flex-grow">
+            {{ bond?.term.value }} {{ bond?.term.interval }}
+          </div>
+        </div>
+        <div
+          class="radial-progress text-xs"
+          :style="`--value: ${termProgress}; --size: 3rem; --thickness: 0.2rem;`"
+        >
+          {{ termProgress }}%
+        </div>
       </div>
-      <div class="stat-desc skeleton-placeholder">{{ order?.interest.apr }}% APR</div>
+
       <div class="stat-actions text-center flex gap-2">
         <button
-          v-if="order?.cancellable"
-          @click="cancelOrder()"
-          class="btn btn-sm btn-ghost"
-          :class="{ loading: cancelling }"
+          v-if="bond?.liquidable"
+          @click="liquidate()"
+          class="btn btn-sm btn-primary flex-grow"
+          :class="{ loading }"
           :disabled="!wallet.connected || loadingBox"
         >
-          Cancel
+          Liquidate
         </button>
         <button
-          @click="openModal()"
+          v-else-if="bond?.repayable"
           class="btn btn-sm btn-primary flex-grow"
           :disabled="!wallet.connected || loadingBox"
         >
-          Lend
+          Repay
         </button>
       </div>
     </div>

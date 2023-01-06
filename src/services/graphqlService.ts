@@ -1,6 +1,6 @@
 import { Client, createClient, gql } from "@urql/core";
 import { Box as GraphQLBox, QueryBoxesArgs, Token } from "@ergo-graphql/types";
-import { chunk, Box, NonMandatoryRegisters, Network } from "@fleet-sdk/common";
+import { chunk, Box, NonMandatoryRegisters, Network, Amount, some } from "@fleet-sdk/common";
 import { getNetworkType } from "@/utils";
 
 class GraphQLService {
@@ -36,6 +36,23 @@ class GraphQLService {
     }
 
     return [];
+  }
+
+  public async *yeldBoxes(args: QueryBoxesArgs) {
+    const take = 50;
+
+    let len = 0;
+    let skip = 0;
+
+    do {
+      const chunk = await this.getBoxes({ ...args, take, skip });
+      skip += take;
+      len = chunk.length;
+
+      if (some(chunk)) {
+        yield chunk;
+      }
+    } while (len === take);
   }
 
   public async getBoxes(args: QueryBoxesArgs): Promise<Box<string>[]> {

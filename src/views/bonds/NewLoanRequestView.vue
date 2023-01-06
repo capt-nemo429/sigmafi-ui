@@ -161,6 +161,10 @@ async function submit() {
     if (e instanceof Error) {
       message = e.message;
     } else if (isDefined(e.info)) {
+      if (e.code === 2) {
+        return;
+      }
+
       message = "dApp Connector: " + e.info;
     }
 

@@ -95,23 +95,33 @@ export function getNetworkType(): Network {
 }
 
 export function blockToTime(blocks: number) {
-  const term = { interval: "", value: blocks * 2 };
+  const term = { interval: "", value: blocks * 2, blocks };
+  let negative = false;
+
+  if (term.value < 0) {
+    negative = true;
+    term.value *= -1;
+  }
 
   if (term.value > 59) {
-    term.value /= 60;
+    term.value = Math.floor(term.value / 60);
     term.interval = pluralize("hour", term.value);
 
     if (term.value > 23) {
-      term.value /= 24;
+      term.value = Math.floor(term.value / 24);
       term.interval = pluralize("day", term.value);
 
       if (term.value > 29) {
-        term.value /= 30;
+        term.value = Math.floor(term.value / 30);
         term.interval = pluralize("month", term.value);
       }
     }
   } else {
     term.interval = pluralize("minute", term.value);
+  }
+
+  if (negative) {
+    term.interval += " ago";
   }
 
   return term;

@@ -7,7 +7,7 @@ import { ErgoAddress } from "@fleet-sdk/core";
 import { EIP12ErgoAPI } from "@nautilus-js/eip12-types";
 import { uniq } from "lodash-es";
 import { defineStore, acceptHMRUpdate } from "pinia";
-import { computed, onBeforeMount, ref } from "vue";
+import { computed, onBeforeMount, ref, toRaw } from "vue";
 
 export type StateAssetMetadata = { [tokenId: string]: AssetMetadata };
 
@@ -16,12 +16,14 @@ export const useWalletStore = defineStore("wallet", () => {
   let _context: EIP12ErgoAPI | undefined;
 
   // private state
-  let _balance = ref<AssetInfo[]>([]);
-  let _changeAddress = ref<string>();
-  let _loading = ref(false);
-  let _connected = ref(false);
-  let _usedAddresses = ref<string[]>([]);
-  let _metadata = ref<StateAssetMetadata>({
+  const _balance = ref<AssetInfo[]>([]);
+  const _changeAddress = ref<string>();
+  const _loading = ref(false);
+  const _connected = ref(false);
+  const _usedAddresses = ref<string[]>([]);
+  const _height = ref<number>(0);
+
+  const _metadata = ref<StateAssetMetadata>({
     [ERG_TOKEN_ID]: { name: "ERG", decimals: ERG_DECIMALS }
   });
 
@@ -34,6 +36,7 @@ export const useWalletStore = defineStore("wallet", () => {
   const changeAddress = computed(() => _changeAddress.value);
   const usedAddresses = computed(() => _usedAddresses.value);
   const connected = computed(() => _connected.value);
+  const height = computed(() => _height.value);
 
   // hooks
   onBeforeMount(async () => {
@@ -94,8 +97,8 @@ export const useWalletStore = defineStore("wallet", () => {
 
     localStorage.setItem("firstConnected", "false");
     _context = undefined;
-    _changeAddress.value = undefined;
     _usedAddresses.value = [];
+    _changeAddress.value = undefined;
     _balance.value = [];
     _connected.value = false;
 
@@ -107,9 +110,9 @@ export const useWalletStore = defineStore("wallet", () => {
       return;
     }
 
+    _height.value = await _context.get_current_height();
+    _usedAddresses.value = await _context.get_used_addresses();
     _changeAddress.value = await _context.get_change_address();
-    _usedAddresses.value = await _context.get_unused_addresses();
-    _usedAddresses.value.unshift(_changeAddress.value);
 
     _balance.value = (await _context.get_balance("all")).map((b) => ({
       tokenId: b.tokenId,
@@ -153,6 +156,7 @@ export const useWalletStore = defineStore("wallet", () => {
     loadTokensMetadata,
     metadata,
     loading,
+    height,
     balance,
     changeAddress,
     connected,

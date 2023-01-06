@@ -115,3 +115,18 @@ export function CloseOrderPlugin(
     addOutputs([bond, borrower, devFee, uiFee], { index: 0 });
   };
 }
+
+export function LiquidatePlugin(bondBox: Box<Amount>, recipient: ErgoAddress): FleetPlugin {
+  // todo: add validation if orderBox is valid
+  // todo: add validation if orderBox is spendably by destination pk
+
+  return ({ addInputs, addOutputs }) => {
+    addInputs(bondBox);
+
+    addOutputs(
+      new OutputBuilder(bondBox.value, recipient)
+        .addTokens(bondBox.assets)
+        .setAdditionalRegisters({ R4: SConstant(SColl(SByte, bondBox.boxId)) })
+    );
+  };
+}

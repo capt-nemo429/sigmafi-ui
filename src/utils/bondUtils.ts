@@ -1,7 +1,7 @@
 import { ERG_DECIMALS, ERG_TOKEN_ID } from "@/constants";
 import { StateAssetMetadata } from "@/stories";
 import { blockToTime, formatBigNumber, getNetworkType } from "@/utils";
-import { Box, decimalize } from "@fleet-sdk/common";
+import { Box, decimalize, isDefined } from "@fleet-sdk/common";
 import { ErgoAddress, SAFE_MIN_BOX_VALUE, SParse } from "@fleet-sdk/core";
 import BigNumber from "bignumber.js";
 
@@ -38,12 +38,9 @@ export function parseOpenOrderBox(
     .multipliedBy(365)
     .decimalPlaces(3);
 
-  let borrowerAddress: string | undefined;
-  if (box.additionalRegisters.R4) {
-    borrowerAddress = ErgoAddress.fromPublicKey(box.additionalRegisters.R4.substring(4)).encode(
-      getNetworkType()
-    );
-  }
+  const borrower = isDefined(box.additionalRegisters.R4)
+    ? ErgoAddress.fromPublicKey(box.additionalRegisters.R4.substring(4)).encode(getNetworkType())
+    : undefined;
 
   return {
     amount: decimalizeDefault(parseOr(box.additionalRegisters.R5, "0"), ERG_DECIMALS),
@@ -54,8 +51,49 @@ export function parseOpenOrderBox(
       value: decimalizeDefault(interestValue.toString(), ERG_DECIMALS),
       apr: formatBigNumber(apr, 3)
     },
-    borrowerAddress,
-    cancellable: borrowerAddress ? ownAddresses.includes(borrowerAddress) : false
+    borrower,
+    cancellable: borrower ? ownAddresses.includes(borrower) : false
+  };
+}
+
+export function parseBondBox(
+  box: Box<string>,
+  metadata: StateAssetMetadata,
+  currentHeight: number,
+  ownAddresses: string[]
+) {
+  const collateral = box.assets.map((token) => ({
+    tokenId: token.tokenId,
+    amount: token.amount,
+    metadata: metadata[token.tokenId]
+  }));
+
+  if (BigInt(box.value) > SAFE_MIN_BOX_VALUE) {
+    collateral.unshift({
+      tokenId: ERG_TOKEN_ID,
+      amount: box.value,
+      metadata: { decimals: ERG_DECIMALS, name: "ERG" }
+    });
+  }
+
+  const borrower = isDefined(box.additionalRegisters.R5)
+    ? ErgoAddress.fromPublicKey(box.additionalRegisters.R5.substring(4)).encode(getNetworkType())
+    : undefined;
+
+  const lender = isDefined(box.additionalRegisters.R8)
+    ? ErgoAddress.fromPublicKey(box.additionalRegisters.R8.substring(4)).encode(getNetworkType())
+    : undefined;
+
+  const blocksLeft = parseOr(box.additionalRegisters.R7, 0) - currentHeight;
+
+  return {
+    repayment: decimalizeDefault(parseOr(box.additionalRegisters.R6, "0"), ERG_DECIMALS),
+    term: blockToTime(blocksLeft),
+    collateral,
+    borrower,
+    lender,
+    liquidable: blocksLeft <= 0 && isDefined(lender) && ownAddresses.includes(lender),
+    repayable: blocksLeft > 0 && isDefined(borrower) && ownAddresses.includes(borrower)
   };
 }
 
