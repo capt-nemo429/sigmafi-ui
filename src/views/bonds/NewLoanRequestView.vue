@@ -75,7 +75,7 @@ const interestAmount = computed(() => {
 const rules = {
   amount: {
     required,
-    minValue: minValue(decimalize(SAFE_MIN_BOX_VALUE, ERG_DECIMALS))
+    minValue: minValue("0.1")
   },
   collateral: {
     required: helpers.withMessage("At least one asset should be added as collateral.", required)
