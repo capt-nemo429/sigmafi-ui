@@ -32,7 +32,7 @@ const termProgress = computed(() => {
   }
 
   const totalTerm = wallet.height - props.box.creationHeight;
-  return ((blocks / totalTerm) * 100).toFixed(1);
+  return ((totalTerm / blocks) * 100).toFixed(1);
 });
 
 const bond = computed(() => {

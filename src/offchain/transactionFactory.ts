@@ -1,12 +1,7 @@
+import { MIN_FEE } from "@/constants";
 import { useWalletStore } from "@/stories";
 import { EIP12UnsignedTransaction } from "@fleet-sdk/common";
-import {
-  Amount,
-  Box,
-  ErgoAddress,
-  RECOMMENDED_MIN_FEE_VALUE,
-  TransactionBuilder
-} from "@fleet-sdk/core";
+import { Amount, Box, ErgoAddress, TransactionBuilder } from "@fleet-sdk/core";
 import { EIP12ErgoAPI } from "@nautilus-js/eip12-types";
 import {
   CancelOrderPlugin,
@@ -28,7 +23,7 @@ export class TransactionFactory {
     const unsignedTx = new TransactionBuilder(height)
       .from(inputs)
       .extend(OpenOrderPlugin({ ...order, borrower: changeAddress }))
-      .payMinFee()
+      .payFee(MIN_FEE)
       .sendChangeTo(changeAddress)
       .build("EIP-12");
 
@@ -46,7 +41,7 @@ export class TransactionFactory {
     const unsignedTx = new TransactionBuilder(height)
       .from(inputs)
       .extend(CancelOrderPlugin(box, changeAddress))
-      .payMinFee()
+      .payFee(MIN_FEE)
       .sendChangeTo(changeAddress)
       .build("EIP-12");
 
@@ -73,7 +68,7 @@ export class TransactionFactory {
           uiImplementor: implementor
         })
       )
-      .payFee(RECOMMENDED_MIN_FEE_VALUE * 2n)
+      .payFee(MIN_FEE)
       .sendChangeTo(changeAddress)
       .build("EIP-12");
 
@@ -91,7 +86,7 @@ export class TransactionFactory {
     const unsignedTx = new TransactionBuilder(height)
       .from(inputs)
       .extend(LiquidatePlugin(box, changeAddress))
-      .payMinFee()
+      .payFee(MIN_FEE)
       .sendChangeTo(changeAddress)
       .build("EIP-12");
 
