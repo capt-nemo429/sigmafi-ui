@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { ERG_TOKEN_ID } from "@/constants";
 import { useWalletStore } from "@/stories/walletStore";
-import { shortenString, showToast } from "@/utils";
-import { Box, decimalize, isDefined } from "@fleet-sdk/common";
+import { shortenString } from "@/utils";
+import { Box, decimalize } from "@fleet-sdk/common";
 import { computed, PropType, ref, toRaw } from "vue";
 import AssetIcon from "@/components/AssetIcon.vue";
-import { useProgrammatic } from "@oruga-ui/oruga-next";
 import { TransactionFactory } from "@/offchain/transactionFactory";
-import TxIdNotification from "@/components/TxIdNotification.vue";
-import { parseBondBox } from "@/utils/bondUtils";
+import { parseBondBox, sendTransaction } from "@/utils";
 
 const wallet = useWalletStore();
 
@@ -44,39 +42,25 @@ const bond = computed(() => {
 });
 
 async function liquidate() {
-  if (!props.box) {
+  const box = props.box;
+  if (!box) {
     return;
   }
 
-  try {
-    loading.value = true;
-    const txId = await TransactionFactory.liquidate(toRaw(props.box));
+  await sendTransaction(async () => {
+    return await TransactionFactory.liquidate(toRaw(box));
+  }, loading);
+}
 
-    const { oruga } = useProgrammatic();
-    oruga.notification.open({
-      duration: 5000,
-      component: TxIdNotification,
-      props: { txId }
-    });
-
-    loading.value = false;
-  } catch (e: any) {
-    console.error(e);
-    loading.value = false;
-
-    let message = "Unknown error.";
-    if (e instanceof Error) {
-      message = e.message;
-    } else if (isDefined(e.info)) {
-      if (e.code === 2) {
-        return;
-      }
-
-      message = "dApp Connector: " + e.info;
-    }
-
-    showToast(message, "alert-error");
+async function repay() {
+  const box = props.box;
+  if (!box) {
+    return;
   }
+
+  await sendTransaction(async () => {
+    return await TransactionFactory.repay(toRaw(box));
+  }, loading);
 }
 </script>
 
@@ -163,6 +147,8 @@ async function liquidate() {
         </button>
         <button
           v-else-if="bond?.repayable"
+          @click="repay()"
+          :class="{ loading }"
           class="btn btn-sm btn-primary flex-grow"
           :disabled="!wallet.connected || loadingBox"
         >

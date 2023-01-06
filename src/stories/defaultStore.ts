@@ -1,6 +1,6 @@
 import { defineStore, acceptHMRUpdate } from "pinia";
 import { computed, ref } from "vue";
-import { getCurrentTheme, setTheme } from "../utils";
+import { getCurrentTheme, setTheme } from "@/utils";
 
 export const useDefaultStore = defineStore("default", () => {
   // state

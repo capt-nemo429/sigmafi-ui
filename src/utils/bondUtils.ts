@@ -1,6 +1,6 @@
 import { ERG_DECIMALS, ERG_TOKEN_ID } from "@/constants";
 import { StateAssetMetadata } from "@/stories";
-import { blockToTime, formatBigNumber, getNetworkType } from "@/utils";
+import { blockToTime, formatBigNumber, getNetworkType } from "@/utils/otherUtils";
 import { Box, decimalize, isDefined } from "@fleet-sdk/common";
 import { ErgoAddress, SAFE_MIN_BOX_VALUE, SParse } from "@fleet-sdk/core";
 import BigNumber from "bignumber.js";

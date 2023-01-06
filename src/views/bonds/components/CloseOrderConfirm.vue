@@ -1,18 +1,21 @@
 <script setup lang="ts">
 import { useWalletStore } from "@/stories/walletStore";
-import { Box, isDefined, isUndefined } from "@fleet-sdk/common";
+import { Box, isUndefined } from "@fleet-sdk/common";
 import { computed, PropType, ref, toRaw } from "vue";
-import { parseOpenOrderBox } from "@/utils/bondUtils";
-import { decimalizeBN, formatBigNumber, shortenString, showToast } from "@/utils";
+import {
+  decimalizeBN,
+  formatBigNumber,
+  sendTransaction,
+  shortenString,
+  parseOpenOrderBox
+} from "@/utils";
 import { decimalize } from "@fleet-sdk/common";
 import AssetIcon from "@/components/AssetIcon.vue";
-import { ERG_DECIMALS, ERG_TOKEN_ID, EXPLORER_URL } from "@/constants";
-import { useProgrammatic } from "@oruga-ui/oruga-next";
+import { ERG_DECIMALS, ERG_TOKEN_ID, EXPLORER_URL, MIN_FEE } from "@/constants";
 import BigNumber from "bignumber.js";
 import { RECOMMENDED_MIN_FEE_VALUE } from "@fleet-sdk/core";
 import { ExternalLinkIcon } from "@zhuowenli/vue-feather-icons";
 import { TransactionFactory } from "@/offchain/transactionFactory";
-import TxIdNotification from "@/components/TxIdNotification.vue";
 
 const wallet = useWalletStore();
 const emit = defineEmits(["close"]);
@@ -31,10 +34,7 @@ const fees = computed(() => {
   const amount = new BigNumber(order.value?.amount || 0);
   const contract = amount.multipliedBy(0.005);
   const ui = amount.multipliedBy(0.004);
-  const miner = decimalizeBN(
-    new BigNumber(RECOMMENDED_MIN_FEE_VALUE.toString()).multipliedBy(2),
-    ERG_DECIMALS
-  );
+  const miner = decimalizeBN(new BigNumber(MIN_FEE.toString()), ERG_DECIMALS);
 
   return formatBigNumber(contract.plus(ui).plus(miner), ERG_DECIMALS);
 });
@@ -50,39 +50,14 @@ const order = computed(() => {
 const explorerUrl = new URL(`addresses/${order.value?.borrower}`, EXPLORER_URL).href;
 
 async function closeOrder() {
-  if (!props.box) {
+  const box = props.box;
+  if (!box) {
     return;
   }
 
-  try {
-    loading.value = true;
-    const txId = await TransactionFactory.closeOrder(toRaw(props.box));
-
-    const { oruga } = useProgrammatic();
-    oruga.notification.open({
-      duration: 5000,
-      component: TxIdNotification,
-      props: { txId }
-    });
-
-    loading.value = false;
-  } catch (e: any) {
-    console.error(e);
-    loading.value = false;
-
-    let message = "Unknown error.";
-    if (e instanceof Error) {
-      message = e.message;
-    } else if (isDefined(e.info)) {
-      if (e.code === 2) {
-        return;
-      }
-
-      message = "dApp Connector: " + e.info;
-    }
-
-    showToast(message, "alert-error");
-  }
+  await sendTransaction(async () => {
+    return await TransactionFactory.closeOrder(toRaw(box));
+  }, loading);
 }
 </script>
 

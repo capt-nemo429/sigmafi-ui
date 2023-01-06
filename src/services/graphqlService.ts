@@ -1,7 +1,7 @@
 import { Client, createClient, gql } from "@urql/core";
 import { Box as GraphQLBox, QueryBoxesArgs, Token } from "@ergo-graphql/types";
 import { chunk, Box, NonMandatoryRegisters, Network, Amount, some } from "@fleet-sdk/common";
-import { getNetworkType } from "@/utils";
+import { getNetworkType } from "@/utils/otherUtils";
 
 class GraphQLService {
   private _client: Client;

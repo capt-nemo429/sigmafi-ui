@@ -8,7 +8,8 @@ import {
   CloseOrderPlugin,
   LiquidatePlugin,
   OpenOrderParams,
-  OpenOrderPlugin
+  OpenOrderPlugin,
+  RepayPlugin
 } from "./plugins";
 
 export class TransactionFactory {
@@ -86,6 +87,24 @@ export class TransactionFactory {
     const unsignedTx = new TransactionBuilder(height)
       .from(inputs)
       .extend(LiquidatePlugin(box, changeAddress))
+      .payFee(MIN_FEE)
+      .sendChangeTo(changeAddress)
+      .build("EIP-12");
+
+    return await this._signAndSend(unsignedTx, context);
+  }
+
+  public static async repay(box: Box<Amount>) {
+    const wallet = useWalletStore();
+    const context = wallet.getContext();
+
+    const height = await context.get_current_height();
+    const inputs = await context.get_utxos();
+    const changeAddress = ErgoAddress.fromBase58(await context.get_change_address());
+
+    const unsignedTx = new TransactionBuilder(height)
+      .from(inputs)
+      .extend(RepayPlugin(box))
       .payFee(MIN_FEE)
       .sendChangeTo(changeAddress)
       .build("EIP-12");

@@ -1,38 +1,5 @@
 import { BigNumber } from "bignumber.js";
-import { useProgrammatic } from "@oruga-ui/oruga-next";
 import { Network } from "@fleet-sdk/common";
-
-export function setSystemTheme() {
-  const isInDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
-
-  if (isInDarkMode) {
-    setTheme("dark");
-  } else {
-    setTheme("light");
-  }
-}
-
-export function toggleTheme() {
-  setTheme(getCurrentTheme());
-}
-
-export function getCurrentTheme(): "light" | "dark" {
-  return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
-}
-
-export function setTheme(theme: "light" | "dark") {
-  if (getCurrentTheme() === theme) {
-    return;
-  }
-
-  if (theme === "dark") {
-    document.documentElement.classList.add("dark");
-  } else {
-    document.documentElement.classList.remove("dark");
-  }
-
-  document.documentElement.setAttribute("data-theme", theme);
-}
 
 export function shortenString(
   val: string | undefined,
@@ -71,19 +38,6 @@ export function undecimalizeBN(number: BigNumber, decimals: number) {
 
 export function decimalizeBN(number: BigNumber, decimals: number) {
   return number.decimalPlaces(decimals).shiftedBy(decimals * -1);
-}
-
-export function showToast(
-  msg: string,
-  type: "alert-success" | "alert-error" | "alert-info" = "alert-info"
-) {
-  const { oruga } = useProgrammatic();
-  oruga.notification.open({
-    duration: 5000,
-    message: msg,
-    rootClass: "toast toast-top toast-center min-w-max bg-transparent",
-    contentClass: "alert " + type
-  });
 }
 
 export function getNetworkType(): Network {

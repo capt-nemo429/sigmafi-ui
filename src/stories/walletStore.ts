@@ -2,7 +2,7 @@ import { ERG_DECIMALS, ERG_TOKEN_ID } from "@/constants";
 import { graphQLService } from "@/services/graphqlService";
 import { AssetInfo, AssetMetadata } from "@/types";
 import { getNetworkType, showToast } from "@/utils";
-import { isEmpty, isUndefined, Network, some } from "@fleet-sdk/common";
+import { isEmpty, isUndefined, some } from "@fleet-sdk/common";
 import { ErgoAddress } from "@fleet-sdk/core";
 import { EIP12ErgoAPI } from "@nautilus-js/eip12-types";
 import { uniq } from "lodash-es";

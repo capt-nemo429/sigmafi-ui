@@ -129,7 +129,34 @@ export function LiquidatePlugin(bondBox: Box<Amount>, recipient: ErgoAddress): F
     addOutputs(
       new OutputBuilder(bondBox.value, recipient)
         .addTokens(bondBox.assets)
-        .setAdditionalRegisters({ R4: SConstant(SColl(SByte, bondBox.boxId)) })
+        .setAdditionalRegisters({ R4: SConstant(SColl(SByte, bondBox.boxId)) }),
+      { index: 0 }
     );
+  };
+}
+
+export function RepayPlugin(bondBox: Box<Amount>): FleetPlugin {
+  return ({ addInputs, addOutputs }) => {
+    addInputs(bondBox);
+    if (!bondBox.additionalRegisters.R5) {
+      throw new Error("Invalid bond. Borrower public key is not present.");
+    }
+    if (!bondBox.additionalRegisters.R6) {
+      throw new Error("Invalid bond. Repayment amount is not present.");
+    }
+    if (!bondBox.additionalRegisters.R8) {
+      throw new Error("Invalid bond. Lender public key is not present.");
+    }
+
+    const repaymentAmount = SParse<bigint>(bondBox.additionalRegisters.R6);
+    const borrower = ErgoAddress.fromPublicKey(bondBox.additionalRegisters.R5.substring(4));
+    const lender = ErgoAddress.fromPublicKey(bondBox.additionalRegisters.R8.substring(4));
+
+    const repayment = new OutputBuilder(repaymentAmount, lender).setAdditionalRegisters({
+      R4: SConstant(SColl(SByte, bondBox.boxId))
+    });
+    const returnCollateral = new OutputBuilder(bondBox.value, borrower).addTokens(bondBox.assets);
+
+    addOutputs([repayment, returnCollateral], { index: 0 });
   };
 }

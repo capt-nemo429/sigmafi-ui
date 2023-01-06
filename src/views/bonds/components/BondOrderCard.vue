@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { ERG_TOKEN_ID } from "@/constants";
 import { useWalletStore } from "@/stories/walletStore";
-import { shortenString, showToast } from "@/utils";
-import { Box, decimalize, isDefined } from "@fleet-sdk/common";
+import { sendTransaction, shortenString, parseOpenOrderBox } from "@/utils";
+import { Box, decimalize } from "@fleet-sdk/common";
 import { computed, PropType, ref, toRaw } from "vue";
 import AssetIcon from "@/components/AssetIcon.vue";
 import { useProgrammatic } from "@oruga-ui/oruga-next";
 import { TransactionFactory } from "@/offchain/transactionFactory";
-import TxIdNotification from "@/components/TxIdNotification.vue";
-import { parseOpenOrderBox } from "@/utils/bondUtils";
 import CloseOrderConfirm from "./CloseOrderConfirm.vue";
 
 const { oruga } = useProgrammatic();
@@ -39,38 +37,14 @@ function openModal() {
 }
 
 async function cancelOrder() {
-  if (!props.box) {
+  const box = props.box;
+  if (!box) {
     return;
   }
 
-  try {
-    cancelling.value = true;
-    const txId = await TransactionFactory.cancelOrder(toRaw(props.box));
-
-    oruga.notification.open({
-      duration: 5000,
-      component: TxIdNotification,
-      props: { txId }
-    });
-
-    cancelling.value = false;
-  } catch (e: any) {
-    console.error(e);
-    cancelling.value = false;
-
-    let message = "Unknown error.";
-    if (e instanceof Error) {
-      message = e.message;
-    } else if (isDefined(e.info)) {
-      if (e.code === 2) {
-        return;
-      }
-
-      message = "dApp Connector: " + e.info;
-    }
-
-    showToast(message, "alert-error");
-  }
+  await sendTransaction(async () => {
+    return await TransactionFactory.cancelOrder(toRaw(box));
+  }, cancelling);
 }
 </script>
 
