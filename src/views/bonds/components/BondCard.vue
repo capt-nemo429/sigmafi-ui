@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ERG_TOKEN_ID } from "@/constants";
+import { ERG_TOKEN_ID, EXPLORER_URL } from "@/constants";
 import { useWalletStore } from "@/stories/walletStore";
 import { shortenString } from "@/utils";
 import { Box, decimalize } from "@fleet-sdk/common";
@@ -7,6 +7,7 @@ import { computed, PropType, ref, toRaw } from "vue";
 import AssetIcon from "@/components/AssetIcon.vue";
 import { TransactionFactory } from "@/offchain/transactionFactory";
 import { parseBondBox, sendTransaction } from "@/utils";
+import { ExternalLinkIcon } from "@zhuowenli/vue-feather-icons";
 
 const wallet = useWalletStore();
 
@@ -23,14 +24,14 @@ const termProgress = computed(() => {
     return 0;
   }
 
-  let blocks = bond.value.term.blocks;
+  let blocksLeft = bond.value.term.blocks;
 
-  if (blocks < 0) {
+  if (blocksLeft < 0) {
     return 100;
   }
 
-  const totalTerm = wallet.height - props.box.creationHeight;
-  return ((totalTerm / blocks) * 100).toFixed(1);
+  const totalTerm = wallet.height - props.box.creationHeight + blocksLeft;
+  return (((totalTerm - blocksLeft) / totalTerm) * 100).toFixed(1);
 });
 
 const bond = computed(() => {
@@ -40,6 +41,14 @@ const bond = computed(() => {
 
   return parseBondBox(props.box, wallet.metadata, wallet.height, wallet.usedAddresses);
 });
+
+function linkFor(address?: string) {
+  if (!address) {
+    return;
+  }
+
+  return new URL(`addresses/${address}`, EXPLORER_URL).href;
+}
 
 async function liquidate() {
   const box = props.box;
@@ -119,6 +128,30 @@ async function repay() {
 
     <div class="flex-grow opacity-0"></div>
 
+    <div class="stat" v-if="bond?.type === 'debit'">
+      <div class="stat-title skeleton-placeholder">Lender</div>
+      <a
+        :href="linkFor(bond?.lender)"
+        class="link link-hover text-sm skeleton-placeholder"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {{ shortenString(bond?.lender, 25) }}
+        <external-link-icon class="inline pb-1" />
+      </a>
+    </div>
+    <div class="stat" v-else>
+      <div class="stat-title skeleton-placeholder">Borrower</div>
+      <a
+        :href="linkFor(bond?.borrower)"
+        class="link link-hover text-sm skeleton-placeholder"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {{ shortenString(bond?.borrower, 25) }}
+        <external-link-icon class="inline pb-1" />
+      </a>
+    </div>
     <div class="stat">
       <div class="flex">
         <div class="flex-grow">

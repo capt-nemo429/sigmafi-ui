@@ -84,7 +84,7 @@ export function parseBondBox(
     ? ErgoAddress.fromPublicKey(box.additionalRegisters.R8.substring(4)).encode(getNetworkType())
     : undefined;
 
-  const blocksLeft = parseOr(box.additionalRegisters.R7, 0) - currentHeight;
+  const blocksLeft = parseOr<number>(box.additionalRegisters.R7, 0) - currentHeight;
 
   return {
     repayment: decimalizeDefault(parseOr(box.additionalRegisters.R6, "0"), ERG_DECIMALS),
@@ -92,6 +92,7 @@ export function parseBondBox(
     collateral,
     borrower,
     lender,
+    type: isDefined(lender) && ownAddresses.includes(lender) ? "lend" : "debit",
     liquidable: blocksLeft <= 0 && isDefined(lender) && ownAddresses.includes(lender),
     repayable: blocksLeft > 0 && isDefined(borrower) && ownAddresses.includes(borrower)
   };
