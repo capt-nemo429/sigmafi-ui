@@ -58,6 +58,7 @@ async function closeOrder() {
   await sendTransaction(async () => {
     return await TransactionFactory.closeOrder(toRaw(box));
   }, loading);
+  emit("close");
 }
 </script>
 

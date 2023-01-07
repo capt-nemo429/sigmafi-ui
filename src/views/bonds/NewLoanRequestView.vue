@@ -2,11 +2,11 @@
 import AssetInput from "@/components/AssetInput.vue";
 import CleaveInput from "@/components/CleaveInput.vue";
 import { useWalletStore } from "@/stories/walletStore";
-import { computed, reactive } from "vue";
+import { computed, reactive, ref } from "vue";
 import { ERG_DECIMALS, ERG_TOKEN_ID } from "@/constants";
 import { decimalize, isDefined, isEmpty, TokenAmount } from "@fleet-sdk/common";
 import { BigNumber } from "bignumber.js";
-import { formatBigNumber, shortenString, showToast, undecimalizeBN } from "@/utils";
+import { formatBigNumber, sendTransaction, shortenString, undecimalizeBN } from "@/utils";
 import SigDropdown from "@/components/SigDropdown.vue";
 import AssetIcon from "@/components/AssetIcon.vue";
 import { differenceBy, remove } from "lodash-es";
@@ -14,10 +14,7 @@ import { AssetInfo } from "@/types";
 import { helpers, required } from "@vuelidate/validators";
 import { minValue } from "@/validators/bigNumbers";
 import useVuelidate from "@vuelidate/core";
-import { SAFE_MIN_BOX_VALUE } from "@fleet-sdk/core";
 import { TransactionFactory } from "@/offchain/transactionFactory";
-import { useProgrammatic } from "@oruga-ui/oruga-next";
-import TxIdNotification from "@/components/TxIdNotification.vue";
 
 const wallet = useWalletStore();
 const emit = defineEmits(["close"]);
@@ -26,8 +23,8 @@ type CollateralAsset = TokenAmount<string> & {
   info: AssetInfo;
 };
 
+const loading = ref(false);
 const state = reactive({
-  loading: false,
   amount: "",
   term: {
     value: "",
@@ -108,7 +105,7 @@ function removeCollateral(asset: AssetInfo) {
 
 async function submit() {
   const isValid = await $v.value.$validate();
-  if (!isValid || state.loading) {
+  if (!isValid || loading.value) {
     return;
   }
 
@@ -130,10 +127,8 @@ async function submit() {
     tokensCollateral = tokensCollateral.filter((x) => x.tokenId != ERG_TOKEN_ID);
   }
 
-  try {
-    state.loading = true;
-
-    const txId = await TransactionFactory.openOrder({
+  await sendTransaction(async () => {
+    return await TransactionFactory.openOrder({
       type: "on-close",
       lendAmount: lend.toString(),
       maturityLength: blocks.value,
@@ -143,33 +138,9 @@ async function submit() {
         tokens: tokensCollateral
       }
     });
+  }, loading);
 
-    const { oruga } = useProgrammatic();
-    oruga.notification.open({
-      duration: 5000,
-      component: TxIdNotification,
-      props: { txId }
-    });
-
-    state.loading = false;
-    emit("close");
-  } catch (e: any) {
-    console.error(e);
-    state.loading = false;
-
-    let message = "Unknown error.";
-    if (e instanceof Error) {
-      message = e.message;
-    } else if (isDefined(e.info)) {
-      if (e.code === 2) {
-        return;
-      }
-
-      message = "dApp Connector: " + e.info;
-    }
-
-    showToast(message, "alert-error");
-  }
+  emit("close");
 }
 </script>
 
@@ -185,7 +156,7 @@ async function submit() {
           <cleave-input
             v-model="state.amount"
             @blur="$v.amount.$touch()"
-            :readonly="state.loading"
+            :readonly="loading"
             :options="{
               numeral: true,
               numeralPositiveOnly: true,
@@ -214,7 +185,7 @@ async function submit() {
             <cleave-input
               v-model="state.term.value"
               @blur="$v.term.$touch()"
-              :readonly="state.loading"
+              :readonly="loading"
               :options="{
                 blocks: [5],
                 numericOnly: true
@@ -247,7 +218,7 @@ async function submit() {
             <cleave-input
               v-model="state.interest"
               @blur="$v.interest.$touch()"
-              :readonly="state.loading"
+              :readonly="loading"
               :options="{
                 numeral: true,
                 numeralPositiveOnly: true,
@@ -274,7 +245,7 @@ async function submit() {
           v-for="asset in state.collateral"
           v-model="asset.amount"
           @remove="removeCollateral"
-          :readonly="state.loading"
+          :readonly="loading"
           :key="asset.tokenId"
           :asset="asset.info"
           :disposable="true"
@@ -282,7 +253,7 @@ async function submit() {
         />
       </div>
       <sig-dropdown root-class="w-full" menu-class="w-full">
-        <button :disabled="state.loading" class="btn w-full shadow mt-2">Add collateral</button>
+        <button :disabled="loading" class="btn w-full shadow mt-2">Add collateral</button>
         <template v-slot:menu>
           <li v-for="asset in unselectedAssets">
             <a @click="addCollateral(asset)" class="flex flex-row" :key="asset.tokenId">
@@ -312,8 +283,8 @@ async function submit() {
     </div>
 
     <div class="modal-action">
-      <button class="btn btn-ghost" :disabled="state.loading" @click="emit('close')">Cancel</button>
-      <button class="btn btn-primary" :class="{ loading: state.loading }" @click="submit()">
+      <button class="btn btn-ghost" :disabled="loading" @click="emit('close')">Cancel</button>
+      <button class="btn btn-primary" :class="{ loading: loading }" @click="submit()">
         Confirm
       </button>
     </div>
