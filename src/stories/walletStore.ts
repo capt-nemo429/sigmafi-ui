@@ -7,7 +7,7 @@ import { ErgoAddress } from "@fleet-sdk/core";
 import { EIP12ErgoAPI } from "@nautilus-js/eip12-types";
 import { uniq } from "lodash-es";
 import { defineStore, acceptHMRUpdate } from "pinia";
-import { computed, onBeforeMount, ref, toRaw } from "vue";
+import { computed, onBeforeMount, ref } from "vue";
 
 export type StateAssetMetadata = { [tokenId: string]: AssetMetadata };
 

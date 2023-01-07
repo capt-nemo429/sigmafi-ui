@@ -2,10 +2,9 @@ import { defineStore, acceptHMRUpdate } from "pinia";
 import { computed, ref } from "vue";
 import { getCurrentTheme, setTheme } from "@/utils";
 
-export const useDefaultStore = defineStore("default", () => {
+export const useUIStore = defineStore("default", () => {
   // state
   const currentTheme = ref<"dark" | "light">(getCurrentTheme());
-  const walletContext = ref<typeof ergo>();
 
   // computed
   const theme = computed(() => currentTheme);
@@ -25,5 +24,5 @@ export const useDefaultStore = defineStore("default", () => {
 });
 
 if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useDefaultStore, import.meta.hot));
+  import.meta.hot.accept(acceptHMRUpdate(useUIStore, import.meta.hot));
 }

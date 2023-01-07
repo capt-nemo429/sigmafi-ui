@@ -1,2 +1,2 @@
-export * from "./defaultStore";
+export * from "./uiStore";
 export * from "./walletStore";

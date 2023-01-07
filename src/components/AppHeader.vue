@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useDefaultStore } from "@/stories/defaultStore";
+import { useUIStore } from "@/stories/uiStore";
 import { useWalletStore } from "@/stories/walletStore";
 import { getNetworkType, shortenString } from "@/utils";
 import { decimalize, Network } from "@fleet-sdk/common";
@@ -7,7 +7,7 @@ import { computed } from "vue";
 import { MoonIcon, SunIcon } from "@zhuowenli/vue-feather-icons";
 import { ERG_DECIMALS } from "@/constants";
 
-const defaultStore = useDefaultStore();
+const defaultStore = useUIStore();
 const wallet = useWalletStore();
 const isTestnet = getNetworkType() === Network.Testnet;
 
