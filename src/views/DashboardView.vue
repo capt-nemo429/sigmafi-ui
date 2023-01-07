@@ -8,7 +8,9 @@ import { Amount, Box, first, isDefined, isEmpty, some } from "@fleet-sdk/common"
 import { ErgoAddress } from "@fleet-sdk/core";
 import { QueryBoxesArgs } from "@ergo-graphql/types";
 import BondCard from "./bonds/components/BondCard.vue";
+import { useChainStore } from "@/stories";
 
+const chain = useChainStore();
 const wallet = useWalletStore();
 
 type Tab = "orders" | "loans" | "debits";
@@ -134,7 +136,7 @@ async function loadData(
       boxes.value = boxes.value.concat(chunk.filter(validate(query.pk)));
 
       loading.boxes = false;
-      await wallet.loadTokensMetadata(chunk.flatMap((x) => x.assets.map((t) => t.tokenId)));
+      await chain.loadTokensMetadata(chunk.flatMap((x) => x.assets.map((t) => t.tokenId)));
       loading.metadata = false;
     }
   }

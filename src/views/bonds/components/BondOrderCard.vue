@@ -8,8 +8,11 @@ import AssetIcon from "@/components/AssetIcon.vue";
 import { useProgrammatic } from "@oruga-ui/oruga-next";
 import { TransactionFactory } from "@/offchain/transactionFactory";
 import CloseOrderConfirm from "./CloseOrderConfirm.vue";
+import { useChainStore } from "@/stories";
 
 const { oruga } = useProgrammatic();
+
+const chain = useChainStore();
 const wallet = useWalletStore();
 
 const props = defineProps({
@@ -25,7 +28,7 @@ const order = computed(() => {
     return;
   }
 
-  return parseOpenOrderBox(props.box, wallet.metadata, wallet.usedAddresses);
+  return parseOpenOrderBox(props.box, chain.tokensMetadata, wallet.usedAddresses);
 });
 
 function openModal() {

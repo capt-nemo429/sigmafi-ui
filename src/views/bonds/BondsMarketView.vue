@@ -7,9 +7,12 @@ import { onMounted, reactive, ref } from "vue";
 import { graphQLService } from "@/services/graphqlService";
 import { ORDER_ON_CLOSE_ERG_CONTRACT } from "@/offchain/plugins";
 import { Box, isEmpty } from "@fleet-sdk/common";
+import { useChainStore } from "@/stories";
 
 const { oruga } = useProgrammatic();
+
 const wallet = useWalletStore();
+const chain = useChainStore();
 
 const boxes = ref<Box<string>[]>();
 const loading = reactive({ boxes: true, metadata: true });
@@ -31,7 +34,7 @@ onMounted(async () => {
   });
   loading.boxes = false;
 
-  await wallet.loadTokensMetadata(boxes.value.flatMap((x) => x.assets.map((t) => t.tokenId)));
+  await chain.loadTokensMetadata(boxes.value.flatMap((x) => x.assets.map((t) => t.tokenId)));
   loading.metadata = false;
 });
 </script>

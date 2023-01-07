@@ -1,5 +1,11 @@
 import { Client, createClient, gql } from "@urql/core";
-import { Box as GraphQLBox, QueryBoxesArgs, Token } from "@ergo-graphql/types";
+import {
+  Box as GraphQLBox,
+  Header,
+  QueryBlockHeadersArgs,
+  QueryBoxesArgs,
+  Token
+} from "@ergo-graphql/types";
 import { chunk, Box, NonMandatoryRegisters, Network, Amount, some } from "@fleet-sdk/common";
 import { getNetworkType } from "@/utils/otherUtils";
 
@@ -13,6 +19,19 @@ class GraphQLService {
           : "https://tn-ergo-explorer.anetabtc.io/graphql",
       requestPolicy: "network-only"
     });
+  }
+
+  public async getCurrentHeight(): Promise<number | undefined> {
+    const query = gql<{ blockHeaders: Header[] }, QueryBlockHeadersArgs>`
+      query height {
+        blockHeaders(take: 1) {
+          height
+        }
+      }
+    `;
+
+    const response = await this._client.query(query, {}).toPromise();
+    return response.data?.blockHeaders[0].height;
   }
 
   public async *yeldTokensMetadata(tokenIds: string[]) {

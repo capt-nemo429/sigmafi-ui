@@ -4,7 +4,7 @@ import CleaveInput from "@/components/CleaveInput.vue";
 import { useWalletStore } from "@/stories/walletStore";
 import { computed, reactive, ref } from "vue";
 import { ERG_DECIMALS, ERG_TOKEN_ID } from "@/constants";
-import { decimalize, isDefined, isEmpty, TokenAmount } from "@fleet-sdk/common";
+import { decimalize, isEmpty, TokenAmount } from "@fleet-sdk/common";
 import { BigNumber } from "bignumber.js";
 import { formatBigNumber, sendTransaction, shortenString, undecimalizeBN } from "@/utils";
 import SigDropdown from "@/components/SigDropdown.vue";

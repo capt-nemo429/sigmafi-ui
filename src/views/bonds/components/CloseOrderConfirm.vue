@@ -13,11 +13,12 @@ import { decimalize } from "@fleet-sdk/common";
 import AssetIcon from "@/components/AssetIcon.vue";
 import { ERG_DECIMALS, ERG_TOKEN_ID, EXPLORER_URL, MIN_FEE } from "@/constants";
 import BigNumber from "bignumber.js";
-import { RECOMMENDED_MIN_FEE_VALUE } from "@fleet-sdk/core";
 import { ExternalLinkIcon } from "@zhuowenli/vue-feather-icons";
 import { TransactionFactory } from "@/offchain/transactionFactory";
+import { useChainStore } from "@/stories";
 
 const wallet = useWalletStore();
+const chain = useChainStore();
 const emit = defineEmits(["close"]);
 
 const loading = ref(false);
@@ -44,7 +45,7 @@ const order = computed(() => {
     return;
   }
 
-  return parseOpenOrderBox(props.box, wallet.metadata, wallet.usedAddresses);
+  return parseOpenOrderBox(props.box, chain.tokensMetadata, wallet.usedAddresses);
 });
 
 const explorerUrl = new URL(`addresses/${order.value?.borrower}`, EXPLORER_URL).href;

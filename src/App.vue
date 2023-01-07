@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import AppHeader from "./components/AppHeader.vue";
 import AppFooter from "./components/AppFooter.vue";
+import { BoxIcon } from "@zhuowenli/vue-feather-icons";
+import { useChainStore } from "./stories";
+
+const chain = useChainStore();
 </script>
 
 <template>
@@ -9,9 +13,14 @@ import AppFooter from "./components/AppFooter.vue";
 
     <main class="py-8 px-4 md:px-8 lg:px-16">
       <router-view />
-      <!-- <bonds-market-view /> -->
     </main>
 
     <app-footer />
+    <div
+      v-if="chain.height"
+      class="flex items-center gap-1 text-sm cursor-default text-primary fixed right-3 bottom-2 drop-shadow-md opacity-50 hover:opacity-100"
+    >
+      <box-icon /> <span>{{ chain.height.toLocaleString() }}</span>
+    </div>
   </div>
 </template>

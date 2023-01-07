@@ -2,7 +2,7 @@ import { defineStore, acceptHMRUpdate } from "pinia";
 import { computed, ref } from "vue";
 import { getCurrentTheme, setTheme } from "@/utils";
 
-export const useUIStore = defineStore("default", () => {
+export const useUIStore = defineStore("ui", () => {
   // state
   const currentTheme = ref<"dark" | "light">(getCurrentTheme());
 

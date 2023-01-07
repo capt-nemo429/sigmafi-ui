@@ -1,5 +1,5 @@
 import { ERG_DECIMALS, ERG_TOKEN_ID } from "@/constants";
-import { StateAssetMetadata } from "@/stories";
+import { StateTokenMetadata } from "@/stories";
 import { blockToTime, formatBigNumber, getNetworkType } from "@/utils/otherUtils";
 import { Box, decimalize, isDefined } from "@fleet-sdk/common";
 import { ErgoAddress, SAFE_MIN_BOX_VALUE, SParse } from "@fleet-sdk/core";
@@ -7,7 +7,7 @@ import BigNumber from "bignumber.js";
 
 export function parseOpenOrderBox(
   box: Box<string>,
-  metadata: StateAssetMetadata,
+  metadata: StateTokenMetadata,
   ownAddresses: string[]
 ) {
   const collateral = box.assets.map((token) => ({
@@ -58,7 +58,7 @@ export function parseOpenOrderBox(
 
 export function parseBondBox(
   box: Box<string>,
-  metadata: StateAssetMetadata,
+  metadata: StateTokenMetadata,
   currentHeight: number,
   ownAddresses: string[]
 ) {

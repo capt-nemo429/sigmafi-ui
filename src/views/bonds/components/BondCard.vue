@@ -8,7 +8,9 @@ import AssetIcon from "@/components/AssetIcon.vue";
 import { TransactionFactory } from "@/offchain/transactionFactory";
 import { parseBondBox, sendTransaction } from "@/utils";
 import { ExternalLinkIcon } from "@zhuowenli/vue-feather-icons";
+import { useChainStore } from "@/stories";
 
+const chain = useChainStore();
 const wallet = useWalletStore();
 
 const props = defineProps({
@@ -39,7 +41,7 @@ const bond = computed(() => {
     return;
   }
 
-  return parseBondBox(props.box, wallet.metadata, wallet.height, wallet.usedAddresses);
+  return parseBondBox(props.box, chain.tokensMetadata, wallet.height, wallet.usedAddresses);
 });
 
 function linkFor(address?: string) {

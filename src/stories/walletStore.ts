@@ -1,17 +1,15 @@
-import { ERG_DECIMALS, ERG_TOKEN_ID } from "@/constants";
-import { graphQLService } from "@/services/graphqlService";
-import { AssetInfo, AssetMetadata } from "@/types";
+import { AssetInfo } from "@/types";
 import { getNetworkType, showToast } from "@/utils";
-import { isEmpty, isUndefined, some } from "@fleet-sdk/common";
+import { isUndefined, some } from "@fleet-sdk/common";
 import { ErgoAddress } from "@fleet-sdk/core";
 import { EIP12ErgoAPI } from "@nautilus-js/eip12-types";
-import { uniq } from "lodash-es";
 import { defineStore, acceptHMRUpdate } from "pinia";
 import { computed, onBeforeMount, ref } from "vue";
-
-export type StateAssetMetadata = { [tokenId: string]: AssetMetadata };
+import { useChainStore } from "./chainStore";
 
 export const useWalletStore = defineStore("wallet", () => {
+  const chain = useChainStore();
+
   // private
   let _context: EIP12ErgoAPI | undefined;
 
@@ -23,15 +21,10 @@ export const useWalletStore = defineStore("wallet", () => {
   const _usedAddresses = ref<string[]>([]);
   const _height = ref<number>(0);
 
-  const _metadata = ref<StateAssetMetadata>({
-    [ERG_TOKEN_ID]: { name: "ERG", decimals: ERG_DECIMALS }
-  });
-
   // computed
   const balance = computed(() =>
-    _balance.value.map((asset) => ({ ...asset, metadata: _metadata.value[asset.tokenId] }))
+    _balance.value.map((asset) => ({ ...asset, metadata: chain.tokensMetadata[asset.tokenId] }))
   );
-  const metadata = computed(() => _metadata.value);
   const loading = computed(() => _loading.value);
   const changeAddress = computed(() => _changeAddress.value);
   const usedAddresses = computed(() => _usedAddresses.value);
@@ -78,7 +71,7 @@ export const useWalletStore = defineStore("wallet", () => {
       localStorage.setItem("firstConnected", "true");
       await _fetchData();
       if (some(balance.value)) {
-        loadTokensMetadata(
+        chain.loadTokensMetadata(
           balance.value.filter((x) => isUndefined(x.metadata)).map((x) => x.tokenId)
         );
       }
@@ -117,28 +110,8 @@ export const useWalletStore = defineStore("wallet", () => {
     _balance.value = (await _context.get_balance("all")).map((b) => ({
       tokenId: b.tokenId,
       amount: BigInt(b.balance),
-      metadata: _metadata.value[b.tokenId]
+      metadata: chain.tokensMetadata[b.tokenId]
     }));
-  }
-
-  async function loadTokensMetadata(tokenIds: string[]) {
-    const metadataTokenIds = Object.keys(_metadata.value);
-    tokenIds = tokenIds.filter((id) => !metadataTokenIds.includes(id));
-
-    if (isEmpty(tokenIds)) {
-      return;
-    }
-
-    tokenIds = uniq(tokenIds);
-
-    for await (const tokensMetadata of graphQLService.yeldTokensMetadata(tokenIds)) {
-      for (const metadata of tokensMetadata) {
-        _metadata.value[metadata.tokenId] = {
-          name: metadata?.name || undefined,
-          decimals: metadata.decimals || undefined
-        };
-      }
-    }
   }
 
   function getContext() {
@@ -153,8 +126,6 @@ export const useWalletStore = defineStore("wallet", () => {
     connect,
     disconnect,
     getContext,
-    loadTokensMetadata,
-    metadata,
     loading,
     height,
     balance,
