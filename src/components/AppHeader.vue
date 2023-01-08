@@ -32,10 +32,8 @@ const ergBalance = computed(() => {
           <li>
             <router-link to="/" active-class="active-item">Market</router-link>
           </li>
-          <li>
-            <router-link to="/dashboard" v-if="wallet.connected" active-class="active-item"
-              >Dashboard</router-link
-            >
+          <li v-if="wallet.connected">
+            <router-link to="/dashboard" active-class="active-item">Dashboard</router-link>
           </li>
         </ul>
       </div>
