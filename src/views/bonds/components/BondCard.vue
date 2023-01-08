@@ -44,6 +44,18 @@ const bond = computed(() => {
   return parseBondBox(props.box, chain.tokensMetadata, chain.height, wallet.usedAddresses);
 });
 
+const blocksLeft = computed(() => {
+  if (!bond.value) {
+    return "";
+  }
+
+  let blocks = bond.value?.term.blocks;
+
+  return `${(blocks < 0 ? blocks * -1 : blocks).toLocaleString()} blocks ${
+    blocks < 0 ? "passed" : "left"
+  }`;
+});
+
 function linkFor(address?: string) {
   if (!address) {
     return;
@@ -160,6 +172,9 @@ async function repay() {
           <div class="stat-title skeleton-placeholder">Term</div>
           <div class="stat-value skeleton-placeholder flex-grow">
             {{ bond?.term.value }} {{ bond?.term.interval }}
+          </div>
+          <div class="stat-desc skeleton-placeholder">
+            {{ blocksLeft }}
           </div>
         </div>
         <div

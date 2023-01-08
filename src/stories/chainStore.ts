@@ -30,7 +30,6 @@ export const useChainStore = defineStore("chain", () => {
 
   // hooks
   onMounted(async () => {
-    console.log("mounted");
     _height.value = (await graphQLService.getCurrentHeight()) || 0;
 
     _timer = setInterval(async () => {

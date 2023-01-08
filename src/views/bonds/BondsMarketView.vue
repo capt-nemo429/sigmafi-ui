@@ -44,7 +44,7 @@ onMounted(async () => {
     <div class="flex flex-row justify-end">
       <button
         class="btn btn-success shadow flex-col"
-        :disabled="!wallet.connected"
+        :disabled="!wallet.connected || wallet.loading"
         @click="openNewLoanModal()"
       >
         New loan request

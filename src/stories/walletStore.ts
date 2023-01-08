@@ -1,10 +1,19 @@
+import { ERG_TOKEN_ID } from "@/constants";
 import { AssetInfo } from "@/types";
 import { getNetworkType, showToast } from "@/utils";
-import { EIP12UnsignedTransaction, isUndefined, some } from "@fleet-sdk/common";
+import {
+  Amount,
+  Box,
+  EIP12UnsignedTransaction,
+  ensureBigInt,
+  isUndefined,
+  some,
+  utxoSum
+} from "@fleet-sdk/common";
 import { ErgoAddress } from "@fleet-sdk/core";
 import { EIP12ErgoAPI, SignedTransaction } from "@nautilus-js/eip12-types";
 import { defineStore, acceptHMRUpdate } from "pinia";
-import { computed, onBeforeMount, ref } from "vue";
+import { computed, onBeforeMount, ref, watch } from "vue";
 import { useChainStore } from "./chainStore";
 
 export const useWalletStore = defineStore("wallet", () => {
@@ -12,6 +21,8 @@ export const useWalletStore = defineStore("wallet", () => {
 
   // private
   let _context: EIP12ErgoAPI | undefined;
+  let _boxes: Box<Amount>[];
+  let _lastBoxFetch = 0;
 
   // private state
   const _balance = ref<AssetInfo[]>([]);
@@ -28,6 +39,22 @@ export const useWalletStore = defineStore("wallet", () => {
   const changeAddress = computed(() => _changeAddress.value);
   const usedAddresses = computed(() => _usedAddresses.value);
   const connected = computed(() => _connected.value);
+
+  // watchers
+  watch(
+    () => chain.height,
+    () => {
+      getBoxes();
+    }
+  );
+
+  watch(balance, () => {
+    if (some(_balance.value)) {
+      chain.loadTokensMetadata(
+        balance.value.filter((x) => isUndefined(x.metadata)).map((x) => x.tokenId)
+      );
+    }
+  });
 
   // hooks
   onBeforeMount(async () => {
@@ -68,16 +95,10 @@ export const useWalletStore = defineStore("wallet", () => {
       _connected.value = true;
       localStorage.setItem("firstConnected", "true");
       await _fetchData();
-      if (some(balance.value)) {
-        chain.loadTokensMetadata(
-          balance.value.filter((x) => isUndefined(x.metadata)).map((x) => x.tokenId)
-        );
-      }
     } else {
       localStorage.setItem("firstConnected", "false");
+      _loading.value = false;
     }
-
-    _loading.value = false;
   }
 
   async function disconnect() {
@@ -103,20 +124,34 @@ export const useWalletStore = defineStore("wallet", () => {
 
     _usedAddresses.value = await _context.get_used_addresses();
     _changeAddress.value = await _context.get_change_address();
+    const ergBalance = await _context.get_balance();
 
-    _balance.value = (await _context.get_balance("all")).map((b) => ({
-      tokenId: b.tokenId,
-      amount: BigInt(b.balance),
-      metadata: chain.tokensMetadata[b.tokenId]
-    }));
+    _balance.value = [{ tokenId: ERG_TOKEN_ID, amount: ensureBigInt(ergBalance) }];
   }
 
   async function getBoxes() {
     if (!_context) {
-      throw new Error("Wallet not connected.");
+      return [];
     }
 
-    return await _context.get_utxos();
+    if (Date.now() - _lastBoxFetch < 20000) {
+      return _boxes;
+    }
+
+    _boxes = await _context.get_utxos();
+    _lastBoxFetch = Date.now();
+    updateBalances(_boxes);
+
+    _loading.value = false;
+
+    return _boxes;
+  }
+
+  function updateBalances(boxes: Box<Amount>[]) {
+    const sum = utxoSum(boxes);
+
+    _balance.value = sum.tokens;
+    _balance.value.unshift({ tokenId: ERG_TOKEN_ID, amount: sum.nanoErgs });
   }
 
   async function getChangeAddress() {
