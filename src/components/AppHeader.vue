@@ -25,8 +25,8 @@ const ergBalance = computed(() => {
     <div class="navbar w-full px-4 flex">
       <div class="flex-1 gap-2">
         <router-link to="/" class="btn btn-ghost normal-case text-xl gap-2"
-          >SigmaFi
-          <span v-if="isTestnet" class="badge badge-outline font-normal">testnet</span></router-link
+          >SigmaFi <span v-if="isTestnet" class="badge badge-outline font-normal">testnet</span
+          ><span class="badge badge-outline font-normal">beta</span></router-link
         >
         <ul class="menu menu-horizontal px-1 gap-2">
           <li>
