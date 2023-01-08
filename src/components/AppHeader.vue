@@ -44,8 +44,7 @@ const ergBalance = computed(() => {
 
       <div class="flex-2">
         <ul class="menu menu-horizontal px-1 gap-2">
-          <li></li>
-          <li>
+          <li class="hidden md:block">
             <a
               class="btn btn-ghost gap-1 bg-base-100 hover:bg-base-100 hover:bg-opacity-50 bg-opacity-50 no-animation h-2"
               :class="{ loading: wallet.loading }"
