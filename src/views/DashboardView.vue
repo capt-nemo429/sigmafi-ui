@@ -44,11 +44,9 @@ watch(
         return;
       }
 
-      publicKeys = [
-        first(
-          wallet.usedAddresses.map((addr) => ErgoAddress.fromBase58(addr).ergoTree.substring(2))
-        )
-      ];
+      publicKeys = wallet.usedAddresses.map((addr) =>
+        ErgoAddress.fromBase58(addr).ergoTree.substring(2)
+      );
     }
 
     switch (newVal.tab) {
