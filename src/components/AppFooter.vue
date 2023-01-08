@@ -31,9 +31,20 @@
     </div>
     <div>
       <span class="footer-title">Social</span>
-      <a class="link link-hover" target="_blank" rel="noopener noreferrer">Twitter</a>
-      <a class="link link-hover" target="_blank" rel="noopener noreferrer">Telegram</a>
-      <a class="link link-hover" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a
+        class="link link-hover"
+        target="_blank"
+        rel="noopener noreferrer"
+        href="https://twitter.com/nautiluswallet"
+        >Twitter</a
+      >
+      <a
+        href="https://github.com/capt-nemo429"
+        class="link link-hover"
+        target="_blank"
+        rel="noopener noreferrer"
+        >GitHub</a
+      >
     </div>
   </footer>
 </template>
