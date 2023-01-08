@@ -65,7 +65,7 @@ async function cancelOrder() {
           <div class="skeleton-placeholder">{{ order?.amount }} <small>ERG</small></div>
         </div>
         <div v-if="loadingBox" class="skeleton-fixed h-8 w-8 skeleton-circular"></div>
-        <asset-icon v-else class="h-8 w-8 opacity-70" :token-id="ERG_TOKEN_ID" />
+        <asset-icon v-else class="h-8 w-8" :token-id="ERG_TOKEN_ID" />
       </div>
     </div>
 
