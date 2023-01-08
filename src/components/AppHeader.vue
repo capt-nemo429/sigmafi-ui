@@ -57,10 +57,12 @@ const ergBalance = computed(() => {
                   {{ shortenString(wallet.changeAddress, 14) }}
                 </span>
                 <img
-                  :src="wallet.connectedWallet === 'nautilus' ? './nautilus.svg' : './safew.png'"
+                  v-if="wallet.connectedWallet === 'nautilus'"
+                  src="../assets/nautilus.svg"
                   width="24"
                   height="24"
                 />
+                <img v-else src="../assets/safew.png" width="24" height="24" />
               </template>
             </a>
             <ul class="p-2 bg-base-100 shadow-md w-full">
@@ -72,7 +74,7 @@ const ergBalance = computed(() => {
                     :class="{ 'opacity-100': wallet.wallets.nautilus }"
                   >
                     <div class="flex-grow text-left">Nautilus</div>
-                    <img src="./nautilus.svg" class="w-5 h-5" />
+                    <img src="../assets/nautilus.svg" class="w-5 h-5" />
                   </a>
                 </li>
                 <li>
@@ -82,7 +84,7 @@ const ergBalance = computed(() => {
                     :class="{ 'opacity-100': wallet.wallets.safew }"
                   >
                     <div class="flex-grow text-left">SAFEW</div>
-                    <img src="./safew.png" class="w-5 h-5"
+                    <img src="../assets/safew.png" class="w-5 h-5"
                   /></a>
                 </li>
               </template>

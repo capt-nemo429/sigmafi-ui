@@ -1,7 +1,7 @@
 <template>
   <footer class="footer p-10 bg-base-300 bg-opacity-50 z-30 text-base-content">
     <div>
-      <img src="./nautilus.svg" width="50" height="50" />
+      <img src="../assets/nautilus.svg" width="50" height="50" />
       <p>Nautilus Team</p>
       <p class="opacity-70">Ad augusta per angusta</p>
     </div>
