@@ -113,6 +113,8 @@ export const useWalletStore = defineStore("wallet", () => {
     _changeAddress.value = undefined;
     _balance.value = [];
     _connected.value = false;
+    _boxes = [];
+    _lastBoxFetch = 0;
 
     _loading.value = false;
   }
@@ -127,6 +129,10 @@ export const useWalletStore = defineStore("wallet", () => {
     const ergBalance = await _context.get_balance();
 
     _balance.value = [{ tokenId: ERG_TOKEN_ID, amount: ensureBigInt(ergBalance) }];
+
+    if (chain.height > 0) {
+      getBoxes();
+    }
   }
 
   async function getBoxes() {
@@ -135,6 +141,7 @@ export const useWalletStore = defineStore("wallet", () => {
     }
 
     if (Date.now() - _lastBoxFetch < 20000) {
+      _loading.value = false;
       return _boxes;
     }
 
