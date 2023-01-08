@@ -49,7 +49,6 @@ const ergBalance = computed(() => {
             <a
               class="btn btn-ghost gap-1 bg-base-100 hover:bg-base-100 hover:bg-opacity-50 bg-opacity-50 no-animation h-2"
               :class="{ loading: wallet.loading }"
-              @click="wallet.connect()"
             >
               <template v-if="!wallet.connected">Connect Wallet</template>
               <template v-else>
@@ -57,11 +56,37 @@ const ergBalance = computed(() => {
                 <span class="normal-case py-1 px-2 font-normal opacity-70">
                   {{ shortenString(wallet.changeAddress, 14) }}
                 </span>
-                <img src="/nautilus.svg" width="24" height="24" />
+                <img
+                  :src="wallet.connectedWallet === 'nautilus' ? '/nautilus.svg' : '/safew.png'"
+                  width="24"
+                  height="24"
+                />
               </template>
             </a>
-            <ul class="p-2 bg-base-100 shadow-md w-full" v-if="wallet.connected">
-              <li><a @click="wallet.disconnect()">Disconnect</a></li>
+            <ul class="p-2 bg-base-100 shadow-md w-full">
+              <template v-if="!wallet.connected">
+                <li>
+                  <a
+                    @click="wallet.connect('nautilus')"
+                    class="opacity-50"
+                    :class="{ 'opacity-100': wallet.wallets.nautilus }"
+                  >
+                    <div class="flex-grow text-left">Nautilus</div>
+                    <img src="/nautilus.svg" class="w-5 h-5" />
+                  </a>
+                </li>
+                <li>
+                  <a
+                    @click="wallet.connect('safew')"
+                    class="opacity-50"
+                    :class="{ 'opacity-100': wallet.wallets.safew }"
+                  >
+                    <div class="flex-grow text-left">SAFEW</div>
+                    <img src="/safew.png" class="w-5 h-5"
+                  /></a>
+                </li>
+              </template>
+              <li v-else><a @click="wallet.disconnect()">Disconnect</a></li>
             </ul>
           </li>
           <li>

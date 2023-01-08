@@ -27,7 +27,6 @@ export class TransactionFactory {
 
   public static async cancelOrder(box: Box<Amount>) {
     const { chain, changeAddress, inputs, wallet } = await this._getTxContext();
-
     const unsignedTx = new TransactionBuilder(chain.height)
       .from(inputs)
       .extend(CancelOrderPlugin(box, changeAddress))

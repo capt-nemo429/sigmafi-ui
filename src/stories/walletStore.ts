@@ -30,6 +30,8 @@ export const useWalletStore = defineStore("wallet", () => {
   const _loading = ref(false);
   const _connected = ref(false);
   const _usedAddresses = ref<string[]>([]);
+  const _wallets = ref<{ [key: string]: boolean }>({});
+  const _connectedWallet = ref<"nautilus" | "safew" | string | undefined>();
 
   // computed
   const balance = computed(() =>
@@ -39,6 +41,8 @@ export const useWalletStore = defineStore("wallet", () => {
   const changeAddress = computed(() => _changeAddress.value);
   const usedAddresses = computed(() => _usedAddresses.value);
   const connected = computed(() => _connected.value);
+  const wallets = computed(() => _wallets.value);
+  const connectedWallet = computed(() => _connectedWallet.value);
 
   // watchers
   watch(
@@ -58,32 +62,42 @@ export const useWalletStore = defineStore("wallet", () => {
 
   // hooks
   onBeforeMount(async () => {
-    const firstConnected = localStorage.getItem("firstConnected") === "true";
-    if (firstConnected) {
-      await connect();
+    if (typeof ergoConnector !== "undefined") {
+      Object.keys(ergoConnector).map((key) => (_wallets.value[key] = true));
+    }
+
+    const connectedWallet = localStorage.getItem("connectedWallet");
+    if (connectedWallet) {
+      await connect(connectedWallet);
     }
   });
 
   // actions
-  async function connect() {
-    if (typeof ergoConnector === "undefined" || !ergoConnector.nautilus) {
-      showToast("Nautilus wallet is not installed", "alert-error");
+  async function connect(walletName: "nautilus" | "safew" | string) {
+    if (typeof ergoConnector === "undefined") {
+      showToast("Ergo wallet not detected.", "alert-error");
 
       return;
     }
 
-    if (await ergoConnector.nautilus.isConnected()) {
+    const walletConnector = ergoConnector[walletName];
+    if (typeof ergoConnector === "undefined" || !walletConnector) {
+      showToast(`${walletName} wallet is not detected.`, "alert-error");
+
       return;
     }
 
-    _loading.value = true;
+    if (await walletConnector.isConnected()) {
+      return;
+    }
 
-    const granted = await ergoConnector.nautilus.connect({
+    const granted = await walletConnector.connect({
       createErgoObject: false
     });
 
     if (granted) {
-      _context = await ergoConnector.nautilus.getContext();
+      _loading.value = true;
+      _context = await walletConnector.getContext();
       const change = ErgoAddress.fromBase58(await _context.get_change_address());
       if (change.network !== getNetworkType()) {
         disconnect();
@@ -93,21 +107,28 @@ export const useWalletStore = defineStore("wallet", () => {
       }
 
       _connected.value = true;
-      localStorage.setItem("firstConnected", "true");
+      _connectedWallet.value = walletName;
+      localStorage.setItem("connectedWallet", walletName);
       await _fetchData();
     } else {
-      localStorage.setItem("firstConnected", "false");
+      localStorage.removeItem("connectedWallet");
+      _connectedWallet.value = undefined;
       _loading.value = false;
     }
   }
 
   async function disconnect() {
-    _loading.value = true;
-    if (ergoConnector?.nautilus) {
-      await ergoConnector.nautilus.disconnect();
+    const connector =
+      typeof ergoConnector !== undefined && ergoConnector && _connectedWallet.value
+        ? ergoConnector[_connectedWallet.value]
+        : undefined;
+
+    if (connector) {
+      await connector.disconnect();
     }
 
-    localStorage.setItem("firstConnected", "false");
+    _loading.value = true;
+    localStorage.removeItem("connectedWallet");
     _context = undefined;
     _usedAddresses.value = [];
     _changeAddress.value = undefined;
@@ -197,6 +218,8 @@ export const useWalletStore = defineStore("wallet", () => {
     getChangeAddress,
     signTx,
     submitTx,
+    wallets,
+    connectedWallet,
     loading,
     balance,
     changeAddress,
