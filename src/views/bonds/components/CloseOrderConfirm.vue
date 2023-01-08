@@ -56,10 +56,13 @@ async function closeOrder() {
     return;
   }
 
-  await sendTransaction(async () => {
+  const sent = await sendTransaction(async () => {
     return await TransactionFactory.closeOrder(toRaw(box));
   }, loading);
-  emit("close");
+
+  if (sent) {
+    emit("close");
+  }
 }
 </script>
 

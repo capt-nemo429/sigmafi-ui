@@ -127,7 +127,7 @@ async function submit() {
     tokensCollateral = tokensCollateral.filter((x) => x.tokenId != ERG_TOKEN_ID);
   }
 
-  await sendTransaction(async () => {
+  const sent = await sendTransaction(async () => {
     return await TransactionFactory.openOrder({
       type: "on-close",
       lendAmount: lend.toString(),
@@ -140,7 +140,9 @@ async function submit() {
     });
   }, loading);
 
-  emit("close");
+  if (sent) {
+    emit("close");
+  }
 }
 </script>
 

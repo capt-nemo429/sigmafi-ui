@@ -16,7 +16,10 @@ export function showToast(
   });
 }
 
-export async function sendTransaction(callback: () => Promise<string>, loadingRef: Ref) {
+export async function sendTransaction(
+  callback: () => Promise<string>,
+  loadingRef: Ref
+): Promise<boolean> {
   loadingRef.value = true;
 
   try {
@@ -30,6 +33,7 @@ export async function sendTransaction(callback: () => Promise<string>, loadingRe
     });
 
     loadingRef.value = false;
+    return true;
   } catch (e: any) {
     loadingRef.value = false;
     console.error(e);
@@ -40,7 +44,7 @@ export async function sendTransaction(callback: () => Promise<string>, loadingRe
     } else if (isDefined(e.info)) {
       if (e.code === 2) {
         loadingRef.value = false;
-        return;
+        return false;
       }
 
       message = "dApp Connector: " + e.info;
@@ -48,6 +52,8 @@ export async function sendTransaction(callback: () => Promise<string>, loadingRe
 
     showToast(message, "alert-error");
   }
+
+  return false;
 }
 
 export function setSystemTheme() {
