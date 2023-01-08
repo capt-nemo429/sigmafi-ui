@@ -1,11 +1,7 @@
-<script setup lang="ts">
-import nautilusLogoUrl from "@/assets/nautilus.svg?url";
-</script>
-
 <template>
   <footer class="footer p-10 bg-base-300 bg-opacity-50 z-30 text-base-content">
     <div>
-      <img :src="nautilusLogoUrl" width="50" height="50" />
+      <img src="/nautilus.svg" width="50" height="50" />
       <p>Nautilus Team</p>
       <p class="opacity-70">Ad augusta per angusta</p>
     </div>
