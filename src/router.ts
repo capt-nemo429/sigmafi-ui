@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
+import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
 import BondsMarketView from "./views/bonds/BondsMarketView.vue";
 import Dashboard from "./views/DashboardView.vue";
 
@@ -8,6 +8,6 @@ const routes: RouteRecordRaw[] = [
 ];
 
 export const router = createRouter({
-  history: createWebHistory("sigmafi-ui"),
+  history: createWebHashHistory(),
   routes
 });
