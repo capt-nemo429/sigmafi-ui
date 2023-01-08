@@ -1,4 +1,4 @@
-<script setup land="ts">
+<script setup lang="ts">
 import nautilusLogoUrl from "@/assets/nautilus.svg?url";
 </script>
 
