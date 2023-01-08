@@ -1,8 +1,7 @@
 import { MIN_FEE } from "@/constants";
-import { useWalletStore } from "@/stories";
+import { useChainStore, useWalletStore } from "@/stories";
 import { EIP12UnsignedTransaction } from "@fleet-sdk/common";
 import { Amount, Box, ErgoAddress, TransactionBuilder } from "@fleet-sdk/core";
-import { EIP12ErgoAPI } from "@nautilus-js/eip12-types";
 import {
   CancelOrderPlugin,
   CloseOrderPlugin,
@@ -14,57 +13,43 @@ import {
 
 export class TransactionFactory {
   public static async openOrder(order: Omit<OpenOrderParams, "borrower">) {
-    const wallet = useWalletStore();
-    const context = wallet.getContext();
+    const { chain, changeAddress, inputs, wallet } = await this._getTxContext();
 
-    const height = await context.get_current_height();
-    const inputs = await context.get_utxos();
-    const changeAddress = ErgoAddress.fromBase58(await context.get_change_address());
-
-    const unsignedTx = new TransactionBuilder(height)
+    const unsignedTx = new TransactionBuilder(chain.height)
       .from(inputs)
       .extend(OpenOrderPlugin({ ...order, borrower: changeAddress }))
       .payFee(MIN_FEE)
       .sendChangeTo(changeAddress)
       .build("EIP-12");
 
-    return await this._signAndSend(unsignedTx, context);
+    return await this._signAndSend(unsignedTx, wallet);
   }
 
   public static async cancelOrder(box: Box<Amount>) {
-    const wallet = useWalletStore();
-    const context = wallet.getContext();
+    const { chain, changeAddress, inputs, wallet } = await this._getTxContext();
 
-    const height = await context.get_current_height();
-    const inputs = await context.get_utxos();
-    const changeAddress = ErgoAddress.fromBase58(await context.get_change_address());
-
-    const unsignedTx = new TransactionBuilder(height)
+    const unsignedTx = new TransactionBuilder(chain.height)
       .from(inputs)
       .extend(CancelOrderPlugin(box, changeAddress))
       .payFee(MIN_FEE)
       .sendChangeTo(changeAddress)
       .build("EIP-12");
 
-    return await this._signAndSend(unsignedTx, context);
+    return await this._signAndSend(unsignedTx, wallet);
   }
 
   public static async closeOrder(orderBox: Box<Amount>) {
-    const wallet = useWalletStore();
-    const context = wallet.getContext();
+    const { chain, changeAddress, inputs, wallet } = await this._getTxContext();
 
-    const height = await context.get_current_height();
-    const inputs = await context.get_utxos();
-    const changeAddress = ErgoAddress.fromBase58(await context.get_change_address());
     const implementor = ErgoAddress.fromBase58(
       "9i3g6d958MpZAqWn9hrTHcqbBiY5VPYBBY6vRDszZn4koqnahin"
     );
 
-    const unsignedTx = new TransactionBuilder(height)
+    const unsignedTx = new TransactionBuilder(chain.height)
       .from(inputs)
       .extend(
         CloseOrderPlugin(orderBox, {
-          currentHeight: height,
+          currentHeight: chain.height,
           lender: changeAddress,
           uiImplementor: implementor
         })
@@ -73,47 +58,50 @@ export class TransactionFactory {
       .sendChangeTo(changeAddress)
       .build("EIP-12");
 
-    return await this._signAndSend(unsignedTx, context);
+    return await this._signAndSend(unsignedTx, wallet);
   }
 
   public static async liquidate(box: Box<Amount>) {
-    const wallet = useWalletStore();
-    const context = wallet.getContext();
+    const { chain, changeAddress, inputs, wallet } = await this._getTxContext();
 
-    const height = await context.get_current_height();
-    const inputs = await context.get_utxos();
-    const changeAddress = ErgoAddress.fromBase58(await context.get_change_address());
-
-    const unsignedTx = new TransactionBuilder(height)
+    const unsignedTx = new TransactionBuilder(chain.height)
       .from(inputs)
       .extend(LiquidatePlugin(box, changeAddress))
       .payFee(MIN_FEE)
       .sendChangeTo(changeAddress)
       .build("EIP-12");
 
-    return await this._signAndSend(unsignedTx, context);
+    return await this._signAndSend(unsignedTx, wallet);
   }
 
   public static async repay(box: Box<Amount>) {
-    const wallet = useWalletStore();
-    const context = wallet.getContext();
+    const { chain, changeAddress, inputs, wallet } = await this._getTxContext();
 
-    const height = await context.get_current_height();
-    const inputs = await context.get_utxos();
-    const changeAddress = ErgoAddress.fromBase58(await context.get_change_address());
-
-    const unsignedTx = new TransactionBuilder(height)
+    const unsignedTx = new TransactionBuilder(chain.height)
       .from(inputs)
       .extend(RepayPlugin(box))
       .payFee(MIN_FEE)
       .sendChangeTo(changeAddress)
       .build("EIP-12");
 
-    return await this._signAndSend(unsignedTx, context);
+    return await this._signAndSend(unsignedTx, wallet);
   }
 
-  private static async _signAndSend(unsignedTx: EIP12UnsignedTransaction, context: EIP12ErgoAPI) {
-    const signedTx = await context.sign_tx(unsignedTx);
-    return await context.submit_tx(signedTx);
+  private static async _getTxContext() {
+    const chain = useChainStore();
+    const wallet = useWalletStore();
+
+    const inputs = await wallet.getBoxes();
+    const changeAddress = ErgoAddress.fromBase58(await wallet.getChangeAddress());
+
+    return { inputs, changeAddress, chain, wallet };
+  }
+
+  private static async _signAndSend(
+    unsignedTx: EIP12UnsignedTransaction,
+    wallet: ReturnType<typeof useWalletStore>
+  ) {
+    const signedTx = await wallet.signTx(unsignedTx);
+    return await wallet.submitTx(signedTx);
   }
 }

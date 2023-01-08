@@ -32,7 +32,7 @@ const termProgress = computed(() => {
     return 100;
   }
 
-  const totalTerm = wallet.height - props.box.creationHeight + blocksLeft;
+  const totalTerm = chain.height - props.box.creationHeight + blocksLeft;
   return (((totalTerm - blocksLeft) / totalTerm) * 100).toFixed(1);
 });
 
@@ -41,7 +41,7 @@ const bond = computed(() => {
     return;
   }
 
-  return parseBondBox(props.box, chain.tokensMetadata, wallet.height, wallet.usedAddresses);
+  return parseBondBox(props.box, chain.tokensMetadata, chain.height, wallet.usedAddresses);
 });
 
 function linkFor(address?: string) {

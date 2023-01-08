@@ -1,8 +1,8 @@
 import { AssetInfo } from "@/types";
 import { getNetworkType, showToast } from "@/utils";
-import { isUndefined, some } from "@fleet-sdk/common";
+import { EIP12UnsignedTransaction, isUndefined, some } from "@fleet-sdk/common";
 import { ErgoAddress } from "@fleet-sdk/core";
-import { EIP12ErgoAPI } from "@nautilus-js/eip12-types";
+import { EIP12ErgoAPI, SignedTransaction } from "@nautilus-js/eip12-types";
 import { defineStore, acceptHMRUpdate } from "pinia";
 import { computed, onBeforeMount, ref } from "vue";
 import { useChainStore } from "./chainStore";
@@ -19,7 +19,6 @@ export const useWalletStore = defineStore("wallet", () => {
   const _loading = ref(false);
   const _connected = ref(false);
   const _usedAddresses = ref<string[]>([]);
-  const _height = ref<number>(0);
 
   // computed
   const balance = computed(() =>
@@ -29,7 +28,6 @@ export const useWalletStore = defineStore("wallet", () => {
   const changeAddress = computed(() => _changeAddress.value);
   const usedAddresses = computed(() => _usedAddresses.value);
   const connected = computed(() => _connected.value);
-  const height = computed(() => _height.value);
 
   // hooks
   onBeforeMount(async () => {
@@ -103,7 +101,6 @@ export const useWalletStore = defineStore("wallet", () => {
       return;
     }
 
-    _height.value = await _context.get_current_height();
     _usedAddresses.value = await _context.get_used_addresses();
     _changeAddress.value = await _context.get_change_address();
 
@@ -114,20 +111,51 @@ export const useWalletStore = defineStore("wallet", () => {
     }));
   }
 
-  function getContext() {
+  async function getBoxes() {
     if (!_context) {
       throw new Error("Wallet not connected.");
     }
 
-    return _context;
+    return await _context.get_utxos();
+  }
+
+  async function getChangeAddress() {
+    if (!_context) {
+      throw new Error("Wallet not connected.");
+    }
+
+    const changeAddress = await _context.get_change_address();
+    if (_changeAddress.value !== changeAddress) {
+      _changeAddress.value = changeAddress;
+    }
+
+    return changeAddress;
+  }
+
+  async function signTx(unsignedTx: EIP12UnsignedTransaction) {
+    if (!_context) {
+      throw new Error("Wallet not connected.");
+    }
+
+    return await _context.sign_tx(unsignedTx);
+  }
+
+  async function submitTx(signedTx: SignedTransaction) {
+    if (!_context) {
+      throw new Error("Wallet not connected.");
+    }
+
+    return await _context.submit_tx(signedTx);
   }
 
   return {
     connect,
     disconnect,
-    getContext,
+    getBoxes,
+    getChangeAddress,
+    signTx,
+    submitTx,
     loading,
-    height,
     balance,
     changeAddress,
     connected,
