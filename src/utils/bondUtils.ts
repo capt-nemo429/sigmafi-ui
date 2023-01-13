@@ -1,6 +1,7 @@
 import { ERG_DECIMALS, ERG_TOKEN_ID } from "@/constants";
+import { assetIconMap } from "@/maps/assetIconMap";
 import { StateTokenMetadata } from "@/stories";
-import { blockToTime, formatBigNumber, getNetworkType } from "@/utils/otherUtils";
+import { blockToTime, decimalizeBN, formatBigNumber, getNetworkType } from "@/utils/otherUtils";
 import { Box, decimalize, isDefined } from "@fleet-sdk/common";
 import { ErgoAddress, SAFE_MIN_BOX_VALUE, SParse } from "@fleet-sdk/core";
 import BigNumber from "bignumber.js";
@@ -43,12 +44,12 @@ export function parseOpenOrderBox(
     : undefined;
 
   return {
-    amount: decimalizeDefault(parseOr(box.additionalRegisters.R5, "0"), ERG_DECIMALS),
+    amount: decimalizeAndFormat(parseOr(box.additionalRegisters.R5, "0"), ERG_DECIMALS),
     term: blockToTime(parseOr(box.additionalRegisters.R7, 0)),
     collateral,
     interest: {
       percent: formatBigNumber(interest, 3),
-      value: decimalizeDefault(interestValue.toString(), ERG_DECIMALS),
+      value: decimalizeAndFormat(interestValue.toString(), ERG_DECIMALS),
       apr: formatBigNumber(apr, 3)
     },
     borrower,
@@ -102,6 +103,14 @@ function decimalizeDefault(val: string, decimals: number) {
   return decimalize(val, { decimals, thousandMark: "," });
 }
 
+export function decimalizeAndFormat(val: string, decimals: number): string {
+  return formatBigNumber(decimalizeBN(new BigNumber(val), decimals), decimals);
+}
+
 function parseOr<T>(value: string | undefined, or: T) {
   return value ? SParse<T>(value) : or;
+}
+
+export function verifiedToken(tokenId: string) {
+  return isDefined(assetIconMap[tokenId]);
 }

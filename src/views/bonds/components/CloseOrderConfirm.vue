@@ -7,15 +7,18 @@ import {
   formatBigNumber,
   sendTransaction,
   shortenString,
-  parseOpenOrderBox
+  parseOpenOrderBox,
+  addressUrlFor,
+  decimalizeAndFormat
 } from "@/utils";
-import { decimalize } from "@fleet-sdk/common";
 import AssetIcon from "@/components/AssetIcon.vue";
 import { ERG_DECIMALS, ERG_TOKEN_ID, EXPLORER_URL, MIN_FEE } from "@/constants";
 import BigNumber from "bignumber.js";
 import { ExternalLinkIcon } from "@zhuowenli/vue-feather-icons";
 import { TransactionFactory } from "@/offchain/transactionFactory";
 import { useChainStore } from "@/stories";
+import AssetVerificationBadge from "@/components/AssetVerificationBadge.vue";
+import { tokenUrlFor } from "@/utils";
 
 const wallet = useWalletStore();
 const chain = useChainStore();
@@ -48,8 +51,6 @@ const order = computed(() => {
   return parseOpenOrderBox(props.box, chain.tokensMetadata, wallet.usedAddresses);
 });
 
-const explorerUrl = new URL(`addresses/${order.value?.borrower}`, EXPLORER_URL).href;
-
 async function closeOrder() {
   const box = props.box;
   if (!box) {
@@ -72,34 +73,39 @@ async function closeOrder() {
 
     <div class="stats stats-vertical bg-base-100">
       <div class="stat">
-        <div class="grid grid-cols-2">
+        <div class="flex flex-row gap-1">
           <div class="stat-title">Loan</div>
-          <div class="text-xl font-semibold flex items-center text-right gap-2">
+          <div class="text-xl font-semibold flex items-center w-full text-right gap-2">
             <div class="flex-grow">{{ order?.amount }} <small>ERG</small></div>
             <asset-icon class="h-7 w-7" :token-id="ERG_TOKEN_ID" />
           </div>
         </div>
       </div>
       <div class="stat">
-        <div class="grid grid-cols-2">
+        <div class="flex flex-row gap-1">
           <div class="stat-title">Collateral</div>
-          <div class="text-lg text-right">
+          <div class="text-lg text-right w-full">
             <div
-              class="flex items-center gap-2"
+              class="flex items-center gap-2 whitespace-nowrap"
               v-for="collateral in order?.collateral"
               :key="collateral.tokenId"
             >
-              <span class="flex-grow">
-                {{
-                  decimalize(collateral.amount, {
-                    decimals: collateral.metadata?.decimals || 0,
-                    thousandMark: ","
-                  })
-                }}
-                <small>{{
-                  shortenString(collateral.metadata?.name || collateral.tokenId, 15)
-                }}</small>
-              </span>
+              <div class="flex-grow flex items-center justify-end gap-2">
+                <asset-verification-badge :token-id="collateral.tokenId" />
+                <div>
+                  {{ decimalizeAndFormat(collateral.amount, collateral.metadata?.decimals || 0) }}
+                  <a
+                    :href="tokenUrlFor(collateral.tokenId)"
+                    :class="{ 'link link-hover': collateral.tokenId !== ERG_TOKEN_ID }"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <small>{{
+                      shortenString(collateral.metadata?.name || collateral.tokenId, 12)
+                    }}</small>
+                  </a>
+                </div>
+              </div>
               <asset-icon
                 class="h-6 w-6"
                 :token-id="collateral.tokenId"
@@ -110,16 +116,18 @@ async function closeOrder() {
         </div>
       </div>
       <div class="stat">
-        <div class="grid grid-cols-2">
+        <div class="flex flex-row gap-1">
           <div class="stat-title">Term</div>
-          <div class="text-lg text-right">{{ order?.term.value }} {{ order?.term.interval }}</div>
+          <div class="text-lg text-right w-full">
+            {{ order?.term.value }} {{ order?.term.interval }}
+          </div>
         </div>
       </div>
 
       <div class="stat">
-        <div class="grid grid-cols-2">
+        <div class="flex flex-row gap-1">
           <div class="stat-title">Interest</div>
-          <div class="text-lg text-right">
+          <div class="text-lg text-right w-full">
             {{ order?.interest.value }} <small>ERG</small>
             <div class="text-xs text-right opacity-70">{{ order?.interest.percent }}%</div>
           </div>
@@ -127,11 +135,11 @@ async function closeOrder() {
       </div>
 
       <div class="stat">
-        <div class="grid grid-cols-2">
+        <div class="flex flex-row gap-1">
           <div class="stat-title">Borrower</div>
-          <div class="text-lg text-right">
+          <div class="text-lg text-right w-full">
             <a
-              :href="explorerUrl"
+              :href="addressUrlFor(order?.borrower)"
               class="link link-hover text-sm"
               target="_blank"
               rel="noopener noreferrer"
@@ -144,9 +152,9 @@ async function closeOrder() {
       </div>
 
       <div class="stat">
-        <div class="grid grid-cols-2">
+        <div class="flex flex-row gap-1">
           <div class="stat-title">Fees</div>
-          <div class="text-right">{{ fees }} <small>ERG</small></div>
+          <div class="text-right w-full">{{ fees }} <small>ERG</small></div>
         </div>
       </div>
     </div>

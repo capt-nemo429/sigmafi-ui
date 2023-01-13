@@ -1,6 +1,14 @@
 import { BigNumber } from "bignumber.js";
 import { Network } from "@fleet-sdk/common";
 
+const BIG_NUMBER_IN_SHORT = Intl.NumberFormat("en", {
+  notation: "compact",
+  compactDisplay: "short",
+  maximumFractionDigits: 2
+});
+
+const SHORT_NUMBER_THRESHOLD = 1_000_000;
+
 export function shortenString(
   val: string | undefined,
   maxLength: number,
@@ -25,6 +33,10 @@ export function shortenString(
 }
 
 export function formatBigNumber(number: BigNumber, decimals: number) {
+  if (number.isGreaterThanOrEqualTo(SHORT_NUMBER_THRESHOLD)) {
+    return BIG_NUMBER_IN_SHORT.format(number.toNumber());
+  }
+
   return number.decimalPlaces(decimals).toFormat({
     groupSeparator: ",",
     groupSize: 3,
@@ -38,14 +50,6 @@ export function undecimalizeBN(number: BigNumber, decimals: number) {
 
 export function decimalizeBN(number: BigNumber, decimals: number) {
   return number.decimalPlaces(decimals).shiftedBy(decimals * -1);
-}
-
-export function getNetworkType(): Network {
-  if (import.meta.env.PROD) {
-    return Network.Mainnet;
-  }
-
-  return import.meta.env.VITE_NETWORK === "testnet" ? Network.Testnet : Network.Mainnet;
 }
 
 export function blockToTime(blocks: number) {
@@ -87,4 +91,12 @@ export function pluralize(word: string, val: number) {
   }
 
   return word + "s";
+}
+
+export function getNetworkType(): Network {
+  if (import.meta.env.PROD) {
+    return Network.Mainnet;
+  }
+
+  return import.meta.env.VITE_NETWORK === "testnet" ? Network.Testnet : Network.Mainnet;
 }

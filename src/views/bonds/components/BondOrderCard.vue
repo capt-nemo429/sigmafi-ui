@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { ERG_TOKEN_ID } from "@/constants";
 import { useWalletStore } from "@/stories/walletStore";
-import { sendTransaction, shortenString, parseOpenOrderBox } from "@/utils";
-import { Box, decimalize } from "@fleet-sdk/common";
+import { sendTransaction, shortenString, parseOpenOrderBox, decimalizeAndFormat } from "@/utils";
+import { Box } from "@fleet-sdk/common";
 import { computed, PropType, ref, toRaw } from "vue";
 import AssetIcon from "@/components/AssetIcon.vue";
 import { useProgrammatic } from "@oruga-ui/oruga-next";
 import { TransactionFactory } from "@/offchain/transactionFactory";
 import CloseOrderConfirm from "./CloseOrderConfirm.vue";
 import { useChainStore } from "@/stories";
+import { tokenUrlFor } from "@/utils";
+import AssetVerificationBadge from "@/components/AssetVerificationBadge.vue";
 
 const { oruga } = useProgrammatic();
 
@@ -70,7 +72,7 @@ async function cancelOrder() {
     </div>
 
     <div class="stat">
-      <div class="stat-title h-fit">Collateral</div>
+      <div class="stat-title h-fit">Collateral offered</div>
       <div class="grid grid-cols-1 gap-2 mt-2 items-start">
         <div v-if="loadingBox" class="flex flex-row items-center gap-2">
           <div class="skeleton-fixed h-8 w-8 skeleton-circular"></div>
@@ -89,16 +91,19 @@ async function cancelOrder() {
               <div class="skeleton-fixed h-5 w-1/3"></div>
             </template>
             <template v-else>
-              <div class="flex-grow">
-                {{ shortenString(collateral.metadata?.name || collateral.tokenId, 15) }}
+              <div class="flex-grow items-center flex gap-2">
+                <a
+                  :href="tokenUrlFor(collateral.tokenId)"
+                  :class="{ 'link link-hover': collateral.tokenId !== ERG_TOKEN_ID }"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {{ shortenString(collateral.metadata?.name || collateral.tokenId, 15) }}
+                </a>
+                <asset-verification-badge :token-id="collateral.tokenId" badge-class="w-5 h-5" />
               </div>
-              <div class="">
-                {{
-                  decimalize(collateral.amount, {
-                    decimals: collateral.metadata?.decimals || 0,
-                    thousandMark: ","
-                  })
-                }}
+              <div>
+                {{ decimalizeAndFormat(collateral.amount, collateral.metadata?.decimals || 0) }}
               </div>
             </template>
           </div>

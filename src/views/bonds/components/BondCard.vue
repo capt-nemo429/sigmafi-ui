@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { ERG_TOKEN_ID, EXPLORER_URL } from "@/constants";
+import { ERG_TOKEN_ID } from "@/constants";
 import { useWalletStore } from "@/stories/walletStore";
-import { shortenString } from "@/utils";
-import { Box, decimalize } from "@fleet-sdk/common";
+import { shortenString, addressUrlFor, decimalizeAndFormat } from "@/utils";
+import { Box } from "@fleet-sdk/common";
 import { computed, PropType, ref, toRaw } from "vue";
 import AssetIcon from "@/components/AssetIcon.vue";
 import { TransactionFactory } from "@/offchain/transactionFactory";
 import { parseBondBox, sendTransaction } from "@/utils";
 import { ExternalLinkIcon } from "@zhuowenli/vue-feather-icons";
 import { useChainStore } from "@/stories";
+import { tokenUrlFor } from "@/utils";
 
 const chain = useChainStore();
 const wallet = useWalletStore();
@@ -55,14 +56,6 @@ const blocksLeft = computed(() => {
     blocks < 0 ? "passed" : "left"
   }`;
 });
-
-function linkFor(address?: string) {
-  if (!address) {
-    return;
-  }
-
-  return new URL(`addresses/${address}`, EXPLORER_URL).href;
-}
 
 async function liquidate() {
   const box = props.box;
@@ -124,15 +117,17 @@ async function repay() {
             </template>
             <template v-else>
               <div class="flex-grow">
-                {{ shortenString(collateral.metadata?.name || collateral.tokenId, 15) }}
+                <a
+                  :href="tokenUrlFor(collateral.tokenId)"
+                  :class="{ 'link link-hover': collateral.tokenId !== ERG_TOKEN_ID }"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {{ shortenString(collateral.metadata?.name || collateral.tokenId, 15) }}
+                </a>
               </div>
               <div class="">
-                {{
-                  decimalize(collateral.amount, {
-                    decimals: collateral.metadata?.decimals || 0,
-                    thousandMark: ","
-                  })
-                }}
+                {{ decimalizeAndFormat(collateral.amount, collateral.metadata?.decimals || 0) }}
               </div>
             </template>
           </div>
@@ -145,7 +140,7 @@ async function repay() {
     <div class="stat" v-if="bond?.type === 'debit'">
       <div class="stat-title skeleton-placeholder">Lender</div>
       <a
-        :href="linkFor(bond?.lender)"
+        :href="addressUrlFor(bond?.lender)"
         class="link link-hover text-sm skeleton-placeholder"
         target="_blank"
         rel="noopener noreferrer"
@@ -157,7 +152,7 @@ async function repay() {
     <div class="stat" v-else>
       <div class="stat-title skeleton-placeholder">Borrower</div>
       <a
-        :href="linkFor(bond?.borrower)"
+        :href="addressUrlFor(bond?.borrower)"
         class="link link-hover text-sm skeleton-placeholder"
         target="_blank"
         rel="noopener noreferrer"
