@@ -6,7 +6,7 @@ import { computed, reactive, ref } from "vue";
 import { ERG_DECIMALS, ERG_TOKEN_ID } from "@/constants";
 import { decimalize, isEmpty, TokenAmount } from "@fleet-sdk/common";
 import { BigNumber } from "bignumber.js";
-import { formatBigNumber, sendTransaction, shortenString, undecimalizeBN } from "@/utils";
+import { formatBigNumber, sendTransaction, shortenString, undecimalizeBigNumber } from "@/utils";
 import SigDropdown from "@/components/SigDropdown.vue";
 import AssetIcon from "@/components/AssetIcon.vue";
 import { differenceBy, remove } from "lodash-es";
@@ -20,7 +20,7 @@ const wallet = useWalletStore();
 const emit = defineEmits(["close"]);
 
 type CollateralAsset = TokenAmount<string> & {
-  info: AssetInfo;
+  info: AssetInfo<bigint>;
 };
 
 const loading = ref(false);
@@ -93,12 +93,12 @@ const rules = {
 
 const $v = useVuelidate(rules, state, { $lazy: true });
 
-function addCollateral(asset: AssetInfo) {
+function addCollateral(asset: AssetInfo<bigint>) {
   $v.value.collateral.$touch();
   state.collateral.push({ tokenId: asset.tokenId, amount: "", info: asset });
 }
 
-function removeCollateral(asset: AssetInfo) {
+function removeCollateral(asset: AssetInfo<bigint>) {
   $v.value.collateral.$touch();
   remove(state.collateral, (x) => x.tokenId === asset.tokenId);
 }
@@ -110,13 +110,13 @@ async function submit() {
   }
 
   // lend
-  const lend = undecimalizeBN(new BigNumber(state.amount), ERG_DECIMALS);
-  const repayment = undecimalizeBN(interestAmount.value, ERG_DECIMALS).plus(lend);
+  const lend = undecimalizeBigNumber(new BigNumber(state.amount), ERG_DECIMALS);
+  const repayment = undecimalizeBigNumber(interestAmount.value, ERG_DECIMALS).plus(lend);
 
   // collateral
   let tokensCollateral: TokenAmount<string>[] = state.collateral.map((token) => ({
     tokenId: token.tokenId,
-    amount: undecimalizeBN(
+    amount: undecimalizeBigNumber(
       new BigNumber(token.amount),
       token.info.metadata?.decimals || 0
     ).toString()
@@ -213,7 +213,7 @@ async function submit() {
           <label class="label">
             <span class="label-text">Interest</span>
             <span class="label-text-alt opacity-70" v-if="interestAmount.gt(0)"
-              >{{ formatBigNumber(interestAmount, ERG_DECIMALS) }} ERG</span
+              >{{ formatBigNumber(interestAmount, ERG_DECIMALS, false) }} ERG</span
             >
           </label>
           <div class="input-group">

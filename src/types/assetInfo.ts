@@ -16,9 +16,9 @@ export type AssetMetadata = {
   type?: AssetType;
 };
 
-export type AssetInfo = {
+export type AssetInfo<AmountType> = {
   metadata?: AssetMetadata;
   conversion?: ConversionOptions;
   tokenId: string;
-  amount: bigint;
+  amount: AmountType;
 };

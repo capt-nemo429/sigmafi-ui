@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ERG_TOKEN_ID } from "@/constants";
 import { useWalletStore } from "@/stories/walletStore";
-import { sendTransaction, shortenString, parseOpenOrderBox, decimalizeAndFormat } from "@/utils";
+import { sendTransaction, parseOpenOrderBox, formatBigNumber } from "@/utils";
 import { Box } from "@fleet-sdk/common";
 import { computed, PropType, ref, toRaw } from "vue";
 import AssetIcon from "@/components/AssetIcon.vue";
@@ -9,8 +9,7 @@ import { useProgrammatic } from "@oruga-ui/oruga-next";
 import { TransactionFactory } from "@/offchain/transactionFactory";
 import CloseOrderConfirm from "./CloseOrderConfirm.vue";
 import { useChainStore } from "@/stories";
-import { tokenUrlFor } from "@/utils";
-import AssetVerificationBadge from "@/components/AssetVerificationBadge.vue";
+import AssetRow from "@/components/AssetRow.vue";
 
 const { oruga } = useProgrammatic();
 
@@ -64,7 +63,12 @@ async function cancelOrder() {
       </div>
       <div class="stat-value text-success flex items-center gap-1">
         <div class="flex-grow">
-          <div class="skeleton-placeholder">{{ order?.amount }} <small>ERG</small></div>
+          <asset-row
+            :max-name-len="15"
+            :asset="order?.loan"
+            root-class="items-baseline"
+            name-class="text-sm"
+          />
         </div>
         <div v-if="loadingBox" class="skeleton-fixed h-8 w-8 skeleton-circular"></div>
         <asset-icon v-else class="h-8 w-8" :token-id="ERG_TOKEN_ID" />
@@ -91,20 +95,15 @@ async function cancelOrder() {
               <div class="skeleton-fixed h-5 w-1/3"></div>
             </template>
             <template v-else>
-              <div class="flex-grow items-center flex gap-2">
-                <a
-                  :href="tokenUrlFor(collateral.tokenId)"
-                  :class="{ 'link link-hover': collateral.tokenId !== ERG_TOKEN_ID }"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {{ shortenString(collateral.metadata?.name || collateral.tokenId, 15) }}
-                </a>
-                <asset-verification-badge :token-id="collateral.tokenId" badge-class="w-5 h-5" />
-              </div>
-              <div>
-                {{ decimalizeAndFormat(collateral.amount, collateral.metadata?.decimals || 0) }}
-              </div>
+              <asset-row
+                link
+                show-badge
+                :asset="collateral"
+                :max-name-len="15"
+                root-class="flex-row-reverse w-full items-center gap-2"
+                amount-class="w-full text-right"
+                badge-class="w-5 h-5"
+              />
             </template>
           </div>
         </div>
@@ -117,9 +116,11 @@ async function cancelOrder() {
       <div class="stat-title">Interest</div>
       <div class="flex gap-2">
         <div class="stat-value skeleton-placeholder flex-grow">{{ order?.interest.percent }}%</div>
-        <div class="skeleton-placeholder">{{ order?.interest.value }} <small>ERG</small></div>
+        <asset-row :asset="order?.interest" name-class="text-sm" root-class="items-baseline" />
       </div>
-      <div class="stat-desc skeleton-placeholder">{{ order?.interest.apr }}% APR</div>
+      <div class="stat-desc skeleton-placeholder">
+        {{ formatBigNumber(order?.interest.apr, 3, false) }}% APR
+      </div>
       <div class="stat-actions text-center flex gap-2">
         <button
           v-if="order?.cancellable"

@@ -1,7 +1,12 @@
 import { ERG_DECIMALS, ERG_TOKEN_ID } from "@/constants";
 import { assetIconMap } from "@/maps/assetIconMap";
 import { StateTokenMetadata } from "@/stories";
-import { blockToTime, decimalizeBN, formatBigNumber, getNetworkType } from "@/utils/otherUtils";
+import {
+  blockToTime,
+  decimalizeBigNumber,
+  formatBigNumber,
+  getNetworkType
+} from "@/utils/otherUtils";
 import { Box, decimalize, isDefined } from "@fleet-sdk/common";
 import { ErgoAddress, SAFE_MIN_BOX_VALUE, SParse } from "@fleet-sdk/core";
 import BigNumber from "bignumber.js";
@@ -13,15 +18,15 @@ export function parseOpenOrderBox(
 ) {
   const collateral = box.assets.map((token) => ({
     tokenId: token.tokenId,
-    amount: token.amount,
+    amount: BigNumber(token.amount),
     metadata: metadata[token.tokenId]
   }));
 
   if (BigInt(box.value) > SAFE_MIN_BOX_VALUE) {
     collateral.unshift({
       tokenId: ERG_TOKEN_ID,
-      amount: box.value,
-      metadata: { decimals: ERG_DECIMALS, name: "ERG" }
+      amount: BigNumber(box.value),
+      metadata: metadata[ERG_TOKEN_ID]
     });
   }
 
@@ -44,13 +49,19 @@ export function parseOpenOrderBox(
     : undefined;
 
   return {
-    amount: decimalizeAndFormat(parseOr(box.additionalRegisters.R5, "0"), ERG_DECIMALS),
+    loan: {
+      tokenId: ERG_TOKEN_ID,
+      amount: BigNumber(parseOr(box.additionalRegisters.R5, "0")),
+      metadata: metadata[ERG_TOKEN_ID]
+    },
     term: blockToTime(parseOr(box.additionalRegisters.R7, 0)),
     collateral,
     interest: {
-      percent: formatBigNumber(interest, 3),
-      value: decimalizeAndFormat(interestValue.toString(), ERG_DECIMALS),
-      apr: formatBigNumber(apr, 3)
+      metadata: metadata[ERG_TOKEN_ID],
+      tokenId: ERG_TOKEN_ID,
+      amount: interestValue,
+      percent: interest,
+      apr: apr
     },
     borrower,
     cancellable: borrower ? ownAddresses.includes(borrower) : false
@@ -65,15 +76,15 @@ export function parseBondBox(
 ) {
   const collateral = box.assets.map((token) => ({
     tokenId: token.tokenId,
-    amount: token.amount,
+    amount: BigNumber(token.amount),
     metadata: metadata[token.tokenId]
   }));
 
   if (BigInt(box.value) > SAFE_MIN_BOX_VALUE) {
     collateral.unshift({
       tokenId: ERG_TOKEN_ID,
-      amount: box.value,
-      metadata: { decimals: ERG_DECIMALS, name: "ERG" }
+      amount: BigNumber(box.value),
+      metadata: metadata[ERG_TOKEN_ID]
     });
   }
 
@@ -88,7 +99,11 @@ export function parseBondBox(
   const blocksLeft = parseOr<number>(box.additionalRegisters.R7, 0) - currentHeight;
 
   return {
-    repayment: decimalizeDefault(parseOr(box.additionalRegisters.R6, "0"), ERG_DECIMALS),
+    repayment: {
+      tokenId: ERG_TOKEN_ID,
+      amount: BigNumber(parseOr(box.additionalRegisters.R6, "0")),
+      metadata: metadata[ERG_TOKEN_ID]
+    },
     term: blockToTime(blocksLeft),
     collateral,
     borrower,
@@ -104,7 +119,7 @@ function decimalizeDefault(val: string, decimals: number) {
 }
 
 export function decimalizeAndFormat(val: string, decimals: number): string {
-  return formatBigNumber(decimalizeBN(new BigNumber(val), decimals), decimals);
+  return formatBigNumber(decimalizeBigNumber(new BigNumber(val), decimals), decimals);
 }
 
 function parseOr<T>(value: string | undefined, or: T) {

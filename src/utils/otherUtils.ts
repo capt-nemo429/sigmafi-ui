@@ -1,5 +1,5 @@
 import { BigNumber } from "bignumber.js";
-import { Network } from "@fleet-sdk/common";
+import { isUndefined, Network } from "@fleet-sdk/common";
 
 const BIG_NUMBER_IN_SHORT = Intl.NumberFormat("en", {
   notation: "compact",
@@ -11,11 +11,11 @@ const SHORT_NUMBER_THRESHOLD = 1_000_000;
 
 export function shortenString(
   val: string | undefined,
-  maxLength: number,
+  maxLength: number | undefined,
   ellipsisPosition: "middle" | "end" = "middle"
 ): string {
-  if (!val || maxLength >= val.length) {
-    return val ?? "";
+  if (!val || !maxLength || maxLength >= val.length) {
+    return val || "";
   }
 
   const ellipsis = "…";
@@ -32,23 +32,31 @@ export function shortenString(
   }
 }
 
-export function formatBigNumber(number: BigNumber, decimals: number) {
+export function formatBigNumber(number?: BigNumber, decimals?: number, decimalize = true): string {
+  if (isUndefined(number)) {
+    return "0";
+  }
+
+  if (decimalize && decimals && decimals > 0) {
+    number = decimalizeBigNumber(number, decimals);
+  }
+
   if (number.isGreaterThanOrEqualTo(SHORT_NUMBER_THRESHOLD)) {
     return BIG_NUMBER_IN_SHORT.format(number.toNumber());
   }
 
-  return number.decimalPlaces(decimals).toFormat({
+  return number.decimalPlaces(decimals || 0).toFormat({
     groupSeparator: ",",
     groupSize: 3,
     decimalSeparator: "."
   });
 }
 
-export function undecimalizeBN(number: BigNumber, decimals: number) {
+export function undecimalizeBigNumber(number: BigNumber.Instance, decimals: number) {
   return number.decimalPlaces(decimals).shiftedBy(decimals);
 }
 
-export function decimalizeBN(number: BigNumber, decimals: number) {
+export function decimalizeBigNumber(number: BigNumber.Instance, decimals: number): BigNumber {
   return number.decimalPlaces(decimals).shiftedBy(decimals * -1);
 }
 

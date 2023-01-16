@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ERG_TOKEN_ID } from "@/constants";
 import { useWalletStore } from "@/stories/walletStore";
-import { shortenString, addressUrlFor, decimalizeAndFormat } from "@/utils";
+import { shortenString, addressUrlFor } from "@/utils";
 import { Box } from "@fleet-sdk/common";
 import { computed, PropType, ref, toRaw } from "vue";
 import AssetIcon from "@/components/AssetIcon.vue";
@@ -9,7 +9,7 @@ import { TransactionFactory } from "@/offchain/transactionFactory";
 import { parseBondBox, sendTransaction } from "@/utils";
 import { ExternalLinkIcon } from "@zhuowenli/vue-feather-icons";
 import { useChainStore } from "@/stories";
-import { tokenUrlFor } from "@/utils";
+import AssetRow from "@/components/AssetRow.vue";
 
 const chain = useChainStore();
 const wallet = useWalletStore();
@@ -89,7 +89,12 @@ async function repay() {
       <div class="stat-title skeleton-placeholder">Repayment</div>
       <div class="stat-value text-success flex items-center gap-1">
         <div class="flex-grow">
-          <div class="skeleton-placeholder">{{ bond?.repayment }} <small>ERG</small></div>
+          <asset-row
+            :max-name-len="15"
+            :asset="bond?.repayment"
+            root-class="items-baseline"
+            name-class="text-sm"
+          />
         </div>
         <div v-if="loadingBox" class="skeleton-fixed h-8 w-8 skeleton-circular"></div>
         <asset-icon v-else class="h-8 w-8" :token-id="ERG_TOKEN_ID" />
@@ -117,17 +122,15 @@ async function repay() {
             </template>
             <template v-else>
               <div class="flex-grow">
-                <a
-                  :href="tokenUrlFor(collateral.tokenId)"
-                  :class="{ 'link link-hover': collateral.tokenId !== ERG_TOKEN_ID }"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {{ shortenString(collateral.metadata?.name || collateral.tokenId, 15) }}
-                </a>
-              </div>
-              <div class="">
-                {{ decimalizeAndFormat(collateral.amount, collateral.metadata?.decimals || 0) }}
+                <asset-row
+                  link
+                  show-badge
+                  :asset="collateral"
+                  :max-name-len="15"
+                  root-class="flex-row-reverse w-full items-center gap-2"
+                  amount-class="w-full text-right"
+                  badge-class="w-5 h-5"
+                />
               </div>
             </template>
           </div>

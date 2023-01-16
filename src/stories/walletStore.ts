@@ -25,7 +25,7 @@ export const useWalletStore = defineStore("wallet", () => {
   let _lastBoxFetch = 0;
 
   // private state
-  const _balance = ref<AssetInfo[]>([]);
+  const _balance = ref<AssetInfo<bigint>[]>([]);
   const _changeAddress = ref<string>();
   const _loading = ref(false);
   const _connected = ref(false);

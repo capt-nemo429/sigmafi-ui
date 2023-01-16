@@ -19,7 +19,7 @@ const props = defineProps({
   placeholder: String,
   readonly: Boolean,
   disposable: Boolean,
-  asset: { type: Object as PropType<AssetInfo>, required: true },
+  asset: { type: Object as PropType<AssetInfo<bigint>>, required: true },
   modelValue: { type: String, required: true }!
 });
 
@@ -49,7 +49,8 @@ const converted = computed(() => {
 
   return formatBigNumber(
     new BigNumber(props.asset.conversion.rate).multipliedBy(value.value || 0),
-    3
+    3,
+    false
   );
 });
 

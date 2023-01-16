@@ -2,23 +2,13 @@
 import { useWalletStore } from "@/stories/walletStore";
 import { Box, isUndefined } from "@fleet-sdk/common";
 import { computed, PropType, ref, toRaw } from "vue";
-import {
-  decimalizeBN,
-  formatBigNumber,
-  sendTransaction,
-  shortenString,
-  parseOpenOrderBox,
-  addressUrlFor,
-  decimalizeAndFormat
-} from "@/utils";
+import { sendTransaction, shortenString, parseOpenOrderBox, addressUrlFor } from "@/utils";
 import AssetIcon from "@/components/AssetIcon.vue";
-import { ERG_DECIMALS, ERG_TOKEN_ID, EXPLORER_URL, MIN_FEE } from "@/constants";
-import BigNumber from "bignumber.js";
+import { ERG_TOKEN_ID } from "@/constants";
 import { ExternalLinkIcon } from "@zhuowenli/vue-feather-icons";
 import { TransactionFactory } from "@/offchain/transactionFactory";
 import { useChainStore } from "@/stories";
-import AssetVerificationBadge from "@/components/AssetVerificationBadge.vue";
-import { tokenUrlFor } from "@/utils";
+import AssetRow from "@/components/AssetRow.vue";
 
 const wallet = useWalletStore();
 const chain = useChainStore();
@@ -31,16 +21,15 @@ const props = defineProps({
 });
 
 const fees = computed(() => {
-  if (isUndefined(order.value?.amount)) {
+  if (isUndefined(order.value)) {
     return;
   }
 
-  const amount = new BigNumber(order.value?.amount || 0);
+  const amount = order.value.loan.amount;
   const contract = amount.multipliedBy(0.005);
   const ui = amount.multipliedBy(0.004);
-  const miner = decimalizeBN(new BigNumber(MIN_FEE.toString()), ERG_DECIMALS);
 
-  return formatBigNumber(contract.plus(ui).plus(miner), ERG_DECIMALS);
+  return contract.plus(ui);
 });
 
 const order = computed(() => {
@@ -76,7 +65,12 @@ async function closeOrder() {
         <div class="flex flex-row gap-1">
           <div class="stat-title">Loan</div>
           <div class="text-xl font-semibold flex items-center w-full text-right gap-2">
-            <div class="flex-grow">{{ order?.amount }} <small>ERG</small></div>
+            <asset-row
+              :max-name-len="15"
+              :asset="order?.loan"
+              root-class="items-baseline w-full justify-end"
+              name-class="text-sm"
+            />
             <asset-icon class="h-7 w-7" :token-id="ERG_TOKEN_ID" />
           </div>
         </div>
@@ -91,20 +85,16 @@ async function closeOrder() {
               :key="collateral.tokenId"
             >
               <div class="flex-grow flex items-center justify-end gap-2">
-                <asset-verification-badge :token-id="collateral.tokenId" />
-                <div>
-                  {{ decimalizeAndFormat(collateral.amount, collateral.metadata?.decimals || 0) }}
-                  <a
-                    :href="tokenUrlFor(collateral.tokenId)"
-                    :class="{ 'link link-hover': collateral.tokenId !== ERG_TOKEN_ID }"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <small>{{
-                      shortenString(collateral.metadata?.name || collateral.tokenId, 12)
-                    }}</small>
-                  </a>
-                </div>
+                <asset-row
+                  link
+                  show-badge
+                  :asset="collateral"
+                  :max-name-len="12"
+                  root-class="w-full items-baseline"
+                  amount-class="w-full text-right"
+                  name-class="text-sm"
+                  badge-class="w-5 h-5"
+                />
               </div>
               <asset-icon
                 class="h-6 w-6"
@@ -128,7 +118,11 @@ async function closeOrder() {
         <div class="flex flex-row gap-1">
           <div class="stat-title">Interest</div>
           <div class="text-lg text-right w-full">
-            {{ order?.interest.value }} <small>ERG</small>
+            <asset-row
+              :asset="order?.interest"
+              name-class="text-sm"
+              root-class="items-baseline w-full justify-end"
+            />
             <div class="text-xs text-right opacity-70">{{ order?.interest.percent }}%</div>
           </div>
         </div>
@@ -153,8 +147,16 @@ async function closeOrder() {
 
       <div class="stat">
         <div class="flex flex-row gap-1">
-          <div class="stat-title">Fees</div>
-          <div class="text-right w-full">{{ fees }} <small>ERG</small></div>
+          <div class="stat-title">Service Fees</div>
+          <asset-row
+            :asset="
+              fees && order
+                ? { amount: fees, tokenId: order.loan.tokenId, metadata: order.loan.metadata }
+                : undefined
+            "
+            name-class="text-sm"
+            root-class="items-baseline w-full justify-end"
+          />
         </div>
       </div>
     </div>
