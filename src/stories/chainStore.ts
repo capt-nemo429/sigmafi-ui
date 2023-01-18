@@ -1,13 +1,12 @@
 import { ERG_DECIMALS, ERG_TOKEN_ID } from "@/constants";
 import { graphQLService } from "@/services/graphqlService";
-import { AssetInfo, AssetMetadata } from "@/types";
-import { getNetworkType, showToast } from "@/utils";
-import { isEmpty, isUndefined, some } from "@fleet-sdk/common";
-import { ErgoAddress } from "@fleet-sdk/core";
-import { EIP12ErgoAPI } from "@nautilus-js/eip12-types";
-import { throttle, uniq } from "lodash-es";
+import { coinGeckoService } from "@/services/coinGeckoService";
+import { AssetMetadata } from "@/types";
+import { isEmpty } from "@fleet-sdk/common";
+import { uniq } from "lodash-es";
 import { defineStore, acceptHMRUpdate } from "pinia";
-import { computed, onBeforeMount, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { spectrumService } from "@/services/spectrumService";
 
 export type StateTokenMetadata = { [tokenId: string]: AssetMetadata };
 
