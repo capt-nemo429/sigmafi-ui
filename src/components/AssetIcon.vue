@@ -4,8 +4,8 @@ import EmptyIcon from "@/assets/icons/asset-empty.svg";
 import PictureNftIcon from "@/assets/icons/asset-nft-picture.svg";
 import AudioNftIcon from "@/assets/icons/asset-nft-audio.svg";
 import VideoNftIcon from "@/assets/icons/asset-nft-video.svg";
-import { assetIconMap } from "@/maps/assetIconMap";
-import { AssetType } from "@/types/assetInfo";
+import { ASSET_ICONS } from "@/maps/assetIcons";
+import { AssetType } from "@/types";
 import { isDefined } from "@fleet-sdk/common";
 
 // props
@@ -17,7 +17,7 @@ const props = defineProps({
 
 // computed
 const logo = computed(() => {
-  const logoFile = assetIconMap[props.tokenId];
+  const logoFile = ASSET_ICONS[props.tokenId];
   if (logoFile) {
     return `./asset-icons/${logoFile}`;
   }

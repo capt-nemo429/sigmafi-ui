@@ -60,6 +60,13 @@ export function decimalizeBigNumber(number: BigNumber.Instance, decimals: number
   return number.decimalPlaces(decimals).shiftedBy(decimals * -1);
 }
 
+export function toDict<T, R>(
+  collection: T[],
+  mapper: (item: T) => { [key: string | number]: unknown }
+): R {
+  return Object.assign({}, ...collection.map(mapper)) as R;
+}
+
 export function blockToTime(blocks: number) {
   const term = { interval: "", value: blocks * 2, blocks };
   let negative = false;

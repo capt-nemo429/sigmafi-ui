@@ -22,3 +22,5 @@ export type AssetInfo<AmountType> = {
   tokenId: string;
   amount: AmountType;
 };
+
+export type VerifiedAsset = Required<Pick<AssetInfo<bigint>, "tokenId" | "metadata">>;

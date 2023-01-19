@@ -1,12 +1,12 @@
 import { ERG_DECIMALS, ERG_TOKEN_ID } from "@/constants";
+import { VERIFIED_ASSETS } from "@/maps/verifiedAssets";
 import { graphQLService } from "@/services/graphqlService";
-import { coinGeckoService } from "@/services/coinGeckoService";
 import { AssetMetadata } from "@/types";
+import { toDict } from "@/utils";
 import { isEmpty } from "@fleet-sdk/common";
 import { uniq } from "lodash-es";
 import { defineStore, acceptHMRUpdate } from "pinia";
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
-import { spectrumService } from "@/services/spectrumService";
 
 export type StateTokenMetadata = { [tokenId: string]: AssetMetadata };
 
@@ -18,9 +18,9 @@ export const useChainStore = defineStore("chain", () => {
   const _loading = ref(true);
   const _height = ref<number>(0);
 
-  const _metadata = ref<StateTokenMetadata>({
-    [ERG_TOKEN_ID]: { name: "ERG", decimals: ERG_DECIMALS }
-  });
+  const _metadata = ref<StateTokenMetadata>(
+    toDict(VERIFIED_ASSETS, (a) => ({ [a.tokenId]: a.metadata }))
+  );
 
   // computed
   const tokensMetadata = computed(() => _metadata.value);

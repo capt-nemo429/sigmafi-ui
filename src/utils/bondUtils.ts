@@ -1,5 +1,5 @@
-import { ERG_DECIMALS, ERG_TOKEN_ID } from "@/constants";
-import { assetIconMap } from "@/maps/assetIconMap";
+import { ERG_TOKEN_ID } from "@/constants";
+import { ASSET_ICONS } from "@/maps/assetIcons";
 import { StateTokenMetadata } from "@/stories";
 import {
   blockToTime,
@@ -127,5 +127,5 @@ function parseOr<T>(value: string | undefined, or: T) {
 }
 
 export function verifiedToken(tokenId: string) {
-  return isDefined(assetIconMap[tokenId]);
+  return isDefined(ASSET_ICONS[tokenId]);
 }
