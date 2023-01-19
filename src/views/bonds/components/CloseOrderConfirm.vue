@@ -71,7 +71,7 @@ async function closeOrder() {
               root-class="items-baseline w-full justify-end"
               name-class="text-sm"
             />
-            <asset-icon class="h-7 w-7" :token-id="ERG_TOKEN_ID" />
+            <asset-icon v-if="order" class="h-7 w-7" :token-id="order.loan.tokenId" />
           </div>
         </div>
       </div>

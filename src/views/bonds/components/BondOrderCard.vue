@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ERG_TOKEN_ID } from "@/constants";
 import { useWalletStore } from "@/stories/walletStore";
 import { sendTransaction, parseOpenOrderBox, formatBigNumber } from "@/utils";
 import { Box } from "@fleet-sdk/common";
@@ -70,8 +69,8 @@ async function cancelOrder() {
             name-class="text-sm"
           />
         </div>
-        <div v-if="loadingBox" class="skeleton-fixed h-8 w-8 skeleton-circular"></div>
-        <asset-icon v-else class="h-8 w-8" :token-id="ERG_TOKEN_ID" />
+        <div v-if="loadingBox || !order" class="skeleton-fixed h-8 w-8 skeleton-circular"></div>
+        <asset-icon v-else class="h-8 w-8" :token-id="order.loan.tokenId" />
       </div>
     </div>
 

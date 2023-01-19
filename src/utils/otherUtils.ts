@@ -45,7 +45,7 @@ export function formatBigNumber(number?: BigNumber, decimals?: number, decimaliz
     return BIG_NUMBER_IN_SHORT.format(number.toNumber());
   }
 
-  return number.decimalPlaces(decimals || 0).toFormat({
+  return number.decimalPlaces(decimals || 0, BigNumber.ROUND_DOWN).toFormat({
     groupSeparator: ",",
     groupSize: 3,
     decimalSeparator: "."

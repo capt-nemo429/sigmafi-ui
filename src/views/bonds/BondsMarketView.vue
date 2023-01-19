@@ -5,9 +5,10 @@ import { useWalletStore } from "@/stories/walletStore";
 import NewLoanRequestView from "@/views/bonds/NewLoanRequestView.vue";
 import { onMounted, reactive, ref } from "vue";
 import { graphQLService } from "@/services/graphqlService";
-import { ORDER_ON_CLOSE_ERG_CONTRACT } from "@/offchain/plugins";
+import { buildOrderContract } from "@/offchain/plugins";
 import { Box, isEmpty } from "@fleet-sdk/common";
 import { useChainStore } from "@/stories";
+import { VERIFIED_ASSETS } from "@/maps";
 
 const { oruga } = useProgrammatic();
 
@@ -29,7 +30,7 @@ onMounted(async () => {
   loading.metadata = true;
 
   boxes.value = await graphQLService.getBoxes({
-    ergoTrees: [ORDER_ON_CLOSE_ERG_CONTRACT],
+    ergoTrees: VERIFIED_ASSETS.map((a) => buildOrderContract(a.tokenId, "on-close")),
     spent: false
   });
   loading.boxes = false;

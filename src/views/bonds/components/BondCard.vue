@@ -96,8 +96,8 @@ async function repay() {
             name-class="text-sm"
           />
         </div>
-        <div v-if="loadingBox" class="skeleton-fixed h-8 w-8 skeleton-circular"></div>
-        <asset-icon v-else class="h-8 w-8" :token-id="ERG_TOKEN_ID" />
+        <div v-if="loadingBox || !bond" class="skeleton-fixed h-8 w-8 skeleton-circular"></div>
+        <asset-icon v-else class="h-8 w-8" :token-id="bond.repayment.tokenId" />
       </div>
     </div>
 

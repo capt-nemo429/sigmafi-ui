@@ -3,12 +3,18 @@ import BondOrderCard from "@/views/bonds/components/BondOrderCard.vue";
 import { useWalletStore } from "@/stories/walletStore";
 import { reactive, ref, watch } from "vue";
 import { graphQLService } from "@/services/graphqlService";
-import { BOND_ERG_CONTRACT, ORDER_ON_CLOSE_ERG_CONTRACT } from "@/offchain/plugins";
+import {
+  buildBondContract,
+  buildOrderContract,
+  ERG_BOND_CONTRACT,
+  ORDER_ON_CLOSE_ERG_CONTRACT
+} from "@/offchain/plugins";
 import { Amount, Box, first, isDefined, isEmpty, some } from "@fleet-sdk/common";
 import { ErgoAddress } from "@fleet-sdk/core";
 import { QueryBoxesArgs } from "@ergo-graphql/types";
 import BondCard from "./bonds/components/BondCard.vue";
 import { useChainStore } from "@/stories";
+import { VERIFIED_ASSETS } from "@/maps";
 
 const chain = useChainStore();
 const wallet = useWalletStore();
@@ -76,7 +82,7 @@ async function loadOpenOrders(tab: Tab) {
     publicKeys.map((pk) => ({
       pk,
       args: {
-        ergoTrees: [ORDER_ON_CLOSE_ERG_CONTRACT],
+        ergoTrees: VERIFIED_ASSETS.map((a) => buildOrderContract(a.tokenId, "on-close")),
         spent: false,
         registers: { R4: pk }
       }
@@ -91,7 +97,7 @@ async function loadLoans(tab: Tab) {
     publicKeys.map((pk) => ({
       pk,
       args: {
-        ergoTrees: [BOND_ERG_CONTRACT],
+        ergoTrees: VERIFIED_ASSETS.map((a) => buildBondContract(a.tokenId)),
         spent: false,
         registers: { R8: pk }
       }
@@ -106,7 +112,7 @@ async function loadDebits(tab: Tab) {
     publicKeys.map((pk) => ({
       pk,
       args: {
-        ergoTrees: [BOND_ERG_CONTRACT],
+        ergoTrees: VERIFIED_ASSETS.map((a) => buildBondContract(a.tokenId)),
         spent: false,
         registers: { R5: pk }
       }

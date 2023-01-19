@@ -1,5 +1,9 @@
 import { ERG_TOKEN_ID } from "@/constants";
 import { ASSET_ICONS } from "@/maps/assetIcons";
+import {
+  extractTokenIdFromBondContract,
+  extractTokenIdFromOrderContract
+} from "@/offchain/plugins";
 import { StateTokenMetadata } from "@/stories";
 import {
   blockToTime,
@@ -48,17 +52,19 @@ export function parseOpenOrderBox(
     ? ErgoAddress.fromPublicKey(box.additionalRegisters.R4.substring(4)).encode(getNetworkType())
     : undefined;
 
+  const tokenId = extractTokenIdFromOrderContract(box.ergoTree);
+
   return {
     loan: {
-      tokenId: ERG_TOKEN_ID,
+      tokenId: tokenId,
       amount: BigNumber(parseOr(box.additionalRegisters.R5, "0")),
-      metadata: metadata[ERG_TOKEN_ID]
+      metadata: metadata[tokenId]
     },
     term: blockToTime(parseOr(box.additionalRegisters.R7, 0)),
     collateral,
     interest: {
-      metadata: metadata[ERG_TOKEN_ID],
-      tokenId: ERG_TOKEN_ID,
+      metadata: metadata[tokenId],
+      tokenId: tokenId,
       amount: interestValue,
       percent: interest,
       apr: apr
@@ -97,12 +103,13 @@ export function parseBondBox(
     : undefined;
 
   const blocksLeft = parseOr<number>(box.additionalRegisters.R7, 0) - currentHeight;
+  const tokenId = extractTokenIdFromBondContract(box.ergoTree);
 
   return {
     repayment: {
-      tokenId: ERG_TOKEN_ID,
+      tokenId: tokenId,
       amount: BigNumber(parseOr(box.additionalRegisters.R6, "0")),
-      metadata: metadata[ERG_TOKEN_ID]
+      metadata: metadata[tokenId]
     },
     term: blockToTime(blocksLeft),
     collateral,
@@ -112,10 +119,6 @@ export function parseBondBox(
     liquidable: blocksLeft <= 0 && isDefined(lender) && ownAddresses.includes(lender),
     repayable: blocksLeft > 0 && isDefined(borrower) && ownAddresses.includes(borrower)
   };
-}
-
-function decimalizeDefault(val: string, decimals: number) {
-  return decimalize(val, { decimals, thousandMark: "," });
 }
 
 export function decimalizeAndFormat(val: string, decimals: number): string {

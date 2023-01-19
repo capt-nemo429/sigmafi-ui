@@ -2,9 +2,9 @@
 import AssetInput from "@/components/AssetInput.vue";
 import CleaveInput from "@/components/CleaveInput.vue";
 import { useWalletStore } from "@/stories/walletStore";
-import { computed, reactive, ref } from "vue";
+import { computed, reactive, ref, toRaw } from "vue";
 import { ERG_DECIMALS, ERG_TOKEN_ID } from "@/constants";
-import { decimalize, isEmpty, TokenAmount } from "@fleet-sdk/common";
+import { decimalize, first, isEmpty, TokenAmount } from "@fleet-sdk/common";
 import { BigNumber } from "bignumber.js";
 import { formatBigNumber, sendTransaction, shortenString, undecimalizeBigNumber } from "@/utils";
 import SigDropdown from "@/components/SigDropdown.vue";
@@ -15,6 +15,7 @@ import { helpers, required } from "@vuelidate/validators";
 import { minValue } from "@/validators/bigNumbers";
 import useVuelidate from "@vuelidate/core";
 import { TransactionFactory } from "@/offchain/transactionFactory";
+import { VERIFIED_ASSETS } from "@/maps";
 
 const wallet = useWalletStore();
 const emit = defineEmits(["close"]);
@@ -25,7 +26,10 @@ type CollateralAsset = TokenAmount<string> & {
 
 const loading = ref(false);
 const state = reactive({
-  amount: "",
+  loan: {
+    amount: "",
+    asset: first(VERIFIED_ASSETS)
+  },
   term: {
     value: "",
     interval: "days" as "hours" | "days" | "months"
@@ -62,17 +66,24 @@ const blocks = computed(() => {
 });
 
 const interestAmount = computed(() => {
-  if (!state.amount || state.amount === "0" || !state.interest || state.interest === "0") {
+  if (
+    !state.loan.amount ||
+    state.loan.amount === "0" ||
+    !state.interest ||
+    state.interest === "0"
+  ) {
     return new BigNumber(0);
   }
 
-  return BigNumber(state.interest).div(100).multipliedBy(state.amount);
+  return BigNumber(state.interest).div(100).multipliedBy(state.loan.amount);
 });
 
 const rules = {
-  amount: {
-    required,
-    minValue: minValue("0.1")
+  loan: {
+    amount: {
+      required,
+      minValue: minValue("0.1")
+    }
   },
   collateral: {
     required: helpers.withMessage("At least one asset should be added as collateral.", required)
@@ -110,8 +121,14 @@ async function submit() {
   }
 
   // lend
-  const lend = undecimalizeBigNumber(new BigNumber(state.amount), ERG_DECIMALS);
-  const repayment = undecimalizeBigNumber(interestAmount.value, ERG_DECIMALS).plus(lend);
+  const loan = undecimalizeBigNumber(
+    new BigNumber(state.loan.amount),
+    state.loan.asset.metadata.decimals || 0
+  );
+  const repayment = undecimalizeBigNumber(
+    interestAmount.value,
+    state.loan.asset.metadata.decimals || 0
+  ).plus(loan);
 
   // collateral
   let tokensCollateral: TokenAmount<string>[] = state.collateral.map((token) => ({
@@ -130,9 +147,12 @@ async function submit() {
   const sent = await sendTransaction(async () => {
     return await TransactionFactory.openOrder({
       type: "on-close",
-      lendAmount: lend.toString(),
+      loan: {
+        amount: loan.toString(),
+        repayment: repayment.toString(),
+        tokenId: state.loan.asset.tokenId
+      },
       maturityLength: blocks.value,
-      repaymentAmount: repayment.toString(),
       collateral: {
         nanoErgs: ergCollateral?.amount,
         tokens: tokensCollateral
@@ -156,23 +176,25 @@ async function submit() {
         </label>
         <div class="input-group">
           <cleave-input
-            v-model="state.amount"
-            @blur="$v.amount.$touch()"
+            v-model="state.loan.amount"
+            @blur="$v.loan.$touch()"
             :readonly="loading"
             :options="{
               numeral: true,
               numeralPositiveOnly: true,
-              numeralDecimalScale: ERG_DECIMALS
+              numeralDecimalScale: state.loan.asset.metadata.decimals || 0
             }"
             placeholder="0.00"
             class="input input-bordered w-full input-lg"
           />
-          <select class="select select-bordered select-lg border-l-0">
-            <option :value="ERG_TOKEN_ID">ERG</option>
+          <select v-model="state.loan.asset" class="select select-bordered select-lg border-l-0">
+            <option v-for="asset in VERIFIED_ASSETS" :key="asset.tokenId" :value="asset">
+              {{ asset.metadata.name }}
+            </option>
           </select>
         </div>
-        <label class="label !pt-1" v-if="$v.amount.$error">
-          <span class="label-text-alt text-error"> {{ $v.amount.$errors[0].$message }}</span>
+        <label class="label !pt-1" v-if="$v.loan.$error">
+          <span class="label-text-alt text-error"> {{ $v.loan.$errors[0].$message }}</span>
         </label>
       </div>
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -213,7 +235,10 @@ async function submit() {
           <label class="label">
             <span class="label-text">Interest</span>
             <span class="label-text-alt opacity-70" v-if="interestAmount.gt(0)"
-              >{{ formatBigNumber(interestAmount, ERG_DECIMALS, false) }} ERG</span
+              >{{
+                formatBigNumber(interestAmount, state.loan.asset.metadata.decimals || 0, false)
+              }}
+              {{ state.loan.asset.metadata.name }}</span
             >
           </label>
           <div class="input-group">
