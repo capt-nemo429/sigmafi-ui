@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import BondOrderCard from "./components/BondOrderCard.vue";
+import { Box, isEmpty } from "@fleet-sdk/common";
 import { useProgrammatic } from "@oruga-ui/oruga-next";
+import { onMounted, reactive, ref } from "vue";
+import BondOrderCard from "./components/BondOrderCard.vue";
+import { VERIFIED_ASSETS } from "@/maps";
+import { buildOrderContract } from "@/offchain/plugins";
+import { graphQLService } from "@/services/graphqlService";
+import { useChainStore } from "@/stories";
 import { useWalletStore } from "@/stories/walletStore";
 import NewLoanRequestView from "@/views/bonds/NewLoanRequestView.vue";
-import { onMounted, reactive, ref } from "vue";
-import { graphQLService } from "@/services/graphqlService";
-import { buildOrderContract } from "@/offchain/plugins";
-import { Box, isEmpty } from "@fleet-sdk/common";
-import { useChainStore } from "@/stories";
-import { VERIFIED_ASSETS } from "@/maps";
 
 const { oruga } = useProgrammatic();
 
@@ -55,19 +55,19 @@ onMounted(async () => {
       class="grid grid-cols-1 gap-8 md:gap-12 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
     >
       <bond-order-card
-        v-if="loading.boxes"
         v-for="n in 4"
+        v-if="loading.boxes"
+        :key="n"
         :loading-box="loading.boxes"
         :loading-metadata="loading.metadata"
-        :key="n"
       />
       <bond-order-card
-        v-else
         v-for="box in boxes"
+        v-else
+        :key="box.boxId"
         :box="box"
         :loading-box="loading.boxes"
         :loading-metadata="loading.metadata"
-        :key="box.boxId"
       />
     </div>
     <div v-if="!loading.boxes && isEmpty(boxes)" class="text-7xl text-center w-full pb-20">

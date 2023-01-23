@@ -1,5 +1,3 @@
-import { MIN_FEE } from "@/constants";
-import { useChainStore, useWalletStore } from "@/stories";
 import { EIP12UnsignedTransaction } from "@fleet-sdk/common";
 import { Amount, Box, ErgoAddress, TransactionBuilder } from "@fleet-sdk/core";
 import {
@@ -10,6 +8,8 @@ import {
   OpenOrderPlugin,
   RepayPlugin
 } from "./plugins";
+import { MIN_FEE } from "@/constants";
+import { useChainStore, useWalletStore } from "@/stories";
 
 export class TransactionFactory {
   public static async openOrder(order: Omit<OpenOrderParams, "borrower">) {
@@ -101,6 +101,7 @@ export class TransactionFactory {
     wallet: ReturnType<typeof useWalletStore>
   ) {
     const signedTx = await wallet.signTx(unsignedTx);
+
     return await wallet.submitTx(signedTx);
   }
 }

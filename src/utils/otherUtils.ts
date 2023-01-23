@@ -1,5 +1,5 @@
-import { BigNumber } from "bignumber.js";
 import { isUndefined, Network } from "@fleet-sdk/common";
+import { BigNumber } from "bignumber.js";
 import { map } from "lodash-es";
 
 const BIG_NUMBER_IN_SHORT = Intl.NumberFormat("en", {
@@ -25,6 +25,7 @@ export function shortenString(
     if (fragmentSize * 2 + ellipsis.length >= val.length) {
       return val;
     }
+
     return `${val.slice(0, fragmentSize).trimEnd()}${ellipsis}${val
       .slice(val.length - fragmentSize)
       .trimStart()}`;

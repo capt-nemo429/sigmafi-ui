@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { ERG_TOKEN_ID } from "@/constants";
-import { useWalletStore } from "@/stories/walletStore";
-import { shortenString, addressUrlFor } from "@/utils";
 import { Box } from "@fleet-sdk/common";
+import { ExternalLinkIcon } from "@zhuowenli/vue-feather-icons";
 import { computed, PropType, ref, toRaw } from "vue";
 import AssetIcon from "@/components/AssetIcon.vue";
-import { TransactionFactory } from "@/offchain/transactionFactory";
-import { parseBondBox, sendTransaction } from "@/utils";
-import { ExternalLinkIcon } from "@zhuowenli/vue-feather-icons";
-import { useChainStore } from "@/stories";
 import AssetRow from "@/components/AssetRow.vue";
+import { ERG_TOKEN_ID } from "@/constants";
+import { TransactionFactory } from "@/offchain/transactionFactory";
+import { useChainStore } from "@/stories";
+import { useWalletStore } from "@/stories/walletStore";
+import { addressUrlFor, shortenString } from "@/utils";
+import { parseBondBox, sendTransaction } from "@/utils";
 
 const chain = useChainStore();
 const wallet = useWalletStore();
@@ -34,7 +34,8 @@ const termProgress = computed(() => {
   }
 
   const totalTerm = chain.height - props.box.creationHeight + blocksLeft;
-  return (((totalTerm - blocksLeft) / totalTerm) * 100).toFixed(1);
+  
+return (((totalTerm - blocksLeft) / totalTerm) * 100).toFixed(1);
 });
 
 const bond = computed(() => {
@@ -109,7 +110,7 @@ async function repay() {
           <div class="flex-grow skeleton-fixed h-5"></div>
           <div class="skeleton-fixed h-5 w-1/3"></div>
         </div>
-        <div v-else v-for="collateral in bond?.collateral" :key="collateral.tokenId">
+        <div v-for="collateral in bond?.collateral" v-else :key="collateral.tokenId">
           <div class="flex flex-row items-center gap-2" :class="{ skeleton: loadingMetadata }">
             <asset-icon
               class="h-8 w-8"
@@ -140,7 +141,7 @@ async function repay() {
 
     <div class="flex-grow opacity-0"></div>
 
-    <div class="stat" v-if="bond?.type === 'debit'">
+    <div v-if="bond?.type === 'debit'" class="stat">
       <div class="stat-title skeleton-placeholder">Lender</div>
       <a
         :href="addressUrlFor(bond?.lender)"
@@ -152,7 +153,7 @@ async function repay() {
         <external-link-icon class="inline pb-1" />
       </a>
     </div>
-    <div class="stat" v-else>
+    <div v-else class="stat">
       <div class="stat-title skeleton-placeholder">Borrower</div>
       <a
         :href="addressUrlFor(bond?.borrower)"
@@ -186,19 +187,19 @@ async function repay() {
       <div class="stat-actions text-center flex gap-2">
         <button
           v-if="bond?.liquidable"
-          @click="liquidate()"
           class="btn btn-sm btn-primary flex-grow"
           :class="{ loading }"
           :disabled="!wallet.connected || loadingBox"
+          @click="liquidate()"
         >
           Liquidate
         </button>
         <button
           v-else-if="bond?.repayable"
-          @click="repay()"
           :class="{ loading }"
           class="btn btn-sm btn-primary flex-grow"
           :disabled="!wallet.connected || loadingBox"
+          @click="repay()"
         >
           Repay
         </button>

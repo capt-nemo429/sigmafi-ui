@@ -1,5 +1,3 @@
-import { ERG_TOKEN_ID } from "@/constants";
-import { VerifiedAsset } from "@/types";
 import { Box, ensureBigInt, first } from "@fleet-sdk/common";
 import {
   Amount,
@@ -18,6 +16,8 @@ import {
   SSigmaProp,
   TokenAmount
 } from "@fleet-sdk/core";
+import { ERG_TOKEN_ID } from "@/constants";
+import { VerifiedAsset } from "@/types";
 
 export type OpenOrderType = "on-close" | "fixed-height";
 
@@ -57,6 +57,7 @@ export function extractTokenIdFromOrderContract(contract: string) {
     contract.startsWith(ORDER_FIXED_TOKEN_CONTRACT_TEMPLATE[0])
   ) {
     const start = ORDER_ON_CLOSE_TOKEN_CONTRACT_TEMPLATE[0].length;
+
     return contract.substring(start, start + 64);
   }
 
@@ -120,6 +121,7 @@ export function buildBondContract(tokenId: string) {
 export function extractTokenIdFromBondContract(contract: string) {
   if (contract.startsWith(TOKEN_BOND_CONTRACT_TEMPLATE[0])) {
     const start = TOKEN_BOND_CONTRACT_TEMPLATE[0].length;
+
     return contract.substring(start, start + 64);
   }
 

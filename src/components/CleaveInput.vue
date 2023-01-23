@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { PropType, ref, watch } from "vue";
-import {
-  HTMLCleaveElement,
-  CleaveOptions,
-  CleaveOnChangedEvent,
-} from "@/types";
-import { vCleave } from "@/directives";
 import { computed } from "vue";
+import { vCleave } from "@/directives";
+import {
+  CleaveOnChangedEvent,
+  CleaveOptions,
+  HTMLCleaveElement,
+} from "@/types";
 
 // emits
 const emit = defineEmits(["update:modelValue"]);

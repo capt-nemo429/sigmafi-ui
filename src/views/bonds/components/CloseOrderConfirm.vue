@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { useWalletStore } from "@/stories/walletStore";
 import { Box, isUndefined } from "@fleet-sdk/common";
-import { computed, PropType, ref, toRaw } from "vue";
-import { sendTransaction, shortenString, parseOpenOrderBox, addressUrlFor } from "@/utils";
-import AssetIcon from "@/components/AssetIcon.vue";
-import { ERG_TOKEN_ID } from "@/constants";
 import { ExternalLinkIcon } from "@zhuowenli/vue-feather-icons";
+import { computed, PropType, ref, toRaw } from "vue";
+import AssetIcon from "@/components/AssetIcon.vue";
+import AssetRow from "@/components/AssetRow.vue";
+import { ERG_TOKEN_ID } from "@/constants";
 import { TransactionFactory } from "@/offchain/transactionFactory";
 import { useChainStore } from "@/stories";
-import AssetRow from "@/components/AssetRow.vue";
+import { useWalletStore } from "@/stories/walletStore";
+import { addressUrlFor, parseOpenOrderBox, sendTransaction, shortenString } from "@/utils";
 
 const wallet = useWalletStore();
 const chain = useChainStore();
@@ -80,9 +80,9 @@ async function closeOrder() {
           <div class="stat-title">Collateral</div>
           <div class="text-lg text-right w-full">
             <div
-              class="flex items-center gap-2 whitespace-nowrap"
               v-for="collateral in order?.collateral"
               :key="collateral.tokenId"
+              class="flex items-center gap-2 whitespace-nowrap"
             >
               <div class="flex-grow flex items-center justify-end gap-2">
                 <asset-row

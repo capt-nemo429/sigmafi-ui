@@ -1,6 +1,6 @@
-import { CleaveInternalOptions, HTMLCleaveElement } from "@/types";
 import Cleave from "cleave.js";
 import { Directive } from "vue";
+import { CleaveInternalOptions, HTMLCleaveElement } from "@/types";
 
 export const vCleave: Directive<HTMLCleaveElement, CleaveInternalOptions> = {
   mounted(el, binding) {

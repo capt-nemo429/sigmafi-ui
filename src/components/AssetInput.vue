@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { formatBigNumber, shortenString } from "@/utils";
 import { decimalize } from "@fleet-sdk/common";
-import { computed, PropType, ref } from "vue";
-import { HTMLCleaveElement, AssetInfo } from "@/types";
-import CleaveInput from "./CleaveInput.vue";
-import { TrashIcon } from "@zhuowenli/vue-feather-icons";
-import { BigNumber } from "bignumber.js";
 import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
-import { maxValue, minValue } from "@/validators/bigNumbers";
+import { TrashIcon } from "@zhuowenli/vue-feather-icons";
+import { BigNumber } from "bignumber.js";
+import { computed, PropType, ref } from "vue";
 import AssetIcon from "./AssetIcon.vue";
+import CleaveInput from "./CleaveInput.vue";
+import { AssetInfo, HTMLCleaveElement } from "@/types";
+import { formatBigNumber, shortenString } from "@/utils";
+import { maxValue, minValue } from "@/validators/bigNumbers";
 
 // emits
 const emit = defineEmits(["update:modelValue", "remove"]);
@@ -30,6 +30,7 @@ const hovered = ref(false);
 // computed
 const total = computed(() => {
   const decimals = props.asset.metadata?.decimals;
+
   return decimalize(props.asset.amount, decimals);
 });
 
@@ -94,17 +95,17 @@ const $v = useVuelidate(rules, { val: value });
       <button
         v-if="disposable && !readonly"
         v-show="hovered"
-        @click.prevent.stop="emitRemove()"
         tabindex="-1"
         class="btn btn-circle btn-sm inline-flex -top-3 -right-3.5 absolute"
+        @click.prevent.stop="emitRemove()"
       >
         <trash-icon class="w-3.5 h-3.5" />
       </button>
       <div class="flex flex-row gap-2 text-base">
         <div class="flex-grow">
           <cleave-input
+            ref="input"
             v-model="value"
-            @blur="$v.$touch()"
             :readonly="readonly"
             :placeholder="placeholder || (asset.metadata?.decimals ? '0.00' : '0')"
             :options="{
@@ -112,16 +113,16 @@ const $v = useVuelidate(rules, { val: value });
               numeralPositiveOnly: true,
               numeralDecimalScale: asset.metadata?.decimals || 0
             }"
-            ref="input"
             class="w-full outline-none"
+            @blur="$v.$touch()"
           />
         </div>
         <div class="flex flex-row text-right items-center gap-1 whitespace-nowrap">
           <asset-icon class="h-5 w-5" :token-id="asset.tokenId" :type="asset.metadata?.type" />
-          <span class="flex-grow text-sm" v-if="asset.metadata?.name">
+          <span v-if="asset.metadata?.name" class="flex-grow text-sm">
             {{ shortenString(asset.metadata.name, 15) }}
           </span>
-          <span class="flex-grow" v-else>{{ shortenString(asset.tokenId, 10) }}</span>
+          <span v-else class="flex-grow">{{ shortenString(asset.tokenId, 10) }}</span>
         </div>
       </div>
       <div class="flex flex-row gap-2 mt-1 text-base-content text-opacity-50 text-xs">
@@ -130,7 +131,7 @@ const $v = useVuelidate(rules, { val: value });
           <span v-else>No conversion rate</span>
         </div>
         <div class="flex-grow text-right">
-          <a @click="setMax()" class="cursor-pointer underline-transparent"
+          <a class="cursor-pointer underline-transparent" @click="setMax()"
             >Balance:
             {{
               decimalize(asset.amount, {
@@ -142,7 +143,7 @@ const $v = useVuelidate(rules, { val: value });
         </div>
       </div>
     </div>
-    <label class="label !pt-2" v-if="$v.$error">
+    <label v-if="$v.$error" class="label !pt-2">
       <span class="label-text-alt text-error"> {{ $v.$errors[0].$message }}</span>
     </label>
   </div>

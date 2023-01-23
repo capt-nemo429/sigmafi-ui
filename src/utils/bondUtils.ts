@@ -1,3 +1,6 @@
+import { Box, decimalize, isDefined } from "@fleet-sdk/common";
+import { ErgoAddress, SAFE_MIN_BOX_VALUE, SParse } from "@fleet-sdk/core";
+import BigNumber from "bignumber.js";
 import { ERG_TOKEN_ID } from "@/constants";
 import { ASSET_ICONS } from "@/maps/assetIcons";
 import {
@@ -11,9 +14,6 @@ import {
   formatBigNumber,
   getNetworkType
 } from "@/utils/otherUtils";
-import { Box, decimalize, isDefined } from "@fleet-sdk/common";
-import { ErgoAddress, SAFE_MIN_BOX_VALUE, SParse } from "@fleet-sdk/core";
-import BigNumber from "bignumber.js";
 
 export function parseOpenOrderBox(
   box: Box<string>,

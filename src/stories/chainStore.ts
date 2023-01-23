@@ -1,12 +1,12 @@
+import { isEmpty } from "@fleet-sdk/common";
+import { uniq } from "lodash-es";
+import { acceptHMRUpdate, defineStore } from "pinia";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { VERIFIED_ASSETS } from "@/maps/verifiedAssets";
 import { graphQLService } from "@/services/graphqlService";
 import { AssetPriceRate, spectrumService } from "@/services/spectrumService";
 import { AssetMetadata } from "@/types";
 import { toDict } from "@/utils";
-import { isEmpty } from "@fleet-sdk/common";
-import { uniq } from "lodash-es";
-import { defineStore, acceptHMRUpdate } from "pinia";
-import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 
 export type StateTokenMetadata = { [tokenId: string]: AssetMetadata };
 

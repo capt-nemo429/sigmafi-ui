@@ -1,11 +1,11 @@
 <script setup lang="ts">
+import { decimalize, Network } from "@fleet-sdk/common";
+import { MoonIcon, SunIcon } from "@zhuowenli/vue-feather-icons";
+import { computed } from "vue";
+import { ERG_DECIMALS } from "@/constants";
 import { useUIStore } from "@/stories/uiStore";
 import { useWalletStore } from "@/stories/walletStore";
 import { getNetworkType, shortenString } from "@/utils";
-import { decimalize, Network } from "@fleet-sdk/common";
-import { computed } from "vue";
-import { MoonIcon, SunIcon } from "@zhuowenli/vue-feather-icons";
-import { ERG_DECIMALS } from "@/constants";
 
 const defaultStore = useUIStore();
 const wallet = useWalletStore();
@@ -66,9 +66,9 @@ const ergBalance = computed(() => {
               <template v-if="!wallet.connected">
                 <li>
                   <a
-                    @click="wallet.connect('nautilus')"
                     class="opacity-50"
                     :class="{ 'opacity-100': wallet.wallets.nautilus }"
+                    @click="wallet.connect('nautilus')"
                   >
                     <div class="flex-grow text-left">Nautilus</div>
                     <img src="/nautilus.svg" class="w-5 h-5" />
@@ -76,9 +76,9 @@ const ergBalance = computed(() => {
                 </li>
                 <li>
                   <a
-                    @click="wallet.connect('safew')"
                     class="opacity-50"
                     :class="{ 'opacity-100': wallet.wallets.safew }"
+                    @click="wallet.connect('safew')"
                   >
                     <div class="flex-grow text-left">SAFEW</div>
                     <img src="@/assets/safew.png" class="w-5 h-5"

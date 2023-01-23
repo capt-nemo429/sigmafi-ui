@@ -1,4 +1,3 @@
-import { Client, createClient, gql } from "@urql/core";
 import {
   Box as GraphQLBox,
   Header,
@@ -6,7 +5,8 @@ import {
   QueryBoxesArgs,
   Token
 } from "@ergo-graphql/types";
-import { chunk, Box, NonMandatoryRegisters, Network, Amount, some } from "@fleet-sdk/common";
+import { Amount, Box, chunk, Network, NonMandatoryRegisters, some } from "@fleet-sdk/common";
+import { Client, createClient, gql } from "@urql/core";
 import { getNetworkType } from "@/utils/otherUtils";
 
 class GraphQLService {
@@ -31,6 +31,7 @@ class GraphQLService {
     `;
 
     const response = await this._client.query(query, {}).toPromise();
+
     return response.data?.blockHeaders[0].height;
   }
 
@@ -106,6 +107,7 @@ class GraphQLService {
     `;
 
     const response = await this._client.query(query, args).toPromise();
+
     return (
       response.data?.boxes.map((box) => ({
         ...box,

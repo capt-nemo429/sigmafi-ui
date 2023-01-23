@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ERG_TOKEN_ID } from "@/constants";
-import { AssetInfo } from "@/types";
-import { formatBigNumber, shortenString, tokenUrlFor } from "@/utils";
+import { AlertTriangleIcon } from "@zhuowenli/vue-feather-icons";
 import BigNumber from "bignumber.js";
 import { PropType } from "vue";
 import SigTooltip from "./SigTooltip.vue";
+import { ERG_TOKEN_ID } from "@/constants";
+import { AssetInfo } from "@/types";
+import { formatBigNumber, shortenString, tokenUrlFor } from "@/utils";
 import { verifiedToken } from "@/utils";
-import { AlertTriangleIcon } from "@zhuowenli/vue-feather-icons";
 
 defineProps({
   asset: Object as PropType<Readonly<AssetInfo<BigNumber>>>,

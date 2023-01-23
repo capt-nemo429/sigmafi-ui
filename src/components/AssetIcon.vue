@@ -1,12 +1,12 @@
 <script setup lang="ts">
+import { isDefined } from "@fleet-sdk/common";
 import { computed } from "vue";
 import EmptyIcon from "@/assets/icons/asset-empty.svg";
-import PictureNftIcon from "@/assets/icons/asset-nft-picture.svg";
 import AudioNftIcon from "@/assets/icons/asset-nft-audio.svg";
+import PictureNftIcon from "@/assets/icons/asset-nft-picture.svg";
 import VideoNftIcon from "@/assets/icons/asset-nft-video.svg";
 import { ASSET_ICONS } from "@/maps/assetIcons";
 import { AssetType } from "@/types";
-import { isDefined } from "@fleet-sdk/common";
 
 // props
 const props = defineProps({

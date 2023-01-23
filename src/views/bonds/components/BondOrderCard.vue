@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { useWalletStore } from "@/stories/walletStore";
-import { sendTransaction, parseOpenOrderBox, formatBigNumber } from "@/utils";
 import { Box } from "@fleet-sdk/common";
-import { computed, PropType, ref, toRaw } from "vue";
-import AssetIcon from "@/components/AssetIcon.vue";
 import { useProgrammatic } from "@oruga-ui/oruga-next";
-import { TransactionFactory } from "@/offchain/transactionFactory";
+import { computed, PropType, ref, toRaw } from "vue";
 import CloseOrderConfirm from "./CloseOrderConfirm.vue";
-import { useChainStore } from "@/stories";
+import AssetIcon from "@/components/AssetIcon.vue";
 import AssetRow from "@/components/AssetRow.vue";
+import { TransactionFactory } from "@/offchain/transactionFactory";
+import { useChainStore } from "@/stories";
+import { useWalletStore } from "@/stories/walletStore";
+import { formatBigNumber, parseOpenOrderBox, sendTransaction } from "@/utils";
 
 const { oruga } = useProgrammatic();
 
@@ -82,7 +82,7 @@ async function cancelOrder() {
           <div class="flex-grow skeleton-fixed h-5"></div>
           <div class="skeleton-fixed h-5 w-1/3"></div>
         </div>
-        <div v-else v-for="collateral in order?.collateral" :key="collateral.tokenId">
+        <div v-for="collateral in order?.collateral" v-else :key="collateral.tokenId">
           <div class="flex flex-row items-center gap-2" :class="{ skeleton: loadingMetadata }">
             <asset-icon
               class="h-8 w-8"
@@ -123,17 +123,17 @@ async function cancelOrder() {
       <div class="stat-actions text-center flex gap-2">
         <button
           v-if="order?.cancellable"
-          @click="cancelOrder()"
           class="btn btn-sm btn-ghost"
           :class="{ loading: cancelling }"
           :disabled="!wallet.connected || loadingBox"
+          @click="cancelOrder()"
         >
           Cancel
         </button>
         <button
-          @click="openModal()"
           class="btn btn-sm btn-primary flex-grow"
           :disabled="!wallet.connected || loadingBox"
+          @click="openModal()"
         >
           Lend
         </button>

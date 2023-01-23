@@ -1,9 +1,9 @@
-import App from "./App.vue";
-import { createApp } from "vue";
+import { Config, Modal, Notification } from "@oruga-ui/oruga-next";
 import { createPinia } from "pinia";
-import { setSystemTheme } from "./utils";
+import { createApp } from "vue";
+import App from "./App.vue";
 import { router } from "./router";
-import { Modal, Notification, Config } from "@oruga-ui/oruga-next";
+import { setSystemTheme } from "./utils";
 
 import "@oruga-ui/oruga-next/dist/oruga.css";
 import "./style.css";

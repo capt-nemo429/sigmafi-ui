@@ -1,4 +1,4 @@
-import { defineStore, acceptHMRUpdate } from "pinia";
+import { acceptHMRUpdate, defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { getCurrentTheme, setTheme } from "@/utils";
 

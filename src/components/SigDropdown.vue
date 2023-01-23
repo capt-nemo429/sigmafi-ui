@@ -68,7 +68,7 @@ onDeactivated(() => {
     <slot />
 
     <div v-show="state.active" class="dropdown-content" :class="props.menuClass">
-      <ul tabindex="0" ref="menu" class="menu p-2 mt-1 shadow bg-base-300 rounded-box">
+      <ul ref="menu" tabindex="0" class="menu p-2 mt-1 shadow bg-base-300 rounded-box">
         <div class="h-40 overflow-y-auto">
           <slot name="menu" />
         </div>

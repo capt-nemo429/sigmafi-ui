@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import AppHeader from "./components/AppHeader.vue";
-import AppFooter from "./components/AppFooter.vue";
 import { BoxIcon } from "@zhuowenli/vue-feather-icons";
+import AppFooter from "./components/AppFooter.vue";
+import AppHeader from "./components/AppHeader.vue";
 import { useChainStore } from "./stories";
 
 const chain = useChainStore();

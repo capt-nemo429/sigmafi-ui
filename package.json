@@ -7,7 +7,9 @@
     "dev:mainnet": "VITE_NETWORK=mainnet vite",
     "dev:testnet": "VITE_NETWORK=testnet vite",
     "build": "vue-tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:lint": "eslint 'src/**/*.{js,ts,vue}'",
+    "fix:lint": "eslint 'src/**/*.{js,ts,vue}' --fix"
   },
   "dependencies": {
     "@fleet-sdk/common": "0.1.0-alpha.19",
@@ -23,6 +25,7 @@
     "lodash-es": "^4.17.21",
     "pinia": "^2.0.28",
     "vue": "^3.2.45",
+    "vue-eslint-parser": "^9.1.0",
     "vue-router": "^4.1.6"
   },
   "devDependencies": {
@@ -31,10 +34,17 @@
     "@types/cleave.js": "^1.4.7",
     "@types/lodash-es": "^4.17.6",
     "@types/node": "^18.11.18",
+    "@typescript-eslint/eslint-plugin": "^5.48.2",
+    "@typescript-eslint/parser": "^5.48.2",
     "@vitejs/plugin-vue": "^4.0.0",
     "autoprefixer": "^10.4.13",
     "daisyui": "^2.46.0",
+    "eslint": "^8.32.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-vue": "^9.9.0",
     "postcss": "^8.4.20",
+    "prettier": "^2.8.3",
     "tailwindcss": "^3.2.4",
     "typescript": "^4.9.4",
     "vite": "^4.0.3",

@@ -1,20 +1,20 @@
 <script setup lang="ts">
+import { decimalize, first, isEmpty, TokenAmount } from "@fleet-sdk/common";
+import useVuelidate from "@vuelidate/core";
+import { helpers, required } from "@vuelidate/validators";
+import { BigNumber } from "bignumber.js";
+import { differenceBy, remove } from "lodash-es";
+import { computed, reactive, ref } from "vue";
+import AssetIcon from "@/components/AssetIcon.vue";
 import AssetInput from "@/components/AssetInput.vue";
 import CleaveInput from "@/components/CleaveInput.vue";
-import { useWalletStore } from "@/stories/walletStore";
-import { computed, reactive, ref } from "vue";
-import { ERG_TOKEN_ID } from "@/constants";
-import { decimalize, first, isEmpty, TokenAmount } from "@fleet-sdk/common";
-import { BigNumber } from "bignumber.js";
-import { formatBigNumber, sendTransaction, shortenString, undecimalizeBigNumber } from "@/utils";
 import SigDropdown from "@/components/SigDropdown.vue";
-import AssetIcon from "@/components/AssetIcon.vue";
-import { differenceBy, remove } from "lodash-es";
-import { AssetInfo } from "@/types";
-import { helpers, required } from "@vuelidate/validators";
-import { minValue } from "@/validators/bigNumbers";
-import useVuelidate from "@vuelidate/core";
+import { ERG_TOKEN_ID } from "@/constants";
 import { TransactionFactory } from "@/offchain/transactionFactory";
+import { useWalletStore } from "@/stories/walletStore";
+import { AssetInfo } from "@/types";
+import { formatBigNumber, sendTransaction, shortenString, undecimalizeBigNumber } from "@/utils";
+import { minValue } from "@/validators/bigNumbers";
 import { VERIFIED_ASSETS } from "@/maps";
 
 const wallet = useWalletStore();
@@ -177,7 +177,6 @@ async function submit() {
         <div class="input-group">
           <cleave-input
             v-model="state.loan.amount"
-            @blur="$v.loan.$touch()"
             :readonly="loading"
             :options="{
               numeral: true,
@@ -186,6 +185,7 @@ async function submit() {
             }"
             placeholder="0.00"
             class="input input-bordered w-full input-lg"
+            @blur="$v.loan.$touch()"
           />
           <select v-model="state.loan.asset" class="select select-bordered select-lg border-l-0">
             <option v-for="asset in VERIFIED_ASSETS" :key="asset.tokenId" :value="asset">
@@ -193,7 +193,7 @@ async function submit() {
             </option>
           </select>
         </div>
-        <label class="label !pt-1" v-if="$v.loan.$error">
+        <label v-if="$v.loan.$error" class="label !pt-1">
           <span class="label-text-alt text-error"> {{ $v.loan.$errors[0].$message }}</span>
         </label>
       </div>
@@ -201,14 +201,13 @@ async function submit() {
         <div class="form-control">
           <label class="label">
             <span class="label-text">Term</span>
-            <span class="label-text-alt opacity-70" v-if="blocks > 0n"
+            <span v-if="blocks > 0n" class="label-text-alt opacity-70"
               >{{ decimalize(blocks.toString(), { decimals: 0, thousandMark: "," }) }} blocks</span
             >
           </label>
           <div class="input-group">
             <cleave-input
               v-model="state.term.value"
-              @blur="$v.term.$touch()"
               :readonly="loading"
               :options="{
                 blocks: [5],
@@ -216,25 +215,26 @@ async function submit() {
               }"
               placeholder="0"
               class="input input-bordered w-full"
+              @blur="$v.term.$touch()"
             />
             <select
-              @blur="$v.term.$touch()"
               v-model="state.term.interval"
               class="select select-bordered border-l-0"
+              @blur="$v.term.$touch()"
             >
               <option value="hours">hours</option>
               <option value="days">days</option>
               <option value="months">months</option>
             </select>
           </div>
-          <label class="label !pt-1" v-if="$v.term.$error">
+          <label v-if="$v.term.$error" class="label !pt-1">
             <span class="label-text-alt text-error"> {{ $v.term.$errors[0].$message }}</span>
           </label>
         </div>
         <div class="form-control">
           <label class="label">
             <span class="label-text">Interest</span>
-            <span class="label-text-alt opacity-70" v-if="interestAmount.gt(0)"
+            <span v-if="interestAmount.gt(0)" class="label-text-alt opacity-70"
               >{{
                 formatBigNumber(interestAmount, state.loan.asset.metadata.decimals || 0, false)
               }}
@@ -244,7 +244,6 @@ async function submit() {
           <div class="input-group">
             <cleave-input
               v-model="state.interest"
-              @blur="$v.interest.$touch()"
               :readonly="loading"
               :options="{
                 numeral: true,
@@ -253,10 +252,11 @@ async function submit() {
               }"
               placeholder="0.00"
               class="input input-bordered w-full"
+              @blur="$v.interest.$touch()"
             />
             <span class="!border-l-0">%</span>
           </div>
-          <label class="label !pt-1" v-if="$v.interest.$error">
+          <label v-if="$v.interest.$error" class="label !pt-1">
             <span class="label-text-alt text-error"> {{ $v.interest.$errors[0].$message }}</span>
           </label>
         </div>
@@ -270,20 +270,20 @@ async function submit() {
         </label>
         <asset-input
           v-for="asset in state.collateral"
-          v-model="asset.amount"
-          @remove="removeCollateral"
-          :readonly="loading"
           :key="asset.tokenId"
+          v-model="asset.amount"
+          :readonly="loading"
           :asset="asset.info"
           :disposable="true"
           class="pb-2"
+          @remove="removeCollateral"
         />
       </div>
       <sig-dropdown root-class="w-full" menu-class="w-full">
         <button :disabled="loading" class="btn w-full shadow mt-2">Add collateral</button>
-        <template v-slot:menu>
+        <template #menu>
           <li v-for="asset in unselectedAssets">
-            <a @click="addCollateral(asset)" class="flex flex-row" :key="asset.tokenId">
+            <a :key="asset.tokenId" class="flex flex-row" @click="addCollateral(asset)">
               <asset-icon
                 class="h-10 w-10"
                 :token-id="asset.tokenId"
@@ -304,7 +304,7 @@ async function submit() {
           </li>
         </template>
       </sig-dropdown>
-      <label class="label !pt-1" v-if="$v.collateral.$error">
+      <label v-if="$v.collateral.$error" class="label !pt-1">
         <span class="label-text-alt text-error"> {{ $v.collateral.$errors[0].$message }}</span>
       </label>
     </div>

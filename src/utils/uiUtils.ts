@@ -1,7 +1,7 @@
-import { useProgrammatic } from "@oruga-ui/oruga-next";
 import { isDefined, Network } from "@fleet-sdk/common";
-import TxIdNotification from "@/components/TxIdNotification.vue";
+import { useProgrammatic } from "@oruga-ui/oruga-next";
 import { Ref } from "vue";
+import TxIdNotification from "@/components/TxIdNotification.vue";
 
 export function showToast(
   msg: string,
@@ -33,6 +33,7 @@ export async function sendTransaction(
     });
 
     loadingRef.value = false;
+
     return true;
   } catch (e: any) {
     loadingRef.value = false;
@@ -44,6 +45,7 @@ export async function sendTransaction(
     } else if (isDefined(e.info)) {
       if (e.code === 2) {
         loadingRef.value = false;
+
         return false;
       }
 

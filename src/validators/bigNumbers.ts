@@ -1,6 +1,6 @@
-import { BigNumber } from "bignumber.js";
 import { ValidationRuleWithParams } from "@vuelidate/core";
-import { Ref, isRef } from "vue";
+import { BigNumber } from "bignumber.js";
+import { isRef, Ref } from "vue";
 
 function valOf<T>(val: T | Ref<T>) {
   return isRef(val) ? val.value : val;

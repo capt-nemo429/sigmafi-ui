@@ -1,6 +1,3 @@
-import { ERG_TOKEN_ID } from "@/constants";
-import { AssetInfo } from "@/types";
-import { getNetworkType, showToast } from "@/utils";
 import {
   Amount,
   Box,
@@ -12,9 +9,12 @@ import {
 } from "@fleet-sdk/common";
 import { ErgoAddress } from "@fleet-sdk/core";
 import { EIP12ErgoAPI, SignedTransaction } from "@nautilus-js/eip12-types";
-import { defineStore, acceptHMRUpdate } from "pinia";
+import { acceptHMRUpdate, defineStore } from "pinia";
 import { computed, onBeforeMount, ref, watch } from "vue";
 import { useChainStore } from "./chainStore";
+import { ERG_TOKEN_ID } from "@/constants";
+import { AssetInfo } from "@/types";
+import { getNetworkType, showToast } from "@/utils";
 
 export const useWalletStore = defineStore("wallet", () => {
   const chain = useChainStore();
@@ -165,6 +165,7 @@ export const useWalletStore = defineStore("wallet", () => {
 
     if (Date.now() - _lastBoxFetch < 20000) {
       _loading.value = false;
+
       return _boxes;
     }
 

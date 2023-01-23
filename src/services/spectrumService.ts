@@ -1,8 +1,8 @@
-import { ERG_TOKEN_ID } from "@/constants";
-import { get, toDict } from "@/utils";
 import BigNumber from "bignumber.js";
 import { uniqWith } from "lodash-es";
 import { coinGeckoService } from "./coinGeckoService";
+import { ERG_TOKEN_ID } from "@/constants";
+import { get, toDict } from "@/utils";
 
 export type SpectrumPool = {
   id: string;
@@ -47,6 +47,7 @@ class SpectrumService {
 
     const dict = toDict(filtered, (r) => {
       const erg = BigNumber(1).div(r.lastPrice);
+
       return {
         [r.quoteId]: {
           erg: erg.toNumber(),
@@ -56,6 +57,7 @@ class SpectrumService {
     });
 
     dict[ERG_TOKEN_ID] = { erg: 1, fiat: ergPrice };
+
     return dict;
   }
 
