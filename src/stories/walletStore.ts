@@ -35,7 +35,11 @@ export const useWalletStore = defineStore("wallet", () => {
 
   // computed
   const balance = computed(() =>
-    _balance.value.map((asset) => ({ ...asset, metadata: chain.tokensMetadata[asset.tokenId] }))
+    _balance.value.map((asset) => ({
+      ...asset,
+      metadata: chain.tokensMetadata[asset.tokenId],
+      conversion: { rate: chain.priceRates[asset.tokenId]?.fiat, currency: "USD" }
+    }))
   );
   const loading = computed(() => _loading.value);
   const changeAddress = computed(() => _changeAddress.value);
@@ -47,9 +51,7 @@ export const useWalletStore = defineStore("wallet", () => {
   // watchers
   watch(
     () => chain.height,
-    () => {
-      getBoxes();
-    }
+    () => getBoxes()
   );
 
   watch(balance, () => {

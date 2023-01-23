@@ -1,12 +1,12 @@
-import { ERG_DECIMALS, ERG_TOKEN_ID } from "@/constants";
 import { VERIFIED_ASSETS } from "@/maps/verifiedAssets";
 import { graphQLService } from "@/services/graphqlService";
+import { AssetPriceRate, spectrumService } from "@/services/spectrumService";
 import { AssetMetadata } from "@/types";
 import { toDict } from "@/utils";
 import { isEmpty } from "@fleet-sdk/common";
 import { uniq } from "lodash-es";
 import { defineStore, acceptHMRUpdate } from "pinia";
-import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 
 export type StateTokenMetadata = { [tokenId: string]: AssetMetadata };
 
@@ -17,6 +17,7 @@ export const useChainStore = defineStore("chain", () => {
   // private state
   const _loading = ref(true);
   const _height = ref<number>(0);
+  const _priceRates = ref<AssetPriceRate>({});
 
   const _metadata = ref<StateTokenMetadata>(
     toDict(VERIFIED_ASSETS, (a) => ({ [a.tokenId]: a.metadata }))
@@ -24,8 +25,22 @@ export const useChainStore = defineStore("chain", () => {
 
   // computed
   const tokensMetadata = computed(() => _metadata.value);
+  const priceRates = computed(() => _priceRates.value);
   const loading = computed(() => _loading.value);
   const height = computed(() => _height.value);
+
+  // watchers
+  watch(
+    height,
+    (newVal, oldVal) => {
+      if (newVal > 0 && !oldVal && !isEmpty(_metadata.value)) {
+        return;
+      }
+
+      loadPriceRates();
+    },
+    { immediate: true }
+  );
 
   // hooks
   onMounted(async () => {
@@ -66,9 +81,15 @@ export const useChainStore = defineStore("chain", () => {
     }
   }
 
+  async function loadPriceRates() {
+    const tokens = await spectrumService.getTokenRates();
+    _priceRates.value = tokens;
+  }
+
   return {
     loadTokensMetadata,
     tokensMetadata,
+    priceRates,
     loading,
     height
   };

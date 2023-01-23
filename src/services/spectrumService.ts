@@ -1,6 +1,8 @@
-import { get } from "@/utils";
+import { ERG_TOKEN_ID } from "@/constants";
+import { get, toDict } from "@/utils";
 import BigNumber from "bignumber.js";
 import { uniqWith } from "lodash-es";
+import { coinGeckoService } from "./coinGeckoService";
 
 export type SpectrumPool = {
   id: string;
@@ -18,21 +20,24 @@ export type SpectrumPoolVolume = {
 };
 
 export type AssetPriceRate = {
-  [tokenId: string]: { erg: number };
+  [tokenId: string]: { erg: number; fiat: number };
 };
 
 const BASE_URL = "https://api.spectrum.fi";
 const SPECTRUM_ERG_TOKEN_ID = "0000000000000000000000000000000000000000000000000000000000000000";
 
-class ErgoDexService {
+class SpectrumService {
   public async getTokenRates(): Promise<AssetPriceRate> {
     const fromDate = new Date();
     fromDate.setDate(fromDate.getDate() - 30);
 
-    const data = await get<SpectrumPool[]>(new URL("v1/amm/markets", BASE_URL), {
-      from: this._getUtcTimestamp(fromDate),
-      to: this._getUtcTimestamp(new Date())
-    });
+    const [ergPrice, data] = await Promise.all([
+      coinGeckoService.getErgPrice(),
+      get<SpectrumPool[]>(new URL("v1/amm/markets", BASE_URL), {
+        from: this._getUtcTimestamp(fromDate),
+        to: this._getUtcTimestamp(new Date())
+      })
+    ]);
 
     const filtered = uniqWith(
       data.filter((x) => x.baseId === SPECTRUM_ERG_TOKEN_ID),
@@ -40,11 +45,17 @@ class ErgoDexService {
         a.quoteId === b.quoteId && BigNumber(a.baseVolume.value).isLessThan(b.baseVolume.value)
     );
 
-    const dict: AssetPriceRate = {};
-    filtered.map((r) => {
-      dict[r.quoteId] = { erg: BigNumber(1).dividedBy(r.lastPrice).toNumber() };
+    const dict = toDict(filtered, (r) => {
+      const erg = BigNumber(1).div(r.lastPrice);
+      return {
+        [r.quoteId]: {
+          erg: erg.toNumber(),
+          fiat: erg.times(ergPrice).toNumber()
+        }
+      };
     });
 
+    dict[ERG_TOKEN_ID] = { erg: 1, fiat: ergPrice };
     return dict;
   }
 
@@ -60,4 +71,4 @@ class ErgoDexService {
   }
 }
 
-export const spectrumService = new ErgoDexService();
+export const spectrumService = new SpectrumService();

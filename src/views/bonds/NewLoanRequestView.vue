@@ -2,8 +2,8 @@
 import AssetInput from "@/components/AssetInput.vue";
 import CleaveInput from "@/components/CleaveInput.vue";
 import { useWalletStore } from "@/stories/walletStore";
-import { computed, reactive, ref, toRaw } from "vue";
-import { ERG_DECIMALS, ERG_TOKEN_ID } from "@/constants";
+import { computed, reactive, ref } from "vue";
+import { ERG_TOKEN_ID } from "@/constants";
 import { decimalize, first, isEmpty, TokenAmount } from "@fleet-sdk/common";
 import { BigNumber } from "bignumber.js";
 import { formatBigNumber, sendTransaction, shortenString, undecimalizeBigNumber } from "@/utils";

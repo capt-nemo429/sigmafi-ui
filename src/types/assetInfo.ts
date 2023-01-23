@@ -5,7 +5,7 @@ export enum AssetType {
   ThresholdSignature = "0201"
 }
 
-type ConversionOptions = {
+type AssetPriceConversion = {
   rate: number;
   currency: string;
 };
@@ -18,7 +18,7 @@ export type AssetMetadata = {
 
 export type AssetInfo<AmountType> = {
   metadata?: AssetMetadata;
-  conversion?: ConversionOptions;
+  conversion?: AssetPriceConversion;
   tokenId: string;
   amount: AmountType;
 };

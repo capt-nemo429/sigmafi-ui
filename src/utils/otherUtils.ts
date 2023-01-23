@@ -1,5 +1,6 @@
 import { BigNumber } from "bignumber.js";
 import { isUndefined, Network } from "@fleet-sdk/common";
+import { map } from "lodash-es";
 
 const BIG_NUMBER_IN_SHORT = Intl.NumberFormat("en", {
   notation: "compact",
@@ -60,11 +61,11 @@ export function decimalizeBigNumber(number: BigNumber.Instance, decimals: number
   return number.decimalPlaces(decimals).shiftedBy(decimals * -1);
 }
 
-export function toDict<T, R>(
+export function toDict<T, R, K extends string | number | symbol>(
   collection: T[],
-  mapper: (item: T) => { [key: string | number]: unknown }
-): R {
-  return Object.assign({}, ...collection.map(mapper)) as R;
+  mapper: (item: T) => { [key in K]: R }
+) {
+  return Object.assign({}, ...collection.map(mapper)) as { [key in K]: R };
 }
 
 export function blockToTime(blocks: number) {
