@@ -1,16 +1,11 @@
 <script setup lang="ts">
 import { QueryBoxesArgs } from "@ergo-graphql/types";
-import { Amount, Box, first, isDefined, isEmpty, some } from "@fleet-sdk/common";
+import { Amount, Box, isDefined, isEmpty, some } from "@fleet-sdk/common";
 import { ErgoAddress } from "@fleet-sdk/core";
 import { reactive, ref, watch } from "vue";
 import BondCard from "./bonds/components/BondCard.vue";
 import { VERIFIED_ASSETS } from "@/maps";
-import {
-  buildBondContract,
-  buildOrderContract,
-  ERG_BOND_CONTRACT,
-  ORDER_ON_CLOSE_ERG_CONTRACT
-} from "@/offchain/plugins";
+import { buildBondContract, buildOrderContract } from "@/offchain/plugins";
 import { graphQLService } from "@/services/graphqlService";
 import { useChainStore } from "@/stories";
 import { useWalletStore } from "@/stories/walletStore";

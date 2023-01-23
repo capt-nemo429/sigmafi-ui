@@ -2,19 +2,15 @@
 import { PropType, ref, watch } from "vue";
 import { computed } from "vue";
 import { vCleave } from "@/directives";
-import {
-  CleaveOnChangedEvent,
-  CleaveOptions,
-  HTMLCleaveElement,
-} from "@/types";
+import { CleaveOnChangedEvent, CleaveOptions, HTMLCleaveElement } from "@/types";
 
 // emits
 const emit = defineEmits(["update:modelValue"]);
 
 // props
 const props = defineProps({
-  options: Object as PropType<CleaveOptions>,
-  modelValue: { type: String, required: true },
+  options: { type: Object as PropType<CleaveOptions>, default: undefined },
+  modelValue: { type: String, required: true }
 });
 
 // refs
@@ -28,7 +24,7 @@ const value = computed({
   },
   set(value) {
     emit("update:modelValue", value);
-  },
+  }
 });
 
 // watchers
@@ -68,7 +64,7 @@ defineExpose({ focus });
     v-cleave="{
       ...options,
       initValue: props.modelValue,
-      onValueChanged: onChanged,
+      onValueChanged: onChanged
     }"
   />
 </template>

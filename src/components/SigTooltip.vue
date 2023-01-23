@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { isDefined } from "@fleet-sdk/common";
 
-defineProps({ tip: String });
+defineProps({ tip: { type: String, default: undefined } });
 </script>
 
 <template>

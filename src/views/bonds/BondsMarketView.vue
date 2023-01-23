@@ -54,21 +54,23 @@ onMounted(async () => {
     <div
       class="grid grid-cols-1 gap-8 md:gap-12 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
     >
-      <bond-order-card
-        v-for="n in 4"
-        v-if="loading.boxes"
-        :key="n"
-        :loading-box="loading.boxes"
-        :loading-metadata="loading.metadata"
-      />
-      <bond-order-card
-        v-for="box in boxes"
-        v-else
-        :key="box.boxId"
-        :box="box"
-        :loading-box="loading.boxes"
-        :loading-metadata="loading.metadata"
-      />
+      <template v-if="loading.boxes">
+        <bond-order-card
+          v-for="n in 4"
+          :key="n"
+          :loading-box="loading.boxes"
+          :loading-metadata="loading.metadata"
+        />
+      </template>
+      <template v-else>
+        <bond-order-card
+          v-for="box in boxes"
+          :key="box.boxId"
+          :box="box"
+          :loading-box="loading.boxes"
+          :loading-metadata="loading.metadata"
+        />
+      </template>
     </div>
     <div v-if="!loading.boxes && isEmpty(boxes)" class="text-7xl text-center w-full pb-20">
       <div class="py-20 opacity-90">No open orders for now.</div>

@@ -4,7 +4,6 @@ import { ExternalLinkIcon } from "@zhuowenli/vue-feather-icons";
 import { computed, PropType, ref, toRaw } from "vue";
 import AssetIcon from "@/components/AssetIcon.vue";
 import AssetRow from "@/components/AssetRow.vue";
-import { ERG_TOKEN_ID } from "@/constants";
 import { TransactionFactory } from "@/offchain/transactionFactory";
 import { useChainStore } from "@/stories";
 import { useWalletStore } from "@/stories/walletStore";
@@ -17,7 +16,7 @@ const emit = defineEmits(["close"]);
 const loading = ref(false);
 
 const props = defineProps({
-  box: { type: Object as PropType<Box<string>>, required: false }
+  box: { type: Object as PropType<Box<string>>, required: false, default: undefined }
 });
 
 const fees = computed(() => {
@@ -71,7 +70,7 @@ async function closeOrder() {
               root-class="items-baseline w-full justify-end"
               name-class="text-sm"
             />
-            <asset-icon v-if="order" class="h-7 w-7" :token-id="order.loan.tokenId" />
+            <asset-icon v-if="order" custom-class="h-7 w-7" :token-id="order.loan.tokenId" />
           </div>
         </div>
       </div>
@@ -97,7 +96,7 @@ async function closeOrder() {
                 />
               </div>
               <asset-icon
-                class="h-6 w-6"
+                custom-class="h-6 w-6"
                 :token-id="collateral.tokenId"
                 :type="collateral.metadata?.type"
               />

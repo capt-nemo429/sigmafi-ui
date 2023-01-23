@@ -1,6 +1,5 @@
 import { isUndefined, Network } from "@fleet-sdk/common";
 import { BigNumber } from "bignumber.js";
-import { map } from "lodash-es";
 
 const BIG_NUMBER_IN_SHORT = Intl.NumberFormat("en", {
   notation: "compact",

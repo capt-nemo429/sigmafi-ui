@@ -1,4 +1,4 @@
-import { Box, decimalize, isDefined } from "@fleet-sdk/common";
+import { Box, isDefined } from "@fleet-sdk/common";
 import { ErgoAddress, SAFE_MIN_BOX_VALUE, SParse } from "@fleet-sdk/core";
 import BigNumber from "bignumber.js";
 import { ERG_TOKEN_ID } from "@/constants";

@@ -16,11 +16,11 @@ const emit = defineEmits(["update:modelValue", "remove"]);
 
 // props
 const props = defineProps({
-  placeholder: String,
+  placeholder: { type: String, default: "" },
   readonly: Boolean,
   disposable: Boolean,
   asset: { type: Object as PropType<AssetInfo<bigint>>, required: true },
-  modelValue: { type: String, required: true }!
+  modelValue: { type: String, required: true }
 });
 
 // refs
@@ -118,7 +118,11 @@ const $v = useVuelidate(rules, { val: value });
           />
         </div>
         <div class="flex flex-row text-right items-center gap-1 whitespace-nowrap">
-          <asset-icon class="h-5 w-5" :token-id="asset.tokenId" :type="asset.metadata?.type" />
+          <asset-icon
+            custom-class="h-5 w-5"
+            :token-id="asset.tokenId"
+            :type="asset.metadata?.type"
+          />
           <span v-if="asset.metadata?.name" class="flex-grow text-sm">
             {{ shortenString(asset.metadata.name, 15) }}
           </span>

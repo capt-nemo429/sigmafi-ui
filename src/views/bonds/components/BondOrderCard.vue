@@ -16,7 +16,7 @@ const chain = useChainStore();
 const wallet = useWalletStore();
 
 const props = defineProps({
-  box: { type: Object as PropType<Box<string>>, required: false },
+  box: { type: Object as PropType<Box<string>>, required: false, default: undefined },
   loadingBox: { type: Boolean, default: false },
   loadingMetadata: { type: Boolean, default: false }
 });
@@ -70,7 +70,7 @@ async function cancelOrder() {
           />
         </div>
         <div v-if="loadingBox || !order" class="skeleton-fixed h-8 w-8 skeleton-circular"></div>
-        <asset-icon v-else class="h-8 w-8" :token-id="order.loan.tokenId" />
+        <asset-icon v-else custom-class="h-8 w-8" :token-id="order.loan.tokenId" />
       </div>
     </div>
 
@@ -85,7 +85,7 @@ async function cancelOrder() {
         <div v-for="collateral in order?.collateral" v-else :key="collateral.tokenId">
           <div class="flex flex-row items-center gap-2" :class="{ skeleton: loadingMetadata }">
             <asset-icon
-              class="h-8 w-8"
+              custom-class="h-8 w-8"
               :token-id="collateral.tokenId"
               :type="collateral.metadata?.type"
             />

@@ -11,8 +11,8 @@ import { AssetType } from "@/types";
 // props
 const props = defineProps({
   tokenId: { type: String, required: true },
-  class: { type: String, required: false },
-  type: { type: String, required: false }
+  customClass: { type: String, default: "" },
+  type: { type: String, default: undefined }
 });
 
 // computed
@@ -24,6 +24,7 @@ const logo = computed(() => {
 
   return undefined;
 });
+
 const hasLogo = computed(() => isDefined(logo.value));
 const isPictureNft = computed(() => props.type === AssetType.PictureArtwork);
 const isAudioNft = computed(() => props.type === AssetType.AudioArtwork);
@@ -40,26 +41,31 @@ function calculateColor(tokenId: string) {
 </script>
 
 <template>
-  <img v-if="hasLogo" :src="logo" :class="class" />
+  <img v-if="hasLogo" :src="logo" :class="customClass" />
   <template v-else>
     <picture-nft-icon
       v-if="isPictureNft"
-      :class="class"
+      :class="customClass"
       class="fill-gray-300"
       :style="`fill: ${color}`"
     />
     <audio-nft-icon
       v-else-if="isAudioNft"
-      :class="class"
+      :class="customClass"
       class="fill-gray-300"
       :style="`fill: ${color}`"
     />
     <video-nft-icon
       v-else-if="isVideoNft"
-      :class="class"
+      :class="customClass"
       class="fill-gray-300"
       :style="`fill: ${color}`"
     />
-    <empty-icon v-else :class="class" class="fill-gray-400 opacity-60" :style="`fill: ${color}`" />
+    <empty-icon
+      v-else
+      :class="customClass"
+      class="fill-gray-400 opacity-60"
+      :style="`fill: ${color}`"
+    />
   </template>
 </template>

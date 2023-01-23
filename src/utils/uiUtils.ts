@@ -1,4 +1,4 @@
-import { isDefined, Network } from "@fleet-sdk/common";
+import { isDefined } from "@fleet-sdk/common";
 import { useProgrammatic } from "@oruga-ui/oruga-next";
 import { Ref } from "vue";
 import TxIdNotification from "@/components/TxIdNotification.vue";
@@ -35,8 +35,10 @@ export async function sendTransaction(
     loadingRef.value = false;
 
     return true;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {
     loadingRef.value = false;
+    // eslint-disable-next-line no-console
     console.error(e);
 
     let message = "Unknown error.";

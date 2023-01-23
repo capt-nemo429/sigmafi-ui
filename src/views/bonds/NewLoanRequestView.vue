@@ -10,12 +10,12 @@ import AssetInput from "@/components/AssetInput.vue";
 import CleaveInput from "@/components/CleaveInput.vue";
 import SigDropdown from "@/components/SigDropdown.vue";
 import { ERG_TOKEN_ID } from "@/constants";
+import { VERIFIED_ASSETS } from "@/maps";
 import { TransactionFactory } from "@/offchain/transactionFactory";
 import { useWalletStore } from "@/stories/walletStore";
 import { AssetInfo } from "@/types";
 import { formatBigNumber, sendTransaction, shortenString, undecimalizeBigNumber } from "@/utils";
 import { minValue } from "@/validators/bigNumbers";
-import { VERIFIED_ASSETS } from "@/maps";
 
 const wallet = useWalletStore();
 const emit = defineEmits(["close"]);
@@ -282,10 +282,10 @@ async function submit() {
       <sig-dropdown root-class="w-full" menu-class="w-full">
         <button :disabled="loading" class="btn w-full shadow mt-2">Add collateral</button>
         <template #menu>
-          <li v-for="asset in unselectedAssets">
+          <li v-for="asset in unselectedAssets" :key="asset.tokenId">
             <a :key="asset.tokenId" class="flex flex-row" @click="addCollateral(asset)">
               <asset-icon
-                class="h-10 w-10"
+                custom-class="h-10 w-10"
                 :token-id="asset.tokenId"
                 :type="asset.metadata?.type"
               />

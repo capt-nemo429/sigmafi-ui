@@ -9,12 +9,12 @@ import { formatBigNumber, shortenString, tokenUrlFor } from "@/utils";
 import { verifiedToken } from "@/utils";
 
 defineProps({
-  asset: Object as PropType<Readonly<AssetInfo<BigNumber>>>,
-  rootClass: String,
-  nameClass: String,
-  amountClass: String,
-  badgeClass: String,
-  maxNameLen: Number,
+  asset: { type: Object as PropType<Readonly<AssetInfo<BigNumber>>>, default: undefined },
+  rootClass: { type: String, default: "" },
+  nameClass: { type: String, default: "" },
+  amountClass: { type: String, default: "" },
+  badgeClass: { type: String, default: "" },
+  maxNameLen: { type: Number, default: undefined },
   showBadge: Boolean,
   link: Boolean
 });

@@ -5,7 +5,7 @@ import {
   QueryBoxesArgs,
   Token
 } from "@ergo-graphql/types";
-import { Amount, Box, chunk, Network, NonMandatoryRegisters, some } from "@fleet-sdk/common";
+import { Box, chunk, Network, NonMandatoryRegisters, some } from "@fleet-sdk/common";
 import { Client, createClient, gql } from "@urql/core";
 import { getNetworkType } from "@/utils/otherUtils";
 

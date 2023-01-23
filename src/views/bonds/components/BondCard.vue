@@ -4,7 +4,6 @@ import { ExternalLinkIcon } from "@zhuowenli/vue-feather-icons";
 import { computed, PropType, ref, toRaw } from "vue";
 import AssetIcon from "@/components/AssetIcon.vue";
 import AssetRow from "@/components/AssetRow.vue";
-import { ERG_TOKEN_ID } from "@/constants";
 import { TransactionFactory } from "@/offchain/transactionFactory";
 import { useChainStore } from "@/stories";
 import { useWalletStore } from "@/stories/walletStore";
@@ -15,7 +14,7 @@ const chain = useChainStore();
 const wallet = useWalletStore();
 
 const props = defineProps({
-  box: { type: Object as PropType<Box<string>>, required: false },
+  box: { type: Object as PropType<Box<string>>, required: false, default: undefined },
   loadingBox: { type: Boolean, default: false },
   loadingMetadata: { type: Boolean, default: false }
 });
@@ -34,8 +33,8 @@ const termProgress = computed(() => {
   }
 
   const totalTerm = chain.height - props.box.creationHeight + blocksLeft;
-  
-return (((totalTerm - blocksLeft) / totalTerm) * 100).toFixed(1);
+
+  return (((totalTerm - blocksLeft) / totalTerm) * 100).toFixed(1);
 });
 
 const bond = computed(() => {
@@ -98,7 +97,7 @@ async function repay() {
           />
         </div>
         <div v-if="loadingBox || !bond" class="skeleton-fixed h-8 w-8 skeleton-circular"></div>
-        <asset-icon v-else class="h-8 w-8" :token-id="bond.repayment.tokenId" />
+        <asset-icon v-else custom-class="h-8 w-8" :token-id="bond.repayment.tokenId" />
       </div>
     </div>
 
@@ -113,7 +112,7 @@ async function repay() {
         <div v-for="collateral in bond?.collateral" v-else :key="collateral.tokenId">
           <div class="flex flex-row items-center gap-2" :class="{ skeleton: loadingMetadata }">
             <asset-icon
-              class="h-8 w-8"
+              custom-class="h-8 w-8"
               :token-id="collateral.tokenId"
               :type="collateral.metadata?.type"
             />

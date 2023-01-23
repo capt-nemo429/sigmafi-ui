@@ -17,7 +17,6 @@ import {
   TokenAmount
 } from "@fleet-sdk/core";
 import { ERG_TOKEN_ID } from "@/constants";
-import { VerifiedAsset } from "@/types";
 
 export type OpenOrderType = "on-close" | "fixed-height";
 

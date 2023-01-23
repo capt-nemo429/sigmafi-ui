@@ -6,6 +6,7 @@ class CoinGeckoService {
   async getErgPrice(): Promise<number> {
     const data = await get(new URL("v3/simple/price", BASE_URI), {
       ids: "ergo",
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       vs_currencies: "usd"
     });
 

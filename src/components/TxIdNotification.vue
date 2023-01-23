@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { EXPLORER_URL } from "@/constants";
 
-defineProps({ txId: String });
+defineProps({ txId: { type: String, required: true } });
 </script>
 
 <template>

@@ -2,7 +2,10 @@
 import { nextTick, onDeactivated, onMounted, reactive, ref, watch } from "vue";
 
 // props
-const props = defineProps({ menuClass: String, rootClass: String });
+const props = defineProps({
+  menuClass: { type: String, default: "" },
+  rootClass: { type: String, default: "" }
+});
 
 // refs
 const root = ref<Node>();
