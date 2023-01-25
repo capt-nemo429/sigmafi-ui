@@ -33,13 +33,9 @@ export function shortenString(
   }
 }
 
-export function formatBigNumber(number?: BigNumber, decimals?: number, decimalize = true): string {
+export function formatBigNumber(number?: BigNumber, decimals?: number): string {
   if (isUndefined(number)) {
     return "0";
-  }
-
-  if (decimalize && decimals && decimals > 0) {
-    number = decimalizeBigNumber(number, decimals);
   }
 
   if (number.isGreaterThanOrEqualTo(SHORT_NUMBER_THRESHOLD)) {
@@ -57,7 +53,11 @@ export function undecimalizeBigNumber(number: BigNumber.Instance, decimals: numb
   return number.decimalPlaces(decimals).shiftedBy(decimals);
 }
 
-export function decimalizeBigNumber(number: BigNumber.Instance, decimals: number): BigNumber {
+export function decimalizeBigNumber(number: BigNumber, decimals?: number): BigNumber {
+  if (!decimals) {
+    return number;
+  }
+
   return number.decimalPlaces(decimals).shiftedBy(decimals * -1);
 }
 

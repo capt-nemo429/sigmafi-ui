@@ -235,9 +235,7 @@ async function submit() {
           <label class="label">
             <span class="label-text">Interest</span>
             <span v-if="interestAmount.gt(0)" class="label-text-alt opacity-70"
-              >{{
-                formatBigNumber(interestAmount, state.loan.asset.metadata.decimals || 0, false)
-              }}
+              >{{ formatBigNumber(interestAmount, state.loan.asset.metadata?.decimals) }}
               {{ state.loan.asset.metadata.name }}</span
             >
           </label>

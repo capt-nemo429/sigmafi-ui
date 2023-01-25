@@ -1,7 +1,7 @@
 import { Box, isDefined } from "@fleet-sdk/common";
 import { ErgoAddress, SAFE_MIN_BOX_VALUE, SParse } from "@fleet-sdk/core";
 import BigNumber from "bignumber.js";
-import { ERG_TOKEN_ID } from "@/constants";
+import { ERG_DECIMALS, ERG_TOKEN_ID } from "@/constants";
 import { ASSET_ICONS } from "@/maps/assetIcons";
 import {
   extractTokenIdFromBondContract,
@@ -22,14 +22,14 @@ export function parseOpenOrderBox(
 ) {
   const collateral = box.assets.map((token) => ({
     tokenId: token.tokenId,
-    amount: BigNumber(token.amount),
+    amount: decimalizeBigNumber(BigNumber(token.amount), metadata[token.tokenId]?.decimals),
     metadata: metadata[token.tokenId]
   }));
 
   if (BigInt(box.value) > SAFE_MIN_BOX_VALUE) {
     collateral.unshift({
       tokenId: ERG_TOKEN_ID,
-      amount: BigNumber(box.value),
+      amount: decimalizeBigNumber(BigNumber(box.value), ERG_DECIMALS),
       metadata: metadata[ERG_TOKEN_ID]
     });
   }
@@ -57,15 +57,18 @@ export function parseOpenOrderBox(
   return {
     loan: {
       tokenId: tokenId,
-      amount: BigNumber(parseOr(box.additionalRegisters.R5, "0")),
+      amount: decimalizeBigNumber(
+        BigNumber(parseOr(box.additionalRegisters.R5, "0")),
+        metadata[tokenId].decimals
+      ),
       metadata: metadata[tokenId]
     },
     term: blockToTime(parseOr(box.additionalRegisters.R7, 0)),
     collateral,
     interest: {
+      amount: decimalizeBigNumber(interestValue, metadata[tokenId]?.decimals),
       metadata: metadata[tokenId],
       tokenId: tokenId,
-      amount: interestValue,
       percent: interest,
       apr: apr
     },
@@ -82,14 +85,14 @@ export function parseBondBox(
 ) {
   const collateral = box.assets.map((token) => ({
     tokenId: token.tokenId,
-    amount: BigNumber(token.amount),
+    amount: decimalizeBigNumber(BigNumber(token.amount), metadata[token.tokenId].decimals),
     metadata: metadata[token.tokenId]
   }));
 
   if (BigInt(box.value) > SAFE_MIN_BOX_VALUE) {
     collateral.unshift({
       tokenId: ERG_TOKEN_ID,
-      amount: BigNumber(box.value),
+      amount: decimalizeBigNumber(BigNumber(box.value), ERG_DECIMALS),
       metadata: metadata[ERG_TOKEN_ID]
     });
   }
@@ -108,7 +111,10 @@ export function parseBondBox(
   return {
     repayment: {
       tokenId: tokenId,
-      amount: BigNumber(parseOr(box.additionalRegisters.R6, "0")),
+      amount: decimalizeBigNumber(
+        BigNumber(parseOr(box.additionalRegisters.R6, "0")),
+        metadata[tokenId].decimals
+      ),
       metadata: metadata[tokenId]
     },
     term: blockToTime(blocksLeft),
@@ -119,10 +125,6 @@ export function parseBondBox(
     liquidable: blocksLeft <= 0 && isDefined(lender) && ownAddresses.includes(lender),
     repayable: blocksLeft > 0 && isDefined(borrower) && ownAddresses.includes(borrower)
   };
-}
-
-export function decimalizeAndFormat(val: string, decimals: number): string {
-  return formatBigNumber(decimalizeBigNumber(new BigNumber(val), decimals), decimals);
 }
 
 function parseOr<T>(value: string | undefined, or: T) {

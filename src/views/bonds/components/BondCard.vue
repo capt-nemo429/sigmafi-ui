@@ -92,12 +92,13 @@ async function repay() {
           <asset-row
             :max-name-len="15"
             :asset="bond?.repayment"
+            mode="amount-then-ticker"
             root-class="items-baseline"
             name-class="text-sm"
           />
         </div>
-        <div v-if="loadingBox || !bond" class="skeleton-fixed h-8 w-8 skeleton-circular"></div>
-        <asset-icon v-else custom-class="h-8 w-8" :token-id="bond.repayment.tokenId" />
+        <div v-if="loadingBox || !bond" class="skeleton-fixed h-10 w-10 skeleton-circular"></div>
+        <asset-icon v-else custom-class="h-10 w-10" :token-id="bond.repayment.tokenId" />
       </div>
     </div>
 

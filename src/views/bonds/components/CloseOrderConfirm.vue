@@ -65,10 +65,12 @@ async function closeOrder() {
           <div class="stat-title">Loan</div>
           <div class="text-xl font-semibold flex items-center w-full text-right gap-2">
             <asset-row
+              mode="amount-then-ticker"
               :max-name-len="15"
               :asset="order?.loan"
               root-class="items-baseline w-full justify-end"
               name-class="text-sm"
+              class="w-full"
             />
             <asset-icon v-if="order" custom-class="h-7 w-7" :token-id="order.loan.tokenId" />
           </div>
@@ -87,6 +89,7 @@ async function closeOrder() {
                 <asset-row
                   link
                   show-badge
+                  mode="amount-then-ticker"
                   :asset="collateral"
                   :max-name-len="12"
                   root-class="w-full items-baseline"
@@ -96,7 +99,7 @@ async function closeOrder() {
                 />
               </div>
               <asset-icon
-                custom-class="h-6 w-6"
+                custom-class="h-7 w-7"
                 :token-id="collateral.tokenId"
                 :type="collateral.metadata?.type"
               />
@@ -119,6 +122,7 @@ async function closeOrder() {
           <div class="text-lg text-right w-full">
             <asset-row
               :asset="order?.interest"
+              mode="amount-then-ticker"
               name-class="text-sm"
               root-class="items-baseline w-full justify-end"
             />
@@ -153,6 +157,8 @@ async function closeOrder() {
                 ? { amount: fees, tokenId: order.loan.tokenId, metadata: order.loan.metadata }
                 : undefined
             "
+            mode="amount-then-ticker"
+            class="w-full text-right"
             name-class="text-sm"
             root-class="items-baseline w-full justify-end"
           />

@@ -48,11 +48,7 @@ const converted = computed(() => {
     return;
   }
 
-  return formatBigNumber(
-    new BigNumber(props.asset.conversion.rate).multipliedBy(value.value || 0),
-    3,
-    false
-  );
+  return formatBigNumber(BigNumber(props.asset.conversion.rate).multipliedBy(value.value || 0), 3);
 });
 
 // methods

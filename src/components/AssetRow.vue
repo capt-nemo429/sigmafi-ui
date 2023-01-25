@@ -2,6 +2,7 @@
 import { AlertTriangleIcon } from "@zhuowenli/vue-feather-icons";
 import BigNumber from "bignumber.js";
 import { PropType } from "vue";
+import AssetPrice from "./AssetPrice.vue";
 import SigTooltip from "./SigTooltip.vue";
 import { ERG_TOKEN_ID } from "@/constants";
 import { AssetInfo } from "@/types";
@@ -15,40 +16,52 @@ defineProps({
   amountClass: { type: String, default: "" },
   badgeClass: { type: String, default: "" },
   maxNameLen: { type: Number, default: undefined },
+  mode: {
+    type: String as PropType<"ticker-then-amount" | "amount-then-ticker">,
+    default: "ticker-then-amount"
+  },
+  hidePrice: Boolean,
   showBadge: Boolean,
   link: Boolean
 });
 </script>
 
 <template>
-  <div :class="rootClass" class="flex gap-1">
-    <template v-if="asset">
-      <div :class="amountClass">{{ formatBigNumber(asset.amount, asset.metadata?.decimals) }}</div>
-      <div :class="nameClass" class="flex items-center gap-2">
-        <a
-          v-if="link && asset.tokenId !== ERG_TOKEN_ID"
-          class="link link-hover"
-          :class="nameClass"
-          :href="tokenUrlFor(asset.tokenId)"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {{ shortenString(asset.metadata?.name || asset.tokenId, maxNameLen) }}
-        </a>
-        <div v-else :class="nameClass">
-          {{ shortenString(asset.metadata?.name || asset.tokenId, maxNameLen) }}
+  <div class="flex flex-col">
+    <div :class="rootClass" class="flex gap-1">
+      <template v-if="asset">
+        <div class="flex flex-col" :class="amountClass">
+          {{ formatBigNumber(asset.amount, asset.metadata?.decimals) }}
+          <asset-price v-if="mode === 'ticker-then-amount' && !hidePrice" :asset="asset" />
         </div>
-        <sig-tooltip
-          v-if="showBadge === true && !verifiedToken(asset.tokenId)"
-          tip="Unverified token"
-        >
-          <alert-triangle-icon :class="badgeClass" class="text-orange-400 dark:text-yellow-500" />
-        </sig-tooltip>
-      </div>
-    </template>
-    <template v-else>
-      <div :class="amountClass" class="skeleton-fixed h-4 w-8/12"></div>
-      <div :class="nameClass" class="skeleton-fixed h-4 w-8/12"></div>
-    </template>
+
+        <div :class="nameClass" class="flex items-center gap-2">
+          <a
+            v-if="link && asset.tokenId !== ERG_TOKEN_ID"
+            class="link link-hover"
+            :class="nameClass"
+            :href="tokenUrlFor(asset.tokenId)"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {{ shortenString(asset.metadata?.name || asset.tokenId, maxNameLen) }}
+          </a>
+          <div v-else :class="nameClass">
+            {{ shortenString(asset.metadata?.name || asset.tokenId, maxNameLen) }}
+          </div>
+          <sig-tooltip
+            v-if="showBadge === true && !verifiedToken(asset.tokenId)"
+            tip="Unverified token"
+          >
+            <alert-triangle-icon :class="badgeClass" class="text-orange-400 dark:text-yellow-500" />
+          </sig-tooltip>
+        </div>
+      </template>
+      <template v-else>
+        <div :class="amountClass" class="skeleton-fixed h-4 w-8/12"></div>
+        <div :class="nameClass" class="skeleton-fixed h-4 w-8/12"></div>
+      </template>
+    </div>
+    <asset-price v-if="mode === 'amount-then-ticker' && !hidePrice" :asset="asset" />
   </div>
 </template>

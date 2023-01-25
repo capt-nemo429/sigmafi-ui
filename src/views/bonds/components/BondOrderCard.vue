@@ -63,14 +63,15 @@ async function cancelOrder() {
       <div class="stat-value text-success flex items-center gap-1">
         <div class="flex-grow">
           <asset-row
+            mode="amount-then-ticker"
             :max-name-len="15"
             :asset="order?.loan"
             root-class="items-baseline"
             name-class="text-sm"
           />
         </div>
-        <div v-if="loadingBox || !order" class="skeleton-fixed h-8 w-8 skeleton-circular"></div>
-        <asset-icon v-else custom-class="h-8 w-8" :token-id="order.loan.tokenId" />
+        <div v-if="loadingBox || !order" class="skeleton-fixed h-10 w-10 skeleton-circular"></div>
+        <asset-icon v-else custom-class="h-10 w-10" :token-id="order.loan.tokenId" />
       </div>
     </div>
 
@@ -78,7 +79,7 @@ async function cancelOrder() {
       <div class="stat-title h-fit">Collateral offered</div>
       <div class="grid grid-cols-1 gap-2 mt-2 items-start">
         <div v-if="loadingBox" class="flex flex-row items-center gap-2">
-          <div class="skeleton-fixed h-8 w-8 skeleton-circular"></div>
+          <div class="skeleton-fixed h-8 w-8 py-3 skeleton-circular"></div>
           <div class="flex-grow skeleton-fixed h-5"></div>
           <div class="skeleton-fixed h-5 w-1/3"></div>
         </div>
@@ -97,8 +98,10 @@ async function cancelOrder() {
               <asset-row
                 link
                 show-badge
+                mode="ticker-then-amount"
                 :asset="collateral"
                 :max-name-len="15"
+                class="w-full"
                 root-class="flex-row-reverse w-full items-center gap-2"
                 amount-class="w-full text-right"
                 badge-class="w-5 h-5"
@@ -115,10 +118,17 @@ async function cancelOrder() {
       <div class="stat-title">Interest</div>
       <div class="flex gap-2">
         <div class="stat-value skeleton-placeholder flex-grow">{{ order?.interest.percent }}%</div>
-        <asset-row :asset="order?.interest" name-class="text-sm" root-class="items-baseline" />
+        <asset-row
+          hide-price
+          mode="amount-then-ticker"
+          :asset="order?.interest"
+          name-class="text-xs"
+          class="text-right"
+          root-class="items-baseline"
+        />
       </div>
       <div class="stat-desc skeleton-placeholder">
-        {{ formatBigNumber(order?.interest.apr, 3, false) }}% APR
+        {{ formatBigNumber(order?.interest.apr, 3) }}% APR
       </div>
       <div class="stat-actions text-center flex gap-2">
         <button
