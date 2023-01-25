@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Box } from "@fleet-sdk/common";
 import { useProgrammatic } from "@oruga-ui/oruga-next";
+import { AlertTriangleIcon, CheckIcon } from "@zhuowenli/vue-feather-icons";
+import BigNumber from "bignumber.js";
 import { computed, PropType, ref, toRaw } from "vue";
 import CloseOrderConfirm from "./CloseOrderConfirm.vue";
 import AssetIcon from "@/components/AssetIcon.vue";
@@ -29,6 +31,19 @@ const order = computed(() => {
   }
 
   return parseOpenOrderBox(props.box, chain.tokensMetadata, wallet.usedAddresses);
+});
+
+const ratio = computed(() => {
+  if (!order.value) {
+    return undefined;
+  }
+
+  const loan = order.value.loan.amount.times(chain.priceRates[order.value.loan.tokenId]?.fiat || 0);
+  const collateral = order.value.collateral.reduce((acc, val) => {
+    return acc.plus(val.amount.times(chain.priceRates[val.tokenId]?.fiat || 0));
+  }, BigNumber(0));
+
+  return collateral.div(loan);
 });
 
 function openModal() {
@@ -76,7 +91,21 @@ async function cancelOrder() {
     </div>
 
     <div class="stat">
-      <div class="stat-title h-fit">Collateral offered</div>
+      <div class="stat-title h-fit">
+        Collateral offered
+        <span
+          v-if="ratio"
+          :class="{
+            'badge-error': ratio.lt(1.5),
+            'badge-warning': ratio.lt(1.7),
+            'badge-success': ratio.gt(2)
+          }"
+          class="badge contrast-125"
+        >
+          {{ formatBigNumber(ratio, 2) }}</span
+        >
+      </div>
+
       <div class="grid grid-cols-1 gap-2 mt-2 items-start">
         <div v-if="loadingBox" class="flex flex-row items-center gap-2">
           <div class="skeleton-fixed h-8 w-8 py-3 skeleton-circular"></div>
