@@ -8,12 +8,7 @@ import {
   extractTokenIdFromOrderContract
 } from "@/offchain/plugins";
 import { StateTokenMetadata } from "@/stories";
-import {
-  blockToTime,
-  decimalizeBigNumber,
-  formatBigNumber,
-  getNetworkType
-} from "@/utils/otherUtils";
+import { blockToTime, decimalizeBigNumber, getNetworkType } from "@/utils/otherUtils";
 
 export function parseOpenOrderBox(
   box: Box<string>,
