@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { Box } from "@fleet-sdk/common";
 import { useProgrammatic } from "@oruga-ui/oruga-next";
-import { AlertTriangleIcon, CheckIcon } from "@zhuowenli/vue-feather-icons";
 import BigNumber from "bignumber.js";
 import { computed, PropType, ref, toRaw } from "vue";
 import CloseOrderConfirm from "./CloseOrderConfirm.vue";
 import AssetIcon from "@/components/AssetIcon.vue";
 import AssetRow from "@/components/AssetRow.vue";
+import SigTooltip from "@/components/SigTooltip.vue";
 import { TransactionFactory } from "@/offchain/transactionFactory";
 import { useChainStore } from "@/stories";
 import { useWalletStore } from "@/stories/walletStore";
@@ -43,7 +43,7 @@ const ratio = computed(() => {
     return acc.plus(val.amount.times(chain.priceRates[val.tokenId]?.fiat || 0));
   }, BigNumber(0));
 
-  return collateral.div(loan);
+  return collateral.div(loan).times(100);
 });
 
 function openModal() {
@@ -91,19 +91,20 @@ async function cancelOrder() {
     </div>
 
     <div class="stat">
-      <div class="stat-title h-fit">
-        Collateral offered
-        <span
-          v-if="ratio"
-          :class="{
-            'badge-error': ratio.lt(1.5),
-            'badge-warning': ratio.lt(1.7),
-            'badge-success': ratio.gt(2)
-          }"
-          class="badge contrast-125"
-        >
-          {{ formatBigNumber(ratio, 2) }}</span
-        >
+      <div class="h-fit flex justify-between items-center">
+        <span class="stat-title">Collateral</span>
+        <sig-tooltip v-if="ratio" tip="Collateral/Loan ratio" class="tooltip-left">
+          <span
+            :class="{
+              'badge-error': ratio.lt(150),
+              'badge-warning': ratio.lt(170),
+              'badge-info': ratio.gt(200)
+            }"
+            class="badge text-base-100"
+          >
+            {{ formatBigNumber(ratio, 2) }}%</span
+          >
+        </sig-tooltip>
       </div>
 
       <div class="grid grid-cols-1 gap-2 mt-2 items-start">
