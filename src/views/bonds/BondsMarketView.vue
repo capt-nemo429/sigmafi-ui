@@ -28,11 +28,12 @@ function openNewLoanModal() {
 onMounted(async () => {
   loading.boxes = true;
   loading.metadata = true;
-
-  boxes.value = await graphQLService.getBoxes({
-    ergoTrees: VERIFIED_ASSETS.map((a) => buildOrderContract(a.tokenId, "on-close")),
+  const contracts = VERIFIED_ASSETS.map((a) => buildOrderContract(a.tokenId, "on-close"));
+  const rawBoxes = await graphQLService.getBoxes({
+    ergoTrees: contracts,
     spent: false
   });
+  boxes.value = rawBoxes.filter((x) => contracts.includes(x.ergoTree));
   loading.boxes = false;
 
   await chain.loadTokensMetadata(boxes.value.flatMap((x) => x.assets.map((t) => t.tokenId)));

@@ -1,11 +1,13 @@
 import {
+  AddressBalance,
   Box as GraphQLBox,
   Header,
+  QueryAddressesArgs,
   QueryBlockHeadersArgs,
   QueryBoxesArgs,
   Token
 } from "@ergo-graphql/types";
-import { Box, chunk, Network, NonMandatoryRegisters, some } from "@fleet-sdk/common";
+import { Box, chunk, Network, NonMandatoryRegisters, some, utxoSum } from "@fleet-sdk/common";
 import { Client, createClient, gql } from "@urql/core";
 import { getNetworkType } from "@/utils/otherUtils";
 
@@ -33,6 +35,32 @@ class GraphQLService {
     const response = await this._client.query(query, {}).toPromise();
 
     return response.data?.blockHeaders[0].height;
+  }
+
+  public async getBalance(addresses: string[]) {
+    const query = gql<{ addresses: { balance: AddressBalance }[] }, QueryAddressesArgs>`
+      query balances($addresses: [String!]!) {
+        addresses(addresses: $addresses) {
+          balance {
+            nanoErgs
+            assets {
+              tokenId
+              amount
+            }
+          }
+        }
+      }
+    `;
+
+    const response = await this._client.query(query, { addresses }).toPromise();
+    if (response.data?.addresses) {
+      return utxoSum(
+        response.data.addresses.map((x) => ({
+          value: x.balance.nanoErgs,
+          assets: x.balance.assets
+        }))
+      );
+    }
   }
 
   public async *yeldTokensMetadata(tokenIds: string[]) {
@@ -77,7 +105,7 @@ class GraphQLService {
 
   public async getBoxes(args: QueryBoxesArgs): Promise<Box<string>[]> {
     const query = gql<{ boxes: GraphQLBox[] }, QueryBoxesArgs>`
-      query Boxes(
+      query SigFiBoxes(
         $ergoTrees: [String!]
         $registers: Registers
         $spent: Boolean!

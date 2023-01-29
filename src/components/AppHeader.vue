@@ -3,11 +3,13 @@ import { decimalize, Network } from "@fleet-sdk/common";
 import { MoonIcon, SunIcon } from "@zhuowenli/vue-feather-icons";
 import { computed } from "vue";
 import { ERG_DECIMALS } from "@/constants";
+import { useChainStore } from "@/stories";
 import { useUIStore } from "@/stories/uiStore";
 import { useWalletStore } from "@/stories/walletStore";
-import { getNetworkType, shortenString } from "@/utils";
+import { formatBigNumber, getNetworkType, shortenString } from "@/utils";
 
 const defaultStore = useUIStore();
+const chain = useChainStore();
 const wallet = useWalletStore();
 const isTestnet = getNetworkType() === Network.Testnet;
 
@@ -25,7 +27,8 @@ const ergBalance = computed(() => {
     <div class="navbar w-full px-4 flex">
       <div class="flex-1 gap-2">
         <router-link to="/" class="btn btn-ghost normal-case text-xl gap-2"
-          >SigmaFi <span v-if="isTestnet" class="badge badge-outline font-normal">testnet</span
+          ><div>Sigma<span class="font-normal">Fi</span></div>
+          <span v-if="isTestnet" class="badge badge-outline font-normal">testnet</span
           ><span class="badge badge-outline font-normal">beta</span></router-link
         >
         <ul class="menu menu-horizontal px-1 gap-2">
@@ -40,7 +43,9 @@ const ergBalance = computed(() => {
 
       <div class="flex-1r"></div>
 
-      <div class="flex-2">
+      <div class="flex-2 gap-2">
+        <div v-if="chain.tvl?.gt(0)">TVL: ${{ formatBigNumber(chain.tvl, 2) }}</div>
+
         <ul class="menu menu-horizontal px-1 gap-2">
           <li class="hidden md:block">
             <a
