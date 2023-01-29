@@ -96,8 +96,8 @@ async function cancelOrder() {
         <sig-tooltip v-if="ratio" tip="Collateral/Loan ratio" class="tooltip-left">
           <span
             :class="{
-              'badge-error': ratio.lt(150),
-              'badge-warning': ratio.lt(170),
+              'badge-error': ratio.lt(100),
+              'badge-warning': ratio.lt(150),
               'badge-info': ratio.gt(200)
             }"
             class="badge text-base-100"
