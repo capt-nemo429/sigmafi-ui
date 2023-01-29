@@ -203,8 +203,8 @@ async function loadData(
         />
       </template>
     </div>
-    <div v-if="!loading.boxes && isEmpty(boxes)" class="text-7xl text-center w-full pb-20">
-      <div class="py-20 opacity-90">Nothing to show yet.</div>
+    <div v-if="!loading.boxes && isEmpty(boxes)" class="text-7xl text-center w-full">
+      <div class="opacity-90">Nothing to show yet.</div>
     </div>
   </div>
 </template>

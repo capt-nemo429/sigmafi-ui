@@ -8,10 +8,12 @@ const chain = useChainStore();
 </script>
 
 <template>
-  <div class="bg-gradient-to-tr from-fuchsia-400 to-blue-400 dark:from-purple-800 dark:to-cyan-800">
+  <div
+    class="min-h-screen flex flex-col justify-between bg-gradient-to-tr from-fuchsia-400 to-blue-400 dark:from-purple-800 dark:to-cyan-800"
+  >
     <app-header />
 
-    <main class="py-8 px-4 md:px-8 lg:px-16">
+    <main class="flex-grow py-8 px-4 md:px-8 lg:px-16">
       <router-view />
     </main>
 
