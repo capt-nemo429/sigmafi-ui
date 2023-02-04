@@ -127,7 +127,7 @@ async function repay() {
                   link
                   show-badge
                   :asset="collateral"
-                  :max-name-len="15"
+                  :max-name-len="50"
                   root-class="flex-row-reverse w-full items-center gap-2"
                   amount-class="w-full text-right"
                   badge-class="w-5 h-5"

@@ -188,11 +188,7 @@ async function submit() {
             @blur="$v.loan.$touch()"
           />
           <select v-model="state.loan.asset" class="select select-bordered select-lg border-l-0">
-            <option
-              v-for="asset in VERIFIED_ASSETS.slice(0, 2)"
-              :key="asset.tokenId"
-              :value="asset"
-            >
+            <option v-for="asset in VERIFIED_ASSETS" :key="asset.tokenId" :value="asset">
               {{ asset.metadata.name }}
             </option>
           </select>

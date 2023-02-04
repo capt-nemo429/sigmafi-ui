@@ -116,7 +116,7 @@ async function cancelOrder() {
         <div v-for="collateral in order?.collateral" v-else :key="collateral.tokenId">
           <div class="flex flex-row items-center gap-2" :class="{ skeleton: loadingMetadata }">
             <asset-icon
-              custom-class="h-8 w-8"
+              custom-class="h-8 w-8 min-w-8 min-h-8"
               :token-id="collateral.tokenId"
               :type="collateral.metadata?.type"
             />
@@ -130,10 +130,11 @@ async function cancelOrder() {
                 show-badge
                 mode="ticker-then-amount"
                 :asset="collateral"
-                :max-name-len="15"
+                :max-name-len="50"
                 class="w-full"
                 root-class="flex-row-reverse w-full items-center gap-2"
-                amount-class="w-full text-right"
+                amount-class="text-right"
+                name-class="w-full"
                 badge-class="w-5 h-5"
               />
             </template>

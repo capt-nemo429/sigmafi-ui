@@ -35,11 +35,10 @@ defineProps({
           <asset-price v-if="mode === 'ticker-then-amount' && !hidePrice" :asset="asset" />
         </div>
 
-        <div :class="nameClass" class="flex items-center gap-2">
+        <div :class="nameClass" class="flex items-center gap-2 justify-start">
           <a
             v-if="link && asset.tokenId !== ERG_TOKEN_ID"
             class="link link-hover"
-            :class="nameClass"
             :href="tokenUrlFor(asset.tokenId)"
             target="_blank"
             rel="noopener noreferrer"

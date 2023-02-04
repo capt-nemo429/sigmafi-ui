@@ -5,6 +5,7 @@ specifiers:
   '@fleet-sdk/common': 0.1.0-alpha.19
   '@fleet-sdk/core': 0.1.0-alpha.19
   '@nautilus-js/eip12-types': ^0.1.9
+  '@noble/hashes': ^1.1.5
   '@oruga-ui/oruga-next': ^0.5.10
   '@types/cleave.js': ^1.4.7
   '@types/lodash-es': ^4.17.6
@@ -41,6 +42,7 @@ specifiers:
 dependencies:
   '@fleet-sdk/common': 0.1.0-alpha.19
   '@fleet-sdk/core': 0.1.0-alpha.19
+  '@noble/hashes': 1.1.5
   '@oruga-ui/oruga-next': 0.5.10_vue@3.2.45
   '@urql/core': 3.1.1_graphql@16.6.0
   '@vuelidate/core': 2.0.0_vue@3.2.45

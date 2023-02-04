@@ -22,7 +22,10 @@ const price = computed(() => {
 </script>
 
 <template>
-  <div class="text-xs text-base-content opacity-70 min-w-max skeleton" :class="customClass">
+  <div
+    class="text-xs text-base-content opacity-70 min-w-min skeleton whitespace-nowrap"
+    :class="customClass"
+  >
     <span v-if="!asset" :class="customClass" class="skeleton-placeholder">loading...</span>
     <span v-else>~{{ formatBigNumber(price, 2) }} USD</span>
   </div>
