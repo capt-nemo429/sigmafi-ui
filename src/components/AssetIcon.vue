@@ -41,31 +41,33 @@ function calculateColor(tokenId: string) {
 </script>
 
 <template>
-  <img v-if="hasLogo" :src="logo" :class="customClass" />
-  <template v-else>
-    <picture-nft-icon
-      v-if="isPictureNft"
-      :class="customClass"
-      class="fill-gray-300"
-      :style="`fill: ${color}`"
-    />
-    <audio-nft-icon
-      v-else-if="isAudioNft"
-      :class="customClass"
-      class="fill-gray-300"
-      :style="`fill: ${color}`"
-    />
-    <video-nft-icon
-      v-else-if="isVideoNft"
-      :class="customClass"
-      class="fill-gray-300"
-      :style="`fill: ${color}`"
-    />
-    <empty-icon
-      v-else
-      :class="customClass"
-      class="fill-gray-400 opacity-60"
-      :style="`fill: ${color}`"
-    />
-  </template>
+  <div class="min-w-max">
+    <img v-if="hasLogo" :class="customClass" :src="logo" />
+    <template v-else>
+      <picture-nft-icon
+        v-if="isPictureNft"
+        :class="customClass"
+        class="fill-gray-300"
+        :style="`fill: ${color}`"
+      />
+      <audio-nft-icon
+        v-else-if="isAudioNft"
+        :class="customClass"
+        class="fill-gray-300"
+        :style="`fill: ${color}`"
+      />
+      <video-nft-icon
+        v-else-if="isVideoNft"
+        :class="customClass"
+        class="fill-gray-300"
+        :style="`fill: ${color}`"
+      />
+      <empty-icon
+        v-else
+        :class="customClass"
+        class="fill-gray-400 opacity-60"
+        :style="`fill: ${color}`"
+      />
+    </template>
+  </div>
 </template>
