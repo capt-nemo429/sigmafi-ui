@@ -101,7 +101,7 @@ async function cancelOrder() {
             :class="{
               'badge-error': ratio.lt(100),
               'badge-warning': ratio.lt(150),
-              'badge-info': ratio.gt(200)
+              'badge-info': ratio.gt(150)
             }"
             class="badge text-base-100"
           >
