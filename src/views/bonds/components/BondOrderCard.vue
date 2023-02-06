@@ -39,11 +39,14 @@ const ratio = computed(() => {
   }
 
   const loan = order.value.loan.amount.times(chain.priceRates[order.value.loan.tokenId]?.fiat || 0);
+  const interest = order.value.interest.amount.times(
+    chain.priceRates[order.value.interest.tokenId]?.fiat || 0
+  );
   const collateral = order.value.collateral.reduce((acc, val) => {
     return acc.plus(val.amount.times(chain.priceRates[val.tokenId]?.fiat || 0));
   }, BigNumber(0));
 
-  return collateral.div(loan).times(100);
+  return collateral.minus(interest).div(loan).times(100);
 });
 
 function openModal() {
