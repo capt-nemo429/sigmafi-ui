@@ -7,11 +7,6 @@ export const ASSET_ICONS: { [tokenId: string]: string } = {
   ["0cd8c9f416e5b1ca9f986a7f10a84191dfb85941619e49e53c0dc30ebf83324b"]: "comet.png",
   ["472c3d4ecaa08fb7392ff041ee2e6af75f4a558810a74b28600549d5392810e8"]: "neta.svg",
   ["d71693c49a84fbbecd4908c94813b46514b18b67a99952dc1e6e4791556de413"]: "ergopad.svg",
-  ["4f5c05967a2a68d5fe0cdd7a688289f5b1a8aef7d24cab71c20ab8896068e0a8"]: "getblock.svg",
-  ["5a34d53ca483924b9a6aa0c771f11888881b516a8d1a9cdc535d063fe26d065e"]: "lunadog.png",
-  ["0779ec04f2fae64e87418a1ad917639d4668f78484f45df962b0dec14a2591d2"]: "migoreng.svg",
-  ["e91cbc48016eb390f8f872aa2962772863e2e840708517d1ab85e57451f91bed"]: "ergold.svg",
-  ["9dbc8dd9d7ea75e38ef43cf3c0ffde2c55fd74d58ac7fc0489ec8ffee082991b"]: "ermoon.svg",
   ["1fd6e032e8476c4aa54c18c1a308dce83940e8f4a28f576440513ed7326ad489"]: "paideia.svg",
   ["00b1e236b60b95c2c6f8007a9d89bc460fc9e78f98b09faec9449007b40bccf3"]: "egio.svg",
   ["007fd64d1ee54d78dd269c8930a38286caa28d3f29d27cadcb796418ab15c283"]: "exle.svg",
@@ -19,7 +14,6 @@ export const ASSET_ICONS: { [tokenId: string]: string } = {
   ["e8b20745ee9d18817305f32eb21015831a48f02d40980de6e849f886dca7f807"]: "flux.svg",
   ["00bd762484086cf560d3127eb53f0769d76244d9737636b2699d55c56cd470bf"]: "epos.svg",
   ["18c938e1924fc3eadc266e75ec02d81fe73b56e4e9f4e268dffffcb30387c42d"]: "aht.svg",
-  ["59ee24951ce668f0ed32bdb2e2e5731b6c36128748a3b23c28407c5f8ccbf0f6"]: "walrus.png",
   ["3405d8f709a19479839597f9a22a7553bdfc1a590a427572787d7c44a88b6386"]: "love.svg",
   ["4c8ac00a28b198219042af9c03937eecb422b34490d55537366dc9245e85d4e1"]: "woodennickels.svg"
 };
