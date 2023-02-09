@@ -3,13 +3,11 @@ import { decimalize, Network } from "@fleet-sdk/common";
 import { MoonIcon, SunIcon } from "@zhuowenli/vue-feather-icons";
 import { computed } from "vue";
 import { ERG_DECIMALS } from "@/constants";
-import { useChainStore } from "@/stories";
 import { useUIStore } from "@/stories/uiStore";
 import { useWalletStore } from "@/stories/walletStore";
-import { formatBigNumber, getNetworkType, shortenString } from "@/utils";
+import { getNetworkType, shortenString } from "@/utils";
 
 const defaultStore = useUIStore();
-const chain = useChainStore();
 const wallet = useWalletStore();
 const isTestnet = getNetworkType() === Network.Testnet;
 
@@ -22,7 +20,7 @@ const ergBalance = computed(() => {
 
 <template>
   <div
-    class="sticky top-0 z-30 flex h-16 w-full justify-center bg-opacity-50 backdrop-blur transition-all duration-100 bg-base-100 text-base-content shadow-sm"
+    class="sticky top-0 z-30 flex h-16 w-full justify-center bg-opacity-10 backdrop-blur transition-all duration-100 bg-base-300 text-base-content shadow-sm"
   >
     <div class="navbar w-full px-4 flex">
       <div class="flex-1 gap-2">
@@ -44,16 +42,10 @@ const ergBalance = computed(() => {
       <div class="flex-1r"></div>
 
       <div class="flex-2 gap-2">
-        <div class="skeleton">
-          TVL:
-          <span v-if="chain.tvl?.gt(0)">${{ formatBigNumber(chain.tvl, 2) }}</span>
-          <span v-else class="skeleton-placeholder">loading</span>
-        </div>
-
         <ul class="menu menu-horizontal px-1 gap-2">
           <li class="hidden md:block">
             <a
-              class="btn btn-ghost gap-1 bg-base-100 hover:bg-base-100 hover:bg-opacity-50 bg-opacity-50 no-animation h-2"
+              class="btn btn-ghost gap-1 bg-base-100 hover:bg-base-100 hover:bg-opacity-40 bg-opacity-40 no-animation h-2"
               :class="{ loading: wallet.loading }"
             >
               <template v-if="!wallet.connected">Connect Wallet</template>

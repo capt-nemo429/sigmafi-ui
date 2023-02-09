@@ -8,6 +8,7 @@ import { buildOrderContract } from "@/offchain/plugins";
 import { graphQLService } from "@/services/graphqlService";
 import { useChainStore } from "@/stories";
 import { useWalletStore } from "@/stories/walletStore";
+import { formatBigNumber } from "@/utils";
 import NewLoanRequestView from "@/views/bonds/NewLoanRequestView.vue";
 
 const { oruga } = useProgrammatic();
@@ -43,7 +44,7 @@ onMounted(async () => {
 
 <template>
   <div class="grid grid-cols-1 gap-8">
-    <div class="flex flex-row justify-end">
+    <div class="flex flex-row justify-between gap-4 items-center">
       <button
         class="btn btn-primary shadow flex-col"
         :disabled="!wallet.connected || wallet.loading"
@@ -51,6 +52,13 @@ onMounted(async () => {
       >
         New loan request
       </button>
+
+      <div class="stats shadow">
+        <div class="stat py-2">
+          <div class="stat-desc">Total Value Locked</div>
+          <div class="stat-value text-center">${{ formatBigNumber(chain.tvl, 2) }}</div>
+        </div>
+      </div>
     </div>
     <div
       class="grid grid-cols-1 gap-8 md:gap-12 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
