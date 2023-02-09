@@ -107,7 +107,7 @@ async function cancelOrder() {
             class="badge gap-1"
           >
             <alert-triangle-icon v-if="ratio.lt(100)" />
-            <check-circle-icon v-else />
+            <check-circle-icon v-else-if="ratio.gte(200)" />
             {{ formatBigNumber(ratio, 2) }}%</span
           >
         </sig-tooltip>
