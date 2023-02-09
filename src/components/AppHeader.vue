@@ -44,7 +44,11 @@ const ergBalance = computed(() => {
       <div class="flex-1r"></div>
 
       <div class="flex-2 gap-2">
-        <div v-if="chain.tvl?.gt(0)">TVL: ${{ formatBigNumber(chain.tvl, 2) }}</div>
+        <div class="skeleton">
+          TVL:
+          <span v-if="chain.tvl?.gt(0)">${{ formatBigNumber(chain.tvl, 2) }}</span>
+          <span v-else class="skeleton-placeholder">loading</span>
+        </div>
 
         <ul class="menu menu-horizontal px-1 gap-2">
           <li class="hidden md:block">

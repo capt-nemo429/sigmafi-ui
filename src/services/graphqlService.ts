@@ -131,6 +131,9 @@ class GraphQLService {
             amount
           }
         }
+        mempool {
+          size
+        }
       }
     `;
 

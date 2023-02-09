@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Box } from "@fleet-sdk/common";
 import { useProgrammatic } from "@oruga-ui/oruga-next";
+import { AlertTriangleIcon, CheckCircleIcon } from "@zhuowenli/vue-feather-icons";
 import BigNumber from "bignumber.js";
 import { computed, PropType, ref, toRaw } from "vue";
 import CloseOrderConfirm from "./CloseOrderConfirm.vue";
@@ -34,7 +35,7 @@ const order = computed(() => {
 });
 
 const ratio = computed(() => {
-  if (!order.value) {
+  if (!order.value || chain.loading) {
     return undefined;
   }
 
@@ -101,10 +102,12 @@ async function cancelOrder() {
             :class="{
               'badge-error': ratio.lt(100),
               'badge-warning': ratio.lt(150),
-              'badge-info': ratio.gt(150)
+              'badge-success': ratio.gt(150)
             }"
-            class="badge text-base-100"
+            class="badge gap-1"
           >
+            <alert-triangle-icon v-if="ratio.lt(100)" />
+            <check-circle-icon v-else />
             {{ formatBigNumber(ratio, 2) }}%</span
           >
         </sig-tooltip>

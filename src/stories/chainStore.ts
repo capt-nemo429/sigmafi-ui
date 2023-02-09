@@ -39,7 +39,7 @@ export const useChainStore = defineStore("chain", () => {
   const loading = computed(() => _loading.value);
   const height = computed(() => _height.value);
   const tvl = computed(() => {
-    if (!_tvl.value || !_tvl.value.nanoErgs) {
+    if (!_tvl.value || !_tvl.value.nanoErgs || _loading.value) {
       return;
     }
 
@@ -86,8 +86,6 @@ export const useChainStore = defineStore("chain", () => {
         _height.value = height;
       }
     }, 5000);
-
-    _loading.value = false;
   });
 
   onBeforeUnmount(() => {
@@ -112,6 +110,10 @@ export const useChainStore = defineStore("chain", () => {
           decimals: metadata.decimals || undefined
         };
       }
+    }
+
+    if (_loading.value) {
+      _loading.value = false;
     }
   }
 
