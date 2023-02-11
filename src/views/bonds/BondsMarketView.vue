@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { Box, isEmpty } from "@fleet-sdk/common";
 import { useProgrammatic } from "@oruga-ui/oruga-next";
-import { onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import BondOrderCard from "./components/BondOrderCard.vue";
 import { VERIFIED_ASSETS } from "@/maps";
 import { buildOrderContract } from "@/offchain/plugins";
 import { graphQLService } from "@/services/graphqlService";
 import { useChainStore } from "@/stories";
 import { useWalletStore } from "@/stories/walletStore";
-import { formatBigNumber } from "@/utils";
+import { formatBigNumber, parseOpenOrderBox } from "@/utils";
 import NewLoanRequestView from "@/views/bonds/NewLoanRequestView.vue";
 
 const { oruga } = useProgrammatic();
@@ -16,8 +16,14 @@ const { oruga } = useProgrammatic();
 const wallet = useWalletStore();
 const chain = useChainStore();
 
-const boxes = ref<Box<string>[]>();
+const boxes = ref<Readonly<Box<string>>[]>([]);
 const loading = reactive({ boxes: true, metadata: true });
+
+const orders = computed(() => {
+  return boxes.value.map((box) =>
+    parseOpenOrderBox(box, chain.tokensMetadata, chain.priceRates, wallet.usedAddresses)
+  );
+});
 
 function openNewLoanModal() {
   oruga.modal.open({
@@ -30,14 +36,17 @@ onMounted(async () => {
   loading.boxes = true;
   loading.metadata = true;
   const contracts = VERIFIED_ASSETS.map((a) => buildOrderContract(a.tokenId, "on-close"));
-  const rawBoxes = await graphQLService.getBoxes({
+  let rawBoxes = await graphQLService.getBoxes({
     ergoTrees: contracts,
     spent: false
   });
-  boxes.value = rawBoxes.filter((x) => contracts.includes(x.ergoTree));
+
+  boxes.value = rawBoxes
+    .filter((box) => contracts.includes(box.ergoTree))
+    .map((box) => Object.freeze(box));
   loading.boxes = false;
 
-  await chain.loadTokensMetadata(boxes.value.flatMap((x) => x.assets.map((t) => t.tokenId)));
+  await chain.loadTokensMetadata(boxes.value.flatMap((box) => box.assets.map((t) => t.tokenId)));
   loading.metadata = false;
 });
 </script>
@@ -73,15 +82,15 @@ onMounted(async () => {
       </template>
       <template v-else>
         <bond-order-card
-          v-for="box in boxes"
-          :key="box.boxId"
-          :box="box"
+          v-for="order in orders"
+          :key="order.box.boxId"
+          :order="order"
           :loading-box="loading.boxes"
           :loading-metadata="loading.metadata"
         />
       </template>
     </div>
-    <div v-if="!loading.boxes && isEmpty(boxes)" class="text-7xl text-center w-full pb-20">
+    <div v-if="!loading.boxes && isEmpty(orders)" class="text-7xl text-center w-full pb-20">
       <div class="py-20 opacity-90">No open orders for now.</div>
     </div>
   </div>

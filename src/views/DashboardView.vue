@@ -2,26 +2,46 @@
 import { QueryBoxesArgs } from "@ergo-graphql/types";
 import { Amount, Box, isDefined, isEmpty, some } from "@fleet-sdk/common";
 import { ErgoAddress } from "@fleet-sdk/core";
-import { reactive, ref, watch } from "vue";
+import { computed, reactive, ref, watch } from "vue";
 import BondCard from "./bonds/components/BondCard.vue";
 import { VERIFIED_ASSETS } from "@/maps";
 import { buildBondContract, buildOrderContract } from "@/offchain/plugins";
 import { graphQLService } from "@/services/graphqlService";
 import { useChainStore } from "@/stories";
 import { useWalletStore } from "@/stories/walletStore";
+import { parseBondBox, parseOpenOrderBox } from "@/utils";
 import BondOrderCard from "@/views/bonds/components/BondOrderCard.vue";
+
+type Tab = "orders" | "loans" | "debits";
 
 const chain = useChainStore();
 const wallet = useWalletStore();
 
-type Tab = "orders" | "loans" | "debits";
-
 const selectedTab = ref<Tab>("orders");
-const boxes = ref<Box<string>[]>([]);
+const boxes = ref<Readonly<Box<string>>[]>([]);
 const loading = reactive({ boxes: true, metadata: true });
 
-let publicKeys: string[] = [];
+const orders = computed(() => {
+  if (selectedTab.value !== "orders") {
+    return [];
+  }
 
+  return boxes.value.map((box) =>
+    parseOpenOrderBox(box, chain.tokensMetadata, chain.priceRates, wallet.usedAddresses)
+  );
+});
+
+const bonds = computed(() => {
+  if (selectedTab.value !== "loans" && selectedTab.value !== "debits") {
+    return [];
+  }
+
+  return boxes.value.map((box) =>
+    parseBondBox(box, chain.tokensMetadata, chain.priceRates, chain.height, wallet.usedAddresses)
+  );
+});
+
+let publicKeys: string[] = [];
 watch(
   () => {
     return {
@@ -138,7 +158,9 @@ async function loadData(
     }
 
     if (some(chunk)) {
-      boxes.value = boxes.value.concat(chunk.filter(validate(query.pk)));
+      boxes.value = boxes.value.concat(
+        chunk.filter(validate(query.pk)).map((box) => Object.freeze(box))
+      );
 
       loading.boxes = false;
       await chain.loadTokensMetadata(chunk.flatMap((x) => x.assets.map((t) => t.tokenId)));
@@ -183,10 +205,10 @@ async function loadData(
           :loading-metadata="loading.metadata"
         />
         <bond-order-card
-          v-for="box in boxes"
+          v-for="order in orders"
           v-else
-          :key="box.boxId"
-          :box="box"
+          :key="order.box.boxId"
+          :order="order"
           :loading-box="loading.boxes"
           :loading-metadata="loading.metadata"
         />
@@ -198,10 +220,10 @@ async function loadData(
           :loading-metadata="loading.metadata"
         />
         <bond-card
-          v-for="box in boxes"
+          v-for="bond in bonds"
           v-else
-          :key="box.boxId"
-          :box="box"
+          :key="bond.box.boxId"
+          :bond="bond"
           :loading-box="loading.boxes"
           :loading-metadata="loading.metadata"
         />

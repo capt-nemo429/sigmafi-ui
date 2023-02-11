@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { Box } from "@fleet-sdk/common";
 import { useProgrammatic } from "@oruga-ui/oruga-next";
 import { AlertTriangleIcon, CheckCircleIcon } from "@zhuowenli/vue-feather-icons";
-import { computed, PropType, ref, toRaw } from "vue";
+import { PropType, ref, toRaw } from "vue";
 import CloseOrderConfirm from "./CloseOrderConfirm.vue";
 import AssetIcon from "@/components/AssetIcon.vue";
 import AssetRow from "@/components/AssetRow.vue";
@@ -10,7 +9,7 @@ import SigTooltip from "@/components/SigTooltip.vue";
 import { TransactionFactory } from "@/offchain/transactionFactory";
 import { useChainStore } from "@/stories";
 import { useWalletStore } from "@/stories/walletStore";
-import { formatBigNumber, parseOpenOrderBox, sendTransaction } from "@/utils";
+import { formatBigNumber, Order, sendTransaction } from "@/utils";
 
 const { oruga } = useProgrammatic();
 
@@ -18,47 +17,23 @@ const chain = useChainStore();
 const wallet = useWalletStore();
 
 const props = defineProps({
-  box: { type: Object as PropType<Box<string>>, required: false, default: undefined },
+  order: { type: Object as PropType<Order>, required: false, default: undefined },
   loadingBox: { type: Boolean, default: false },
   loadingMetadata: { type: Boolean, default: false }
 });
 
 const cancelling = ref(false);
 
-const order = computed(() => {
-  if (!props.box) {
-    return;
-  }
-
-  return parseOpenOrderBox(props.box, chain.tokensMetadata, chain.priceRates, wallet.usedAddresses);
-});
-
-// const ratio = computed(() => {
-//   if (!order.value || chain.loading) {
-//     return undefined;
-//   }
-
-//   const loan = order.value.loan.amount.times(chain.priceRates[order.value.loan.tokenId]?.fiat || 0);
-//   const interest = order.value.interest.amount.times(
-//     chain.priceRates[order.value.interest.tokenId]?.fiat || 0
-//   );
-//   const collateral = order.value.collateral.reduce((acc, val) => {
-//     return acc.plus(val.amount.times(chain.priceRates[val.tokenId]?.fiat || 0));
-//   }, BigNumber(0));
-
-//   return collateral.minus(interest).div(loan).times(100);
-// });
-
 function openModal() {
   oruga.modal.open({
     component: CloseOrderConfirm,
-    props: { box: props.box },
+    props: { order: props.order },
     width: "30rem"
   });
 }
 
 async function cancelOrder() {
-  const box = props.box;
+  const box = props.order?.box;
   if (!box) {
     return;
   }

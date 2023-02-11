@@ -19,6 +19,7 @@ type LoanAsset = {
 };
 
 export type Loan = {
+  box: Readonly<Box<string>>;
   principal: LoanAsset;
   collateral: LoanAsset[];
   interest?: LoanAsset & {
@@ -103,7 +104,8 @@ export function parseOpenOrderBox(
       apr: apr
     },
     borrower,
-    cancellable: borrower ? ownAddresses.includes(borrower) : false
+    cancellable: borrower ? ownAddresses.includes(borrower) : false,
+    box: Object.freeze(box)
   };
   order.ratio = calculateRatio(order, priceRates);
 
@@ -157,7 +159,8 @@ export function parseBondBox(
     lender,
     type: isDefined(lender) && ownAddresses.includes(lender) ? "lend" : "debit",
     liquidable: blocksLeft <= 0 && isDefined(lender) && ownAddresses.includes(lender),
-    repayable: blocksLeft > 0 && isDefined(borrower) && ownAddresses.includes(borrower)
+    repayable: blocksLeft > 0 && isDefined(borrower) && ownAddresses.includes(borrower),
+    box: Object.freeze(box)
   };
   bond.ratio = calculateRatio(bond, priceRates);
 
@@ -174,7 +177,9 @@ function calculateRatio(loan: Loan, rates: AssetPriceRate) {
     ? loan.interest.amount.times(rates[loan.interest.tokenId]?.fiat || 0)
     : 0;
   const collateral = loan.collateral.reduce((acc, val) => {
-    return acc.plus(val.amount.times(rates[val.tokenId]?.fiat || 0));
+    const price = val.metadata ? val.amount.times(rates[val.tokenId]?.fiat || 0) : 0;
+
+    return acc.plus(price);
   }, BigNumber(0));
 
   return collateral.minus(interest).div(principal).times(100);

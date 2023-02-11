@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Box } from "@fleet-sdk/common";
 import { ExternalLinkIcon } from "@zhuowenli/vue-feather-icons";
 import { computed, PropType, ref, toRaw } from "vue";
 import AssetIcon from "@/components/AssetIcon.vue";
@@ -7,14 +6,14 @@ import AssetRow from "@/components/AssetRow.vue";
 import { TransactionFactory } from "@/offchain/transactionFactory";
 import { useChainStore } from "@/stories";
 import { useWalletStore } from "@/stories/walletStore";
-import { addressUrlFor, shortenString } from "@/utils";
-import { parseBondBox, sendTransaction } from "@/utils";
+import { addressUrlFor, Bond, shortenString } from "@/utils";
+import { sendTransaction } from "@/utils";
 
 const chain = useChainStore();
 const wallet = useWalletStore();
 
 const props = defineProps({
-  box: { type: Object as PropType<Box<string>>, required: false, default: undefined },
+  bond: { type: Object as PropType<Bond>, required: false, default: undefined },
   loadingBox: { type: Boolean, default: false },
   loadingMetadata: { type: Boolean, default: false }
 });
@@ -22,41 +21,27 @@ const props = defineProps({
 const loading = ref(false);
 
 const termProgress = computed(() => {
-  if (!props.box || !bond.value) {
+  if (!props.bond || !props.bond) {
     return 0;
   }
 
-  let blocksLeft = bond.value.term.blocks;
+  let blocksLeft = props.bond.term.blocks;
 
   if (blocksLeft < 0) {
     return 100;
   }
 
-  const totalTerm = chain.height - props.box.creationHeight + blocksLeft;
+  const totalTerm = chain.height - props.bond.box.creationHeight + blocksLeft;
 
   return (((totalTerm - blocksLeft) / totalTerm) * 100).toFixed(1);
 });
 
-const bond = computed(() => {
-  if (!props.box) {
-    return;
-  }
-
-  return parseBondBox(
-    props.box,
-    chain.tokensMetadata,
-    chain.priceRates,
-    chain.height,
-    wallet.usedAddresses
-  );
-});
-
 const blocksLeft = computed(() => {
-  if (!bond.value) {
+  if (!props.bond) {
     return "";
   }
 
-  let blocks = bond.value?.term.blocks;
+  let blocks = props.bond?.term.blocks;
 
   return `${(blocks < 0 ? blocks * -1 : blocks).toLocaleString()} blocks ${
     blocks < 0 ? "passed" : "left"
@@ -64,7 +49,7 @@ const blocksLeft = computed(() => {
 });
 
 async function liquidate() {
-  const box = props.box;
+  const box = props.bond?.box;
   if (!box) {
     return;
   }
@@ -75,7 +60,7 @@ async function liquidate() {
 }
 
 async function repay() {
-  const box = props.box;
+  const box = props.bond?.box;
   if (!box) {
     return;
   }

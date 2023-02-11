@@ -1,46 +1,33 @@
 <script setup lang="ts">
-import { Box, isUndefined } from "@fleet-sdk/common";
+import { isUndefined } from "@fleet-sdk/common";
 import { ExternalLinkIcon } from "@zhuowenli/vue-feather-icons";
 import { computed, PropType, ref, toRaw } from "vue";
 import AssetIcon from "@/components/AssetIcon.vue";
 import AssetRow from "@/components/AssetRow.vue";
 import { TransactionFactory } from "@/offchain/transactionFactory";
-import { useChainStore } from "@/stories";
-import { useWalletStore } from "@/stories/walletStore";
-import { addressUrlFor, parseOpenOrderBox, sendTransaction, shortenString } from "@/utils";
+import { addressUrlFor, Order, sendTransaction, shortenString } from "@/utils";
 
-const wallet = useWalletStore();
-const chain = useChainStore();
 const emit = defineEmits(["close"]);
+const props = defineProps({
+  order: { type: Object as PropType<Order>, required: false, default: undefined }
+});
 
 const loading = ref(false);
 
-const props = defineProps({
-  box: { type: Object as PropType<Box<string>>, required: false, default: undefined }
-});
-
 const fees = computed(() => {
-  if (isUndefined(order.value)) {
+  if (isUndefined(props.order)) {
     return;
   }
 
-  const amount = order.value.principal.amount;
+  const amount = props.order.principal.amount;
   const contract = amount.multipliedBy(0.005);
   const ui = amount.multipliedBy(0.004);
 
   return contract.plus(ui);
 });
 
-const order = computed(() => {
-  if (isUndefined(props.box)) {
-    return;
-  }
-
-  return parseOpenOrderBox(props.box, chain.tokensMetadata, chain.priceRates, wallet.usedAddresses);
-});
-
 async function closeOrder() {
-  const box = props.box;
+  const box = props.order?.box;
   if (!box) {
     return;
   }

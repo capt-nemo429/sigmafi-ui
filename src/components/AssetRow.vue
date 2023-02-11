@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { AlertTriangleIcon } from "@zhuowenli/vue-feather-icons";
 import BigNumber from "bignumber.js";
-import { PropType } from "vue";
+import { computed, PropType } from "vue";
 import AssetPrice from "./AssetPrice.vue";
 import SigTooltip from "./SigTooltip.vue";
 import { ERG_TOKEN_ID } from "@/constants";
@@ -9,7 +9,7 @@ import { AssetInfo } from "@/types";
 import { formatBigNumber, shortenString, tokenUrlFor } from "@/utils";
 import { verifiedToken } from "@/utils";
 
-defineProps({
+const props = defineProps({
   asset: { type: Object as PropType<Readonly<AssetInfo<BigNumber>>>, default: undefined },
   rootClass: { type: String, default: "" },
   nameClass: { type: String, default: "" },
@@ -24,6 +24,10 @@ defineProps({
   showBadge: Boolean,
   link: Boolean
 });
+
+const showPrice = computed(() => {
+  return !props.hidePrice && props.asset?.metadata;
+});
 </script>
 
 <template>
@@ -32,7 +36,7 @@ defineProps({
       <template v-if="asset">
         <div class="flex flex-col" :class="amountClass">
           {{ formatBigNumber(asset.amount, asset.metadata?.decimals) }}
-          <asset-price v-if="mode === 'ticker-then-amount' && !hidePrice" :asset="asset" />
+          <asset-price v-if="mode === 'ticker-then-amount' && showPrice" :asset="asset" />
         </div>
 
         <div :class="nameClass" class="flex items-center gap-2 justify-start">
@@ -43,10 +47,20 @@ defineProps({
             target="_blank"
             rel="noopener noreferrer"
           >
-            {{ shortenString(asset.metadata?.name || asset.tokenId, maxNameLen) }}
+            {{
+              shortenString(
+                asset.metadata?.name || asset.tokenId,
+                asset.metadata?.name ? maxNameLen : 10
+              )
+            }}
           </a>
           <div v-else :class="nameClass">
-            {{ shortenString(asset.metadata?.name || asset.tokenId, maxNameLen) }}
+            {{
+              shortenString(
+                asset.metadata?.name || asset.tokenId,
+                asset.metadata?.name ? maxNameLen : 10
+              )
+            }}
           </div>
           <sig-tooltip
             v-if="showBadge === true && !verifiedToken(asset.tokenId)"
@@ -61,6 +75,6 @@ defineProps({
         <div :class="nameClass" class="skeleton-fixed h-4 w-8/12"></div>
       </template>
     </div>
-    <asset-price v-if="mode === 'amount-then-ticker' && !hidePrice" :asset="asset" />
+    <asset-price v-if="mode === 'amount-then-ticker' && showPrice" :asset="asset" />
   </div>
 </template>
