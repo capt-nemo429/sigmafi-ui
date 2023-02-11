@@ -14,7 +14,7 @@ import NewLoanRequestView from "@/views/bonds/NewLoanRequestView.vue";
 
 type Sorting = {
   by: "newest" | "principal" | "interest" | "ratio" | "term" | "apr";
-  up: boolean;
+  asc: boolean;
 };
 
 const { oruga } = useProgrammatic();
@@ -25,7 +25,7 @@ const chain = useChainStore();
 const boxes = ref<Readonly<Box<string>>[]>([]);
 const loading = reactive({ boxes: true, metadata: true });
 const state = reactive({ hideUndercollateralized: true });
-const sort = reactive<Sorting>({ by: "newest", up: true });
+const sort = reactive<Sorting>({ by: "newest", asc: false });
 
 const orders = computed(() => {
   let orders = boxes.value.map((box) =>
@@ -36,7 +36,7 @@ const orders = computed(() => {
     orders = orders.filter((order) => order.ratio && order.ratio.gte(100));
   }
 
-  const direction = sort.up ? "asc" : "desc";
+  const direction = sort.asc ? "asc" : "desc";
   switch (sort.by) {
     case "principal": {
       orders = orderBy(
@@ -131,9 +131,9 @@ onMounted(async () => {
               <option value="term">Term</option>
               <option value="apr">APR</option>
             </select>
-            <button class="btn animate-none outline-none" @click="sort.up = !sort.up">
-              <arrow-down-icon v-if="sort.up" />
-              <arrow-up-icon v-else />
+            <button class="btn animate-none outline-none" @click="sort.asc = !sort.asc">
+              <arrow-up-icon v-if="sort.asc" />
+              <arrow-down-icon v-else />
             </button>
           </div>
         </div>
