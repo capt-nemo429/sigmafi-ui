@@ -1,6 +1,12 @@
 import { isUndefined, Network } from "@fleet-sdk/common";
 import { BigNumber } from "bignumber.js";
 
+export type LoanTerm = {
+  interval: string;
+  value: number;
+  blocks: number;
+};
+
 const BIG_NUMBER_IN_SHORT = Intl.NumberFormat("en", {
   notation: "compact",
   compactDisplay: "short",
@@ -68,7 +74,7 @@ export function toDict<T, R, K extends string | number | symbol>(
   return Object.assign({}, ...collection.map(mapper)) as { [key in K]: R };
 }
 
-export function blockToTime(blocks: number) {
+export function blockToTime(blocks: number): LoanTerm {
   const term = { interval: "", value: blocks * 2, blocks };
   let negative = false;
 

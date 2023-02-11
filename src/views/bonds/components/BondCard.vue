@@ -42,7 +42,13 @@ const bond = computed(() => {
     return;
   }
 
-  return parseBondBox(props.box, chain.tokensMetadata, chain.height, wallet.usedAddresses);
+  return parseBondBox(
+    props.box,
+    chain.tokensMetadata,
+    chain.priceRates,
+    chain.height,
+    wallet.usedAddresses
+  );
 });
 
 const blocksLeft = computed(() => {
@@ -91,14 +97,14 @@ async function repay() {
         <div class="flex-grow">
           <asset-row
             :max-name-len="15"
-            :asset="bond?.repayment"
+            :asset="bond?.principal"
             mode="amount-then-ticker"
             root-class="items-baseline"
             name-class="text-sm"
           />
         </div>
         <div v-if="loadingBox || !bond" class="skeleton-fixed h-10 w-10 skeleton-circular"></div>
-        <asset-icon v-else custom-class="h-10 w-10" :token-id="bond.repayment.tokenId" />
+        <asset-icon v-else custom-class="h-10 w-10" :token-id="bond.principal.tokenId" />
       </div>
     </div>
 

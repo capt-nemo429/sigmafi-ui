@@ -7,19 +7,54 @@ import {
   extractTokenIdFromBondContract,
   extractTokenIdFromOrderContract
 } from "@/offchain/plugins";
+import { AssetPriceRate } from "@/services/spectrumService";
 import { StateTokenMetadata } from "@/stories";
-import { blockToTime, decimalizeBigNumber, getNetworkType } from "@/utils/otherUtils";
+import { AssetMetadata } from "@/types";
+import { blockToTime, decimalizeBigNumber, getNetworkType, LoanTerm } from "@/utils/otherUtils";
+
+type LoanAsset = {
+  tokenId: string;
+  amount: BigNumber;
+  metadata?: AssetMetadata;
+};
+
+export type Loan = {
+  principal: LoanAsset;
+  collateral: LoanAsset[];
+  interest?: LoanAsset & {
+    percent: BigNumber;
+    apr: BigNumber;
+  };
+  ratio?: BigNumber;
+  term: LoanTerm;
+  borrower: string;
+};
+
+export type Order = Loan & {
+  cancellable: boolean;
+};
+
+export type Bond = Loan & {
+  lender: string;
+  type: "lend" | "debit";
+  liquidable: boolean;
+  repayable: boolean;
+};
 
 export function parseOpenOrderBox(
   box: Box<string>,
   metadata: StateTokenMetadata,
+  priceRates: AssetPriceRate,
   ownAddresses: string[]
-) {
-  const collateral = box.assets.map((token) => ({
-    tokenId: token.tokenId,
-    amount: decimalizeBigNumber(BigNumber(token.amount), metadata[token.tokenId]?.decimals),
-    metadata: metadata[token.tokenId]
-  }));
+): Order {
+  const collateral = box.assets.map(
+    (token) =>
+      ({
+        tokenId: token.tokenId,
+        amount: decimalizeBigNumber(BigNumber(token.amount), metadata[token.tokenId]?.decimals),
+        metadata: metadata[token.tokenId]
+      } as LoanAsset)
+  );
 
   if (BigInt(box.value) > SAFE_MIN_BOX_VALUE) {
     collateral.unshift({
@@ -45,12 +80,12 @@ export function parseOpenOrderBox(
 
   const borrower = isDefined(box.additionalRegisters.R4)
     ? ErgoAddress.fromPublicKey(box.additionalRegisters.R4.substring(4)).encode(getNetworkType())
-    : undefined;
+    : "";
 
   const tokenId = extractTokenIdFromOrderContract(box.ergoTree);
 
-  return {
-    loan: {
+  const order: Order = {
+    principal: {
       tokenId: tokenId,
       amount: decimalizeBigNumber(
         BigNumber(parseOr(box.additionalRegisters.R5, "0")),
@@ -70,14 +105,18 @@ export function parseOpenOrderBox(
     borrower,
     cancellable: borrower ? ownAddresses.includes(borrower) : false
   };
+  order.ratio = calculateRatio(order, priceRates);
+
+  return order;
 }
 
 export function parseBondBox(
   box: Box<string>,
   metadata: StateTokenMetadata,
+  priceRates: AssetPriceRate,
   currentHeight: number,
   ownAddresses: string[]
-) {
+): Bond {
   const collateral = box.assets.map((token) => ({
     tokenId: token.tokenId,
     amount: decimalizeBigNumber(BigNumber(token.amount), metadata[token.tokenId].decimals),
@@ -94,17 +133,17 @@ export function parseBondBox(
 
   const borrower = isDefined(box.additionalRegisters.R5)
     ? ErgoAddress.fromPublicKey(box.additionalRegisters.R5.substring(4)).encode(getNetworkType())
-    : undefined;
+    : "";
 
   const lender = isDefined(box.additionalRegisters.R8)
     ? ErgoAddress.fromPublicKey(box.additionalRegisters.R8.substring(4)).encode(getNetworkType())
-    : undefined;
+    : "";
 
   const blocksLeft = parseOr<number>(box.additionalRegisters.R7, 0) - currentHeight;
   const tokenId = extractTokenIdFromBondContract(box.ergoTree);
 
-  return {
-    repayment: {
+  const bond: Bond = {
+    principal: {
       tokenId: tokenId,
       amount: decimalizeBigNumber(
         BigNumber(parseOr(box.additionalRegisters.R6, "0")),
@@ -120,6 +159,25 @@ export function parseBondBox(
     liquidable: blocksLeft <= 0 && isDefined(lender) && ownAddresses.includes(lender),
     repayable: blocksLeft > 0 && isDefined(borrower) && ownAddresses.includes(borrower)
   };
+  bond.ratio = calculateRatio(bond, priceRates);
+
+  return bond;
+}
+
+function calculateRatio(loan: Loan, rates: AssetPriceRate) {
+  if (!rates[loan.principal.tokenId]) {
+    return;
+  }
+
+  const principal = loan.principal.amount.times(rates[loan.principal.tokenId]?.fiat || 0);
+  const interest = loan.interest
+    ? loan.interest.amount.times(rates[loan.interest.tokenId]?.fiat || 0)
+    : 0;
+  const collateral = loan.collateral.reduce((acc, val) => {
+    return acc.plus(val.amount.times(rates[val.tokenId]?.fiat || 0));
+  }, BigNumber(0));
+
+  return collateral.minus(interest).div(principal).times(100);
 }
 
 function parseOr<T>(value: string | undefined, or: T) {

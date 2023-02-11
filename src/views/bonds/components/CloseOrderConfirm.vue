@@ -24,7 +24,7 @@ const fees = computed(() => {
     return;
   }
 
-  const amount = order.value.loan.amount;
+  const amount = order.value.principal.amount;
   const contract = amount.multipliedBy(0.005);
   const ui = amount.multipliedBy(0.004);
 
@@ -36,7 +36,7 @@ const order = computed(() => {
     return;
   }
 
-  return parseOpenOrderBox(props.box, chain.tokensMetadata, wallet.usedAddresses);
+  return parseOpenOrderBox(props.box, chain.tokensMetadata, chain.priceRates, wallet.usedAddresses);
 });
 
 async function closeOrder() {
@@ -67,12 +67,12 @@ async function closeOrder() {
             <asset-row
               mode="amount-then-ticker"
               :max-name-len="15"
-              :asset="order?.loan"
+              :asset="order?.principal"
               root-class="items-baseline w-full justify-end"
               name-class="text-sm"
               class="w-full"
             />
-            <asset-icon v-if="order" custom-class="h-7 w-7" :token-id="order.loan.tokenId" />
+            <asset-icon v-if="order" custom-class="h-7 w-7" :token-id="order.principal.tokenId" />
           </div>
         </div>
       </div>
@@ -126,7 +126,7 @@ async function closeOrder() {
               name-class="text-sm"
               root-class="items-baseline w-full justify-end"
             />
-            <div class="text-xs text-right opacity-70">{{ order?.interest.percent }}%</div>
+            <div class="text-xs text-right opacity-70">{{ order?.interest?.percent }}%</div>
           </div>
         </div>
       </div>
@@ -154,7 +154,11 @@ async function closeOrder() {
           <asset-row
             :asset="
               fees && order
-                ? { amount: fees, tokenId: order.loan.tokenId, metadata: order.loan.metadata }
+                ? {
+                    amount: fees,
+                    tokenId: order.principal.tokenId,
+                    metadata: order.principal.metadata
+                  }
                 : undefined
             "
             mode="amount-then-ticker"

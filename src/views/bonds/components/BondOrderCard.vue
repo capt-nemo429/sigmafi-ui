@@ -2,7 +2,6 @@
 import { Box } from "@fleet-sdk/common";
 import { useProgrammatic } from "@oruga-ui/oruga-next";
 import { AlertTriangleIcon, CheckCircleIcon } from "@zhuowenli/vue-feather-icons";
-import BigNumber from "bignumber.js";
 import { computed, PropType, ref, toRaw } from "vue";
 import CloseOrderConfirm from "./CloseOrderConfirm.vue";
 import AssetIcon from "@/components/AssetIcon.vue";
@@ -31,24 +30,24 @@ const order = computed(() => {
     return;
   }
 
-  return parseOpenOrderBox(props.box, chain.tokensMetadata, wallet.usedAddresses);
+  return parseOpenOrderBox(props.box, chain.tokensMetadata, chain.priceRates, wallet.usedAddresses);
 });
 
-const ratio = computed(() => {
-  if (!order.value || chain.loading) {
-    return undefined;
-  }
+// const ratio = computed(() => {
+//   if (!order.value || chain.loading) {
+//     return undefined;
+//   }
 
-  const loan = order.value.loan.amount.times(chain.priceRates[order.value.loan.tokenId]?.fiat || 0);
-  const interest = order.value.interest.amount.times(
-    chain.priceRates[order.value.interest.tokenId]?.fiat || 0
-  );
-  const collateral = order.value.collateral.reduce((acc, val) => {
-    return acc.plus(val.amount.times(chain.priceRates[val.tokenId]?.fiat || 0));
-  }, BigNumber(0));
+//   const loan = order.value.loan.amount.times(chain.priceRates[order.value.loan.tokenId]?.fiat || 0);
+//   const interest = order.value.interest.amount.times(
+//     chain.priceRates[order.value.interest.tokenId]?.fiat || 0
+//   );
+//   const collateral = order.value.collateral.reduce((acc, val) => {
+//     return acc.plus(val.amount.times(chain.priceRates[val.tokenId]?.fiat || 0));
+//   }, BigNumber(0));
 
-  return collateral.minus(interest).div(loan).times(100);
-});
+//   return collateral.minus(interest).div(loan).times(100);
+// });
 
 function openModal() {
   oruga.modal.open({
@@ -84,31 +83,35 @@ async function cancelOrder() {
           <asset-row
             mode="amount-then-ticker"
             :max-name-len="15"
-            :asset="order?.loan"
+            :asset="order?.principal"
             root-class="items-baseline"
             name-class="text-sm"
           />
         </div>
         <div v-if="loadingBox || !order" class="skeleton-fixed h-10 w-10 skeleton-circular"></div>
-        <asset-icon v-else custom-class="h-10 w-10" :token-id="order.loan.tokenId" />
+        <asset-icon v-else custom-class="h-10 w-10" :token-id="order.principal.tokenId" />
       </div>
     </div>
 
     <div class="stat">
       <div class="h-fit flex justify-between items-center">
         <span class="stat-title">Collateral</span>
-        <sig-tooltip v-if="ratio" tip="Collateral/Loan ratio" class="tooltip-left">
+        <sig-tooltip
+          v-if="order?.ratio && !chain.loading"
+          tip="Collateral/Loan ratio"
+          class="tooltip-left"
+        >
           <span
             :class="{
-              'badge-error': ratio.lt(100),
-              'badge-warning': ratio.lt(150),
-              'badge-success': ratio.gt(150)
+              'badge-error': order.ratio.lt(100),
+              'badge-warning': order.ratio.lt(150),
+              'badge-success': order.ratio.gt(150)
             }"
             class="badge gap-1"
           >
-            <alert-triangle-icon v-if="ratio.lt(100)" />
-            <check-circle-icon v-else-if="ratio.gte(200)" />
-            {{ formatBigNumber(ratio, 2) }}%</span
+            <alert-triangle-icon v-if="order.ratio.lt(100)" />
+            <check-circle-icon v-else-if="order.ratio.gte(200)" />
+            {{ formatBigNumber(order.ratio, 2) }}%</span
           >
         </sig-tooltip>
       </div>
@@ -154,7 +157,7 @@ async function cancelOrder() {
     <div class="stat">
       <div class="stat-title">Interest</div>
       <div class="flex gap-2">
-        <div class="stat-value skeleton-placeholder flex-grow">{{ order?.interest.percent }}%</div>
+        <div class="stat-value skeleton-placeholder flex-grow">{{ order?.interest?.percent }}%</div>
         <asset-row
           hide-price
           mode="amount-then-ticker"
@@ -165,7 +168,7 @@ async function cancelOrder() {
         />
       </div>
       <div class="stat-desc skeleton-placeholder">
-        {{ formatBigNumber(order?.interest.apr, 3) }}% APR
+        {{ formatBigNumber(order?.interest?.apr, 3) }}% APR
       </div>
       <div class="stat-actions text-center flex gap-2">
         <button
