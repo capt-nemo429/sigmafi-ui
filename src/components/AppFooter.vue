@@ -22,7 +22,7 @@ function openKYAModal() {
 </script>
 
 <template>
-  <footer class="footer p-10 bg-base-300 bg-opacity-50 z-30 text-base-content">
+  <footer class="footer p-10 bg-base-300 bg-opacity-50 z-10 text-base-content">
     <div>
       <img src="/nautilus.svg" width="50" height="50" />
       <p>Nautilus Team</p>
