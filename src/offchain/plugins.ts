@@ -122,7 +122,7 @@ export function OpenOrderPlugin(order: OpenOrderParams): FleetPlugin {
         R7: SConstant(SInt(order.maturityLength))
       });
 
-    addOutputs(output);
+    addOutputs(output, { index: 0 });
   };
 }
 

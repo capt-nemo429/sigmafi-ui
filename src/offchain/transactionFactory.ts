@@ -1,5 +1,5 @@
 import { EIP12UnsignedTransaction } from "@fleet-sdk/common";
-import { Amount, Box, ErgoAddress, TransactionBuilder } from "@fleet-sdk/core";
+import { Amount, Box, ErgoAddress, OutputBuilder, TransactionBuilder } from "@fleet-sdk/core";
 import {
   CancelOrderPlugin,
   CloseOrderPlugin,
@@ -11,13 +11,16 @@ import {
 import { MIN_FEE } from "@/constants";
 import { useChainStore, useWalletStore } from "@/stories";
 
+export const OPEN_ORDER_UI_FEE = 10000000n;
+const uiFeeAddress = ErgoAddress.fromBase58("9i3g6d958MpZAqWn9hrTHcqbBiY5VPYBBY6vRDszZn4koqnahin");
+
 export class TransactionFactory {
   public static async openOrder(order: Omit<OpenOrderParams, "borrower">) {
     const { chain, changeAddress, inputs, wallet } = await this._getTxContext();
-
     const unsignedTx = new TransactionBuilder(chain.height)
       .from(inputs)
       .extend(OpenOrderPlugin({ ...order, borrower: changeAddress }))
+      .to(new OutputBuilder(OPEN_ORDER_UI_FEE, uiFeeAddress))
       .payFee(MIN_FEE)
       .sendChangeTo(changeAddress)
       .build("EIP-12");
@@ -40,17 +43,13 @@ export class TransactionFactory {
   public static async closeOrder(orderBox: Box<Amount>) {
     const { chain, changeAddress, inputs, wallet } = await this._getTxContext();
 
-    const implementor = ErgoAddress.fromBase58(
-      "9i3g6d958MpZAqWn9hrTHcqbBiY5VPYBBY6vRDszZn4koqnahin"
-    );
-
     const unsignedTx = new TransactionBuilder(chain.height)
       .from(inputs)
       .extend(
         CloseOrderPlugin(orderBox, {
           currentHeight: chain.height,
           lender: changeAddress,
-          uiImplementor: implementor
+          uiImplementor: uiFeeAddress
         })
       )
       .payFee(MIN_FEE)

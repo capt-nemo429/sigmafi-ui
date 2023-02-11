@@ -9,14 +9,14 @@ import AssetIcon from "@/components/AssetIcon.vue";
 import AssetInput from "@/components/AssetInput.vue";
 import CleaveInput from "@/components/CleaveInput.vue";
 import SigDropdown from "@/components/SigDropdown.vue";
-import { ERG_TOKEN_ID } from "@/constants";
+import { ERG_DECIMALS, ERG_TOKEN_ID, MIN_FEE } from "@/constants";
 import { VERIFIED_ASSETS } from "@/maps";
+import { OPEN_ORDER_UI_FEE } from "@/offchain/transactionFactory";
 import { TransactionFactory } from "@/offchain/transactionFactory";
 import { useWalletStore } from "@/stories/walletStore";
 import { AssetInfo } from "@/types";
 import { formatBigNumber, sendTransaction, shortenString, undecimalizeBigNumber } from "@/utils";
 import { minValue } from "@/validators/bigNumbers";
-
 const wallet = useWalletStore();
 const emit = defineEmits(["close"]);
 
@@ -308,6 +308,10 @@ async function submit() {
     </div>
 
     <div class="modal-action">
+      <div class="w-full h-full text-sm">
+        <p>Miner Fee: {{ decimalize(MIN_FEE, ERG_DECIMALS) }} ERG</p>
+        <p>UI Fee: {{ decimalize(OPEN_ORDER_UI_FEE, ERG_DECIMALS) }} ERG</p>
+      </div>
       <button class="btn btn-ghost" :disabled="loading" @click="emit('close')">Cancel</button>
       <button class="btn btn-primary" :class="{ loading: loading }" @click="submit()">
         Confirm
