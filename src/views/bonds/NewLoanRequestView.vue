@@ -308,7 +308,7 @@ async function submit() {
     </div>
 
     <div class="modal-action">
-      <div class="w-full h-full text-sm">
+      <div class="w-full h-full text-sm opacity-70">
         <p>Miner Fee: {{ decimalize(MIN_FEE, ERG_DECIMALS) }} ERG</p>
         <p>UI Fee: {{ decimalize(OPEN_ORDER_UI_FEE, ERG_DECIMALS) }} ERG</p>
       </div>

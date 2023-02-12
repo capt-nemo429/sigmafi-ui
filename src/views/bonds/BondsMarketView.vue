@@ -28,19 +28,23 @@ const state = reactive({ hideUndercollateralized: true });
 const sort = reactive<Sorting>({ by: "newest", asc: false });
 
 const orders = computed(() => {
-  let orders = boxes.value.map((box) =>
+  return boxes.value.map((box) =>
     parseOpenOrderBox(box, chain.tokensMetadata, chain.priceRates, wallet.usedAddresses)
   );
+});
+
+const filteredOrders = computed(() => {
+  let filtered = orders.value;
 
   if (state.hideUndercollateralized) {
-    orders = orders.filter((order) => order.ratio && order.ratio.gte(100));
+    filtered = filtered.filter((order) => order.ratio && order.ratio.gte(100));
   }
 
   const direction = sort.asc ? "asc" : "desc";
   switch (sort.by) {
     case "principal": {
-      orders = orderBy(
-        orders,
+      filtered = orderBy(
+        filtered,
         (order) => {
           return order.principal.amount
             .multipliedBy(chain.priceRates[order.principal.tokenId]?.fiat || 0)
@@ -51,29 +55,29 @@ const orders = computed(() => {
       break;
     }
     case "interest": {
-      orders = orderBy(orders, (order) => order.interest?.percent.toNumber() || 0, direction);
+      filtered = orderBy(filtered, (order) => order.interest?.percent.toNumber() || 0, direction);
       break;
     }
     case "ratio": {
-      orders = orderBy(orders, (order) => order.ratio?.toNumber() || 0, direction);
+      filtered = orderBy(filtered, (order) => order.ratio?.toNumber() || 0, direction);
       break;
     }
     case "term": {
-      orders = orderBy(orders, (order) => order.term.blocks, direction);
+      filtered = orderBy(filtered, (order) => order.term.blocks, direction);
       break;
     }
     case "apr": {
-      orders = orderBy(orders, (order) => order.interest?.apr.toNumber() || 0, direction);
+      filtered = orderBy(filtered, (order) => order.interest?.apr.toNumber() || 0, direction);
       break;
     }
     case "newest":
     default: {
-      orders = orderBy(orders, (order) => order.box.creationHeight, direction);
+      filtered = orderBy(filtered, (order) => order.box.creationHeight, direction);
       break;
     }
   }
 
-  return orders;
+  return filtered;
 });
 
 function openNewLoanModal() {
@@ -149,17 +153,17 @@ onMounted(async () => {
     <div
       class="grid grid-cols-1 gap-8 md:gap-12 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
     >
-      <template v-if="loading.boxes">
+      <template v-if="loading.boxes || (loading.metadata && filteredOrders.length === 0)">
         <bond-order-card
           v-for="n in 4"
           :key="n"
-          :loading-box="loading.boxes"
+          :loading-box="loading.boxes || loading.metadata"
           :loading-metadata="loading.metadata"
         />
       </template>
       <template v-else>
         <bond-order-card
-          v-for="order in orders"
+          v-for="order in filteredOrders"
           :key="order.box.boxId"
           :order="order"
           :loading-box="loading.boxes"
