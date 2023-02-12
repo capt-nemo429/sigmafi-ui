@@ -104,9 +104,9 @@ onMounted(async () => {
 
 <template>
   <div class="grid grid-cols-1 gap-8">
-    <div class="flex flex-row justify-between gap-4 items-center">
+    <div class="flex flex-wrap flex-row justify-between gap-4 items-center">
       <button
-        class="btn btn-primary shadow flex-col"
+        class="btn btn-primary shadow flex-col flex-grow sm:flex-grow-0"
         :disabled="!wallet.connected || wallet.loading"
         @click="openNewLoanModal()"
       >
@@ -137,8 +137,8 @@ onMounted(async () => {
             </button>
           </div>
         </div>
-        <!-- 
-        <div class="stats shadow">
+
+        <!-- <div class="stats shadow">
           <div class="stat py-2">
             <div class="stat-desc">Total Value Locked</div>
             <div class="stat-value text-center">${{ formatBigNumber(chain.tvl, 2) }}</div>
