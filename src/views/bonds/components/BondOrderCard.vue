@@ -1,19 +1,16 @@
 <script setup lang="ts">
 import { useProgrammatic } from "@oruga-ui/oruga-next";
-import { AlertTriangleIcon, CheckCircleIcon } from "@zhuowenli/vue-feather-icons";
 import { PropType, ref, toRaw } from "vue";
 import CloseOrderConfirm from "./CloseOrderConfirm.vue";
 import AssetIcon from "@/components/AssetIcon.vue";
 import AssetRow from "@/components/AssetRow.vue";
-import SigTooltip from "@/components/SigTooltip.vue";
+import BondRatioBadge from "@/components/BondRatioBadge.vue";
 import { TransactionFactory } from "@/offchain/transactionFactory";
-import { useChainStore } from "@/stories";
 import { useWalletStore } from "@/stories/walletStore";
 import { formatBigNumber, Order, sendTransaction } from "@/utils";
 
 const { oruga } = useProgrammatic();
 
-const chain = useChainStore();
 const wallet = useWalletStore();
 
 const props = defineProps({
@@ -71,24 +68,7 @@ async function cancelOrder() {
     <div class="stat">
       <div class="h-fit flex justify-between items-center">
         <span class="stat-title">Collateral</span>
-        <sig-tooltip
-          v-if="order?.ratio && !chain.loading"
-          tip="Collateral/Loan ratio"
-          class="tooltip-left"
-        >
-          <span
-            :class="{
-              'badge-error': order.ratio.lt(100),
-              'badge-warning': order.ratio.lt(150),
-              'badge-success': order.ratio.gt(150)
-            }"
-            class="badge gap-1"
-          >
-            <alert-triangle-icon v-if="order.ratio.lt(100)" />
-            <check-circle-icon v-else-if="order.ratio.gte(200)" />
-            {{ formatBigNumber(order.ratio, 2) }}%</span
-          >
-        </sig-tooltip>
+        <bond-ratio-badge :ratio="order?.ratio" />
       </div>
 
       <div class="grid grid-cols-1 gap-2 mt-2 items-start">

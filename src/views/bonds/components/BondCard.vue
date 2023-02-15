@@ -3,6 +3,7 @@ import { ExternalLinkIcon } from "@zhuowenli/vue-feather-icons";
 import { computed, PropType, ref, toRaw } from "vue";
 import AssetIcon from "@/components/AssetIcon.vue";
 import AssetRow from "@/components/AssetRow.vue";
+import BondRatioBadge from "@/components/BondRatioBadge.vue";
 import { TransactionFactory } from "@/offchain/transactionFactory";
 import { useChainStore } from "@/stories";
 import { useWalletStore } from "@/stories/walletStore";
@@ -94,7 +95,12 @@ async function repay() {
     </div>
 
     <div class="stat">
-      <div class="stat-title h-fit">Collateral</div>
+      <!-- <div class="stat-title h-fit">Collateral</div> -->
+      <div class="h-fit flex justify-between items-center">
+        <span class="stat-title">Collateral</span>
+        <bond-ratio-badge :ratio="bond?.ratio" />
+      </div>
+
       <div class="grid grid-cols-1 gap-2 mt-2 items-start">
         <div v-if="loadingBox" class="flex flex-row items-center gap-2">
           <div class="skeleton-fixed h-8 w-8 skeleton-circular"></div>
