@@ -3,12 +3,15 @@ import { decimalize, Network } from "@fleet-sdk/common";
 import { MoonIcon, SunIcon } from "@zhuowenli/vue-feather-icons";
 import { computed } from "vue";
 import { ERG_DECIMALS } from "@/constants";
+import { useChainStore } from "@/stories";
 import { useUIStore } from "@/stories/uiStore";
 import { useWalletStore } from "@/stories/walletStore";
 import { getNetworkType, shortenString } from "@/utils";
+import { formatBigNumber } from "@/utils";
 
 const defaultStore = useUIStore();
 const wallet = useWalletStore();
+const chain = useChainStore();
 const isTestnet = getNetworkType() === Network.Testnet;
 
 const ergBalance = computed(() => {
@@ -36,9 +39,10 @@ const ergBalance = computed(() => {
             <router-link to="/dashboard" active-class="active-item">Dashboard</router-link>
           </li>
         </ul>
+        <div v-if="chain.tvl?.gt(0)" class="text-sm opacity-80">
+          TVL: ${{ formatBigNumber(chain.tvl, 2) }}
+        </div>
       </div>
-
-      <div class="flex-1r"></div>
 
       <div class="flex-2 gap-2">
         <ul class="menu menu-horizontal px-1 gap-2">

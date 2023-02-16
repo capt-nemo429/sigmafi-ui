@@ -1,4 +1,5 @@
-import { BoxAmounts, isEmpty } from "@fleet-sdk/common";
+import { AddressBalance } from "@ergo-graphql/types";
+import { isEmpty } from "@fleet-sdk/common";
 import { ErgoAddress } from "@fleet-sdk/core";
 import BigNumber from "bignumber.js";
 import { uniq } from "lodash-es";
@@ -27,7 +28,7 @@ export const useChainStore = defineStore("chain", () => {
   const _loading = ref(true);
   const _height = ref<number>(0);
   const _priceRates = ref<AssetPriceRate>({});
-  const _tvl = ref<BoxAmounts | undefined>();
+  const _tvl = ref<AddressBalance[]>([]);
 
   const _metadata = ref<StateTokenMetadata>(
     toDict(VERIFIED_ASSETS, (a) => ({ [a.tokenId]: a.metadata }))
@@ -39,22 +40,21 @@ export const useChainStore = defineStore("chain", () => {
   const loading = computed(() => _loading.value);
   const height = computed(() => _height.value);
   const tvl = computed(() => {
-    if (!_tvl.value || !_tvl.value.nanoErgs || _loading.value) {
+    if (!_tvl.value || isEmpty(_tvl.value)) {
       return;
     }
 
     const rates = _priceRates.value;
-    let ergs = decimalizeBigNumber(BigNumber(_tvl.value.nanoErgs.toString()), ERG_DECIMALS);
-    for (const token of _tvl.value.tokens) {
-      ergs = ergs.plus(
-        decimalizeBigNumber(
-          BigNumber(token.amount.toString()),
-          _metadata.value[token.tokenId]?.decimals || 0
-        ).times(rates[token.tokenId]?.erg || 0)
-      );
+    let acc = BigNumber(0);
+    for (const balance of _tvl.value) {
+      acc = acc.plus(decimalizeBigNumber(BigNumber(balance.nanoErgs), ERG_DECIMALS));
+      for (const token of balance.assets) {
+        const amount = decimalizeBigNumber(BigNumber(token.amount.toString()), token.decimals || 0);
+        acc = acc.plus(amount.times(rates[token.tokenId]?.erg || 0));
+      }
     }
 
-    return ergs.plus(rates[ERG_TOKEN_ID].fiat);
+    return acc.times(rates[ERG_TOKEN_ID].fiat);
   });
 
   // watchers

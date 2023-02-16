@@ -46,6 +46,7 @@ class GraphQLService {
             assets {
               tokenId
               amount
+              decimals
             }
           }
         }
@@ -53,14 +54,8 @@ class GraphQLService {
     `;
 
     const response = await this._client.query(query, { addresses }).toPromise();
-    if (response.data?.addresses) {
-      return utxoSum(
-        response.data.addresses.map((x) => ({
-          value: x.balance.nanoErgs,
-          assets: x.balance.assets
-        }))
-      );
-    }
+
+    return response.data?.addresses.flatMap((x) => x.balance) || [];
   }
 
   public async *yeldTokensMetadata(tokenIds: string[]) {

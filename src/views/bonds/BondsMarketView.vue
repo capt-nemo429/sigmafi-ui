@@ -141,13 +141,6 @@ onMounted(async () => {
             </button>
           </div>
         </div>
-
-        <!-- <div class="stats shadow">
-          <div class="stat py-2">
-            <div class="stat-desc">Total Value Locked</div>
-            <div class="stat-value text-center">${{ formatBigNumber(chain.tvl, 2) }}</div>
-          </div>
-        </div> -->
       </div>
     </div>
     <div
