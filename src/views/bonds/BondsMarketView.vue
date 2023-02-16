@@ -24,7 +24,7 @@ const chain = useChainStore();
 
 const boxes = ref<Readonly<Box<string>>[]>([]);
 const loading = reactive({ boxes: true, metadata: true });
-const state = reactive({ hideUndercollateralized: true });
+const filter = reactive({ hideUndercollateralized: true });
 const sort = reactive<Sorting>({ by: "newest", asc: false });
 
 const orders = computed(() => {
@@ -36,7 +36,7 @@ const orders = computed(() => {
 const filteredOrders = computed(() => {
   let filtered = orders.value;
 
-  if (state.hideUndercollateralized) {
+  if (filter.hideUndercollateralized) {
     filtered = filtered.filter((order) => order.ratio && order.ratio.gte(100));
   }
 
@@ -119,7 +119,7 @@ onMounted(async () => {
 
       <div class="flex flex-row gap-4 items-center">
         <label class="cursor-pointer label gap-2">
-          <input v-model="state.hideUndercollateralized" type="checkbox" class="checkbox" />
+          <input v-model="filter.hideUndercollateralized" type="checkbox" class="checkbox" />
           <span class="label-text">Hide undercollateralized<br />loan requests</span>
         </label>
         <div class="form-control">
