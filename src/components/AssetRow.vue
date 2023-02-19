@@ -42,7 +42,7 @@ const showPrice = computed(() => {
         <div :class="nameClass" class="flex items-center gap-2 justify-start">
           <a
             v-if="link && asset.tokenId !== ERG_TOKEN_ID"
-            class="link link-hover"
+            class="link link-hover break-all"
             :href="tokenUrlFor(asset.tokenId)"
             target="_blank"
             rel="noopener noreferrer"
@@ -54,7 +54,7 @@ const showPrice = computed(() => {
               )
             }}
           </a>
-          <div v-else :class="nameClass">
+          <div v-else :class="nameClass" class="break-all">
             {{
               shortenString(
                 asset.metadata?.name || asset.tokenId,
