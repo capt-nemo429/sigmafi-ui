@@ -26,7 +26,7 @@ const props = defineProps({
 });
 
 const showPrice = computed(() => {
-  return !props.hidePrice && props.asset?.metadata;
+  return !props.hidePrice;
 });
 </script>
 

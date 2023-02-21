@@ -1,5 +1,5 @@
 import { AddressBalance } from "@ergo-graphql/types";
-import { isEmpty } from "@fleet-sdk/common";
+import { isEmpty, NonMandatoryRegisters } from "@fleet-sdk/common";
 import { ErgoAddress } from "@fleet-sdk/core";
 import BigNumber from "bignumber.js";
 import { uniq } from "lodash-es";
@@ -10,7 +10,7 @@ import { VERIFIED_ASSETS } from "@/maps/verifiedAssets";
 import { buildBondContract, buildOrderContract } from "@/offchain/plugins";
 import { graphQLService } from "@/services/graphqlService";
 import { AssetPriceRate, spectrumService } from "@/services/spectrumService";
-import { AssetMetadata } from "@/types";
+import { AssetMetadata, AssetType } from "@/types";
 import { decimalizeBigNumber, getNetworkType, toDict } from "@/utils";
 
 export type StateTokenMetadata = { [tokenId: string]: AssetMetadata };
@@ -105,9 +105,15 @@ export const useChainStore = defineStore("chain", () => {
 
     for await (const tokensMetadata of graphQLService.yeldTokensMetadata(tokenIds)) {
       for (const metadata of tokensMetadata) {
+        const register = (metadata.box.additionalRegisters as NonMandatoryRegisters)?.R7;
+
         _metadata.value[metadata.tokenId] = {
           name: metadata?.name || undefined,
-          decimals: metadata.decimals || undefined
+          decimals: metadata.decimals || undefined,
+          type:
+            register && register.startsWith("0e02") && register.length === 8
+              ? (register?.substring(4) as AssetType)
+              : undefined
         };
       }
     }

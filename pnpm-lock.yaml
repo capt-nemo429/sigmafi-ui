@@ -1,7 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
-  '@ergo-graphql/types': ^0.4.0
+  '@ergo-graphql/types': ^0.4.2
   '@fleet-sdk/common': 0.1.0-alpha.20
   '@fleet-sdk/core': 0.1.0-alpha.20
   '@nautilus-js/eip12-types': ^0.1.9
@@ -58,7 +58,7 @@ dependencies:
   vue-router: 4.1.6_vue@3.2.45
 
 devDependencies:
-  '@ergo-graphql/types': 0.4.0
+  '@ergo-graphql/types': 0.4.2
   '@nautilus-js/eip12-types': 0.1.9
   '@types/cleave.js': 1.4.7
   '@types/lodash-es': 4.17.6
@@ -105,8 +105,8 @@ packages:
       '@babel/helper-validator-identifier': 7.19.1
       to-fast-properties: 2.0.0
 
-  /@ergo-graphql/types/0.4.0:
-    resolution: {integrity: sha512-YFBP3Fo5UMo/DpLzQXC2D+Pa+LHnquiRlNqOCo19NqEK0VHRIyGpfebg9wzRK/CwCjxTnKSUQp7PjMTIQC7yYg==}
+  /@ergo-graphql/types/0.4.2:
+    resolution: {integrity: sha512-1NrB85kRecptXFck+ca1YFKgbygqVYoomXNASVGZAi4UzgxajvMj6DgWKhHknJM1dpsOfiJnu8qba2jk3G4Reg==}
     dev: true
 
   /@esbuild/android-arm/0.16.10:

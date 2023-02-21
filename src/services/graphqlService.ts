@@ -65,6 +65,9 @@ class GraphQLService {
           tokenId
           name
           decimals
+          box {
+            additionalRegisters
+          }
         }
       }
     `;
