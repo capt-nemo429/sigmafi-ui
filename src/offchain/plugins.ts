@@ -271,26 +271,22 @@ export function RepayPlugin(bondBox: Box<Amount>): FleetPlugin {
       throw new Error("Invalid bond. Lender public key is not present.");
     }
 
-    addInputs(bondBox);
     const repaymentAmount = SParse<bigint>(bondBox.additionalRegisters.R6);
     const borrower = ErgoAddress.fromPublicKey(bondBox.additionalRegisters.R5.substring(4));
     const lender = ErgoAddress.fromPublicKey(bondBox.additionalRegisters.R8.substring(4));
     const tokenId = extractTokenIdFromBondContract(bondBox.ergoTree);
-    const isErg = tokenId === ERG_TOKEN_ID;
-
-    const repayment = new OutputBuilder(
-      isErg ? repaymentAmount : SAFE_MIN_BOX_VALUE,
-      lender
-    ).setAdditionalRegisters({
-      R4: SConstant(SColl(SByte, bondBox.boxId))
-    });
-
-    if (!isErg) {
-      repayment.addTokens({ tokenId, amount: repaymentAmount });
-    }
 
     const returnCollateral = new OutputBuilder(bondBox.value, borrower).addTokens(bondBox.assets);
+    const repayment = (
+      tokenId === ERG_TOKEN_ID
+        ? new OutputBuilder(repaymentAmount, lender)
+        : new OutputBuilder(SAFE_MIN_BOX_VALUE, lender).addTokens({
+            tokenId,
+            amount: repaymentAmount
+          })
+    ).setAdditionalRegisters({ R4: SConstant(SColl(SByte, bondBox.boxId)) });
 
+    addInputs(bondBox);
     addOutputs([repayment, returnCollateral], { index: 0 });
   };
 }
