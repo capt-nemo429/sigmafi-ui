@@ -48,7 +48,9 @@ const converted = computed(() => {
     return;
   }
 
-  return formatBigNumber(BigNumber(props.asset.conversion.rate).multipliedBy(value.value || 0), 3);
+  const fiatValue = BigNumber(props.asset.conversion.rate).multipliedBy(value.value || 0);
+
+  return fiatValue.isNaN() ? BigNumber(0) : fiatValue;
 });
 
 // methods
@@ -127,7 +129,9 @@ const $v = useVuelidate(rules, { val: value });
       </div>
       <div class="flex flex-row gap-2 mt-1 text-base-content text-opacity-50 text-xs">
         <div class="flex-grow">
-          <span v-if="asset.conversion">≈ {{ converted }} {{ asset.conversion.currency }}</span>
+          <span v-if="asset.conversion?.rate"
+            >≈ {{ formatBigNumber(converted, 2) }} {{ asset.conversion.currency }}</span
+          >
           <span v-else>No conversion rate</span>
         </div>
         <div class="flex-grow text-right">
