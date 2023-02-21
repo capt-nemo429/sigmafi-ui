@@ -23,7 +23,8 @@ export class TransactionFactory {
       .to(new OutputBuilder(OPEN_ORDER_UI_FEE, uiFeeAddress))
       .payFee(MIN_FEE)
       .sendChangeTo(changeAddress)
-      .build("EIP-12");
+      .build()
+      .toEIP12Object();
 
     return await this._signAndSend(unsignedTx, wallet);
   }
@@ -35,7 +36,8 @@ export class TransactionFactory {
       .extend(CancelOrderPlugin(box, changeAddress))
       .payFee(MIN_FEE)
       .sendChangeTo(changeAddress)
-      .build("EIP-12");
+      .build()
+      .toEIP12Object();
 
     return await this._signAndSend(unsignedTx, wallet);
   }
@@ -54,7 +56,8 @@ export class TransactionFactory {
       )
       .payFee(MIN_FEE)
       .sendChangeTo(changeAddress)
-      .build("EIP-12");
+      .build()
+      .toEIP12Object();
 
     return await this._signAndSend(unsignedTx, wallet);
   }
@@ -67,7 +70,8 @@ export class TransactionFactory {
       .extend(LiquidatePlugin(box, changeAddress))
       .payFee(MIN_FEE)
       .sendChangeTo(changeAddress)
-      .build("EIP-12");
+      .build()
+      .toEIP12Object();
 
     return await this._signAndSend(unsignedTx, wallet);
   }
@@ -80,7 +84,8 @@ export class TransactionFactory {
       .extend(RepayPlugin(box))
       .payFee(MIN_FEE)
       .sendChangeTo(changeAddress)
-      .build("EIP-12");
+      .build()
+      .toEIP12Object();
 
     return await this._signAndSend(unsignedTx, wallet);
   }

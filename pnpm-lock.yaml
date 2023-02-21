@@ -2,8 +2,8 @@ lockfileVersion: 5.4
 
 specifiers:
   '@ergo-graphql/types': ^0.4.0
-  '@fleet-sdk/common': 0.1.0-alpha.19
-  '@fleet-sdk/core': 0.1.0-alpha.19
+  '@fleet-sdk/common': 0.1.0-alpha.20
+  '@fleet-sdk/core': 0.1.0-alpha.20
   '@nautilus-js/eip12-types': ^0.1.9
   '@noble/hashes': ^1.1.5
   '@oruga-ui/oruga-next': ^0.5.10
@@ -40,8 +40,8 @@ specifiers:
   vue-tsc: ^1.0.18
 
 dependencies:
-  '@fleet-sdk/common': 0.1.0-alpha.19
-  '@fleet-sdk/core': 0.1.0-alpha.19
+  '@fleet-sdk/common': 0.1.0-alpha.20
+  '@fleet-sdk/core': 0.1.0-alpha.20
   '@noble/hashes': 1.1.5
   '@oruga-ui/oruga-next': 0.5.10_vue@3.2.45
   '@urql/core': 3.1.1_graphql@16.6.0
@@ -323,16 +323,16 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /@fleet-sdk/common/0.1.0-alpha.19:
-    resolution: {integrity: sha512-Po0/TUl3iwzPN4f37272MFeYCXZ2az9CDTgCq1D4ixw/XnXzsNrV4R5LKGzb6LDYeCEYb6IX55nBaDk2YTyJag==}
+  /@fleet-sdk/common/0.1.0-alpha.20:
+    resolution: {integrity: sha512-71o/jN8EJq1av54cVUeE8GhjCR5BZWBI51oFWKpYaBjf0msS0auRRYKwGKvX9uOvc3bYSZ11ETe+Gv8qj+skJQ==}
     engines: {node: '>=10'}
     dev: false
 
-  /@fleet-sdk/core/0.1.0-alpha.19:
-    resolution: {integrity: sha512-y+drb1uJwa4TfnWAlVTularQ4KGmyL9kX7/Tl2EUK0eZDyQ6EP00blZhSwW22sps2zRA1ZJEkX8tqB9SMFD8Og==}
+  /@fleet-sdk/core/0.1.0-alpha.20:
+    resolution: {integrity: sha512-S9RuYrOgLuWV+l76YzahyEMLgNXHxY6b2PHC+tEyj7n2fAX0TvNA/sTe9dCYpJAHBA+aQfSWwa3zdLzllRiUhQ==}
     engines: {node: '>=10'}
     dependencies:
-      '@fleet-sdk/common': 0.1.0-alpha.19
+      '@fleet-sdk/common': 0.1.0-alpha.20
       '@noble/hashes': 1.1.5
       '@scure/base': 1.1.1
     dev: false
