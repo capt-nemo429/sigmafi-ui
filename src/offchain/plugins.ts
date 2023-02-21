@@ -261,7 +261,6 @@ export function LiquidatePlugin(bondBox: Box<Amount>, recipient: ErgoAddress): F
 
 export function RepayPlugin(bondBox: Box<Amount>): FleetPlugin {
   return ({ addInputs, addOutputs }) => {
-    addInputs(bondBox);
     if (!bondBox.additionalRegisters.R5) {
       throw new Error("Invalid bond. Borrower public key is not present.");
     }
@@ -272,6 +271,7 @@ export function RepayPlugin(bondBox: Box<Amount>): FleetPlugin {
       throw new Error("Invalid bond. Lender public key is not present.");
     }
 
+    addInputs(bondBox);
     const repaymentAmount = SParse<bigint>(bondBox.additionalRegisters.R6);
     const borrower = ErgoAddress.fromPublicKey(bondBox.additionalRegisters.R5.substring(4));
     const lender = ErgoAddress.fromPublicKey(bondBox.additionalRegisters.R8.substring(4));
