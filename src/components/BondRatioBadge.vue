@@ -22,8 +22,8 @@ defineProps({
       }"
       class="badge gap-1"
     >
-      <alert-triangle-icon v-if="ratio.lt(100)" />
-      <check-circle-icon v-else-if="ratio.gte(200)" />
+      <alert-triangle-icon v-if="ratio.lt(100)" class="h-3" />
+      <check-circle-icon v-else-if="ratio.gte(200)" class="h-3" />
       {{ formatBigNumber(ratio, 2) }}%</span
     >
   </sig-tooltip>

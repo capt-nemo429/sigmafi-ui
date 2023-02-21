@@ -7,16 +7,20 @@ import { differenceBy, remove } from "lodash-es";
 import { computed, reactive, ref } from "vue";
 import AssetIcon from "@/components/AssetIcon.vue";
 import AssetInput from "@/components/AssetInput.vue";
+import BondRatioBadge from "@/components/BondRatioBadge.vue";
 import CleaveInput from "@/components/CleaveInput.vue";
 import SigDropdown from "@/components/SigDropdown.vue";
 import { ERG_DECIMALS, ERG_TOKEN_ID, MIN_FEE } from "@/constants";
 import { VERIFIED_ASSETS } from "@/maps";
 import { OPEN_ORDER_UI_FEE } from "@/offchain/transactionFactory";
 import { TransactionFactory } from "@/offchain/transactionFactory";
+import { useChainStore } from "@/stories";
 import { useWalletStore } from "@/stories/walletStore";
 import { AssetInfo } from "@/types";
 import { formatBigNumber, sendTransaction, shortenString, undecimalizeBigNumber } from "@/utils";
 import { minValue } from "@/validators/bigNumbers";
+
+const chain = useChainStore();
 const wallet = useWalletStore();
 const emit = defineEmits(["close"]);
 
@@ -63,6 +67,53 @@ const blocks = computed(() => {
   }
 
   return minutes / 2;
+});
+
+const loanAmountInFiat = computed(() => {
+  if (!state.loan.amount) {
+    return BigNumber(0);
+  }
+
+  const fiatRate = chain.priceRates[state.loan.asset.tokenId]?.fiat || 0;
+
+  return BigNumber(state.loan.amount).multipliedBy(fiatRate);
+});
+
+const interestAmountInFiat = computed(() => {
+  if (!state.loan.amount || !state.interest) {
+    return BigNumber(0);
+  }
+
+  const fiatRate = chain.priceRates[state.loan.asset.tokenId]?.fiat || 0;
+
+  return interestAmount.value.multipliedBy(fiatRate);
+});
+
+const collateralTotalInFiat = computed(() => {
+  if (isEmpty(state.collateral)) {
+    return BigNumber(0);
+  }
+
+  let acc = BigNumber(0);
+  for (const asset of state.collateral) {
+    if (!asset.amount) {
+      continue;
+    }
+
+    const fiatRate = chain.priceRates[asset.tokenId]?.fiat || 0;
+    if (fiatRate !== 0) {
+      acc = acc.plus(BigNumber(asset.amount).multipliedBy(fiatRate));
+    }
+  }
+
+  return acc;
+});
+
+const ratio = computed(() => {
+  return collateralTotalInFiat.value
+    .minus(interestAmountInFiat.value)
+    .div(loanAmountInFiat.value)
+    .times(100);
 });
 
 const interestAmount = computed(() => {
@@ -168,11 +219,18 @@ async function submit() {
 
 <template>
   <div class="grid grid-cols-1 gap-6">
-    <h3 class="font-semibold text-xl">New loan request</h3>
+    <h3 class="font-semibold text-xl flex items-center justify-between">
+      <span>New loan request</span>
+      <bond-ratio-badge v-if="!ratio.isNaN()" :ratio="ratio" />
+    </h3>
+
     <div>
       <div class="form-control">
         <label class="label">
           <span class="label-text big">Amount</span>
+          <span v-if="loanAmountInFiat.gt(0)" class="label-text-alt opacity-70"
+            >${{ formatBigNumber(loanAmountInFiat, 2) }}</span
+          >
         </label>
         <div class="input-group">
           <cleave-input
@@ -265,6 +323,9 @@ async function submit() {
       <div class="form-control">
         <label class="label">
           <span class="label-text big">Collateral</span>
+          <span v-if="collateralTotalInFiat.gt(0)" class="label-text-alt opacity-70"
+            >${{ formatBigNumber(collateralTotalInFiat, 2) }}</span
+          >
         </label>
         <asset-input
           v-for="asset in state.collateral"
