@@ -2,6 +2,8 @@
 import { decimalize, Network } from "@fleet-sdk/common";
 import { MoonIcon, SunIcon } from "@zhuowenli/vue-feather-icons";
 import { computed } from "vue";
+import logoDarkUrl from "../assets/sigmafi-black.svg?url";
+import logoLightUrl from "../assets/sigmafi-white.svg?url";
 import { ERG_DECIMALS } from "@/constants";
 import { useChainStore } from "@/stories";
 import { useUIStore } from "@/stories/uiStore";
@@ -29,14 +31,7 @@ const ergBalance = computed(() => {
     <div class="navbar w-full px-4 flex">
       <div class="flex-1 gap-2">
         <router-link to="/" class="btn btn-ghost normal-case text-xl gap-2">
-          <img
-            v-if="ui.isDark"
-            src="../assets/sigmafi-white.svg"
-            alt="SigmaFi"
-            width="40"
-            height="40"
-          />
-          <img v-else src="../assets/sigmafi-black.svg" alt="SigmaFi" width="40" height="40" />
+          <img :src="ui.isDark ? logoDarkUrl : logoLightUrl" alt="SigmaFi" width="40" height="40" />
           <span v-if="isTestnet" class="badge badge-outline font-normal">testnet</span></router-link
         >
         <ul class="menu menu-horizontal px-1 gap-2">

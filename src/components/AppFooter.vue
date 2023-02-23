@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { useProgrammatic } from "@oruga-ui/oruga-next";
 import { onMounted } from "vue";
+import nautilusLogoUrl from "../assets/nautilus.svg?url";
 import { useUIStore } from "@/stories";
 import KYAView from "@/views/KYAView.vue";
+
 const { oruga } = useProgrammatic();
 
 const store = useUIStore();
@@ -24,7 +26,7 @@ function openKYAModal() {
 <template>
   <footer class="footer p-10 bg-base-300 bg-opacity-50 z-10 text-base-content">
     <div>
-      <img src="../assets/nautilus.svg" width="50" height="50" />
+      <img :src="nautilusLogoUrl" width="50" height="50" />
       <p>Nautilus Team</p>
       <p class="opacity-70">Ad augusta per angusta</p>
     </div>
