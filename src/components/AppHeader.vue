@@ -2,8 +2,8 @@
 import { decimalize, Network } from "@fleet-sdk/common";
 import { MoonIcon, SunIcon } from "@zhuowenli/vue-feather-icons";
 import { computed } from "vue";
-import logoDarkUrl from "../assets/sigmafi-black.svg?url";
-import logoLightUrl from "../assets/sigmafi-white.svg?url";
+import logoDarkUrl from "@/assets/sigmafi-black.svg?url";
+import logoLightUrl from "@/assets/sigmafi-white.svg?url";
 import { ERG_DECIMALS } from "@/constants";
 import { useChainStore } from "@/stories";
 import { useUIStore } from "@/stories/uiStore";
@@ -62,7 +62,7 @@ const ergBalance = computed(() => {
                 </span>
                 <img
                   v-if="wallet.connectedWallet === 'nautilus'"
-                  src="/nautilus.svg"
+                  src="@/assets/nautilus.svg?url"
                   width="24"
                   height="24"
                 />
@@ -78,7 +78,7 @@ const ergBalance = computed(() => {
                     @click="wallet.connect('nautilus')"
                   >
                     <div class="flex-grow text-left">Nautilus</div>
-                    <img src="/nautilus.svg" class="w-5 h-5" />
+                    <img src="@/assets/nautilus.svg?url" class="w-5 h-5" />
                   </a>
                 </li>
                 <li>
