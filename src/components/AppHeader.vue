@@ -31,7 +31,7 @@ const ergBalance = computed(() => {
     <div class="navbar w-full px-4 flex">
       <div class="flex-1 gap-2">
         <router-link to="/" class="btn btn-ghost normal-case text-xl gap-2">
-          <img :src="ui.isDark ? logoDarkUrl : logoLightUrl" alt="SigmaFi" width="40" height="40" />
+          <img :src="ui.isDark ? logoLightUrl : logoDarkUrl" alt="SigmaFi" width="40" height="40" />
           <span v-if="isTestnet" class="badge badge-outline font-normal">testnet</span></router-link
         >
         <ul class="menu menu-horizontal px-1 gap-2">
