@@ -13,6 +13,7 @@ export const useUIStore = defineStore("ui", () => {
 
   // computed
   const theme = computed(() => currentTheme);
+  const isDark = computed(() => currentTheme.value === "dark");
   const isKYAAccepted = computed(() => _isKyaAccepted);
 
   // actions
@@ -31,7 +32,7 @@ export const useUIStore = defineStore("ui", () => {
     setTheme(currentTheme.value);
   }
 
-  return { theme, isKYAAccepted, toggleTheme, setAcceptedKYA };
+  return { theme, isDark, isKYAAccepted, toggleTheme, setAcceptedKYA };
 });
 
 if (import.meta.hot) {

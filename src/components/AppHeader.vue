@@ -9,9 +9,10 @@ import { useWalletStore } from "@/stories/walletStore";
 import { getNetworkType, shortenString } from "@/utils";
 import { formatBigNumber } from "@/utils";
 
-const defaultStore = useUIStore();
+const ui = useUIStore();
 const wallet = useWalletStore();
 const chain = useChainStore();
+
 const isTestnet = getNetworkType() === Network.Testnet;
 
 const ergBalance = computed(() => {
@@ -27,8 +28,15 @@ const ergBalance = computed(() => {
   >
     <div class="navbar w-full px-4 flex">
       <div class="flex-1 gap-2">
-        <router-link to="/" class="btn btn-ghost normal-case text-xl gap-2"
-          ><div>Sigma<span class="font-normal">Fi</span></div>
+        <router-link to="/" class="btn btn-ghost normal-case text-xl gap-2">
+          <img
+            v-if="ui.isDark"
+            src="../assets/sigmafi-white.svg"
+            alt="SigmaFi"
+            width="40"
+            height="40"
+          />
+          <img v-else src="../assets/sigmafi-black.svg" alt="SigmaFi" width="40" height="40" />
           <span v-if="isTestnet" class="badge badge-outline font-normal">testnet</span></router-link
         >
         <ul class="menu menu-horizontal px-1 gap-2">
@@ -93,9 +101,9 @@ const ergBalance = computed(() => {
             </ul>
           </li>
           <li>
-            <a class="btn btn-ghost" @click="defaultStore.toggleTheme()">
-              <sun-icon v-if="defaultStore.theme.value === 'light'" />
-              <moon-icon v-else />
+            <a class="btn btn-ghost" @click="ui.toggleTheme()">
+              <moon-icon v-if="ui.isDark" />
+              <sun-icon v-else />
             </a>
           </li>
         </ul>
