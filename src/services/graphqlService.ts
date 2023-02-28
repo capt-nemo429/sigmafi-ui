@@ -17,7 +17,7 @@ class GraphQLService {
     this._client = createClient({
       url:
         getNetworkType() === Network.Mainnet
-          ? "https://graphql.erg.zelcore.io/"
+          ? "https://explore.sigmaspace.io/api/graphql"
           : "https://tn-ergo-explorer.anetabtc.io/graphql",
       requestPolicy: "network-only"
     });
