@@ -47,25 +47,25 @@ function calculateColor(tokenId: string) {
       <picture-nft-icon
         v-if="isPictureNft"
         :class="customClass"
-        class="fill-gray-300"
+        class="fill-gray-400 opacity-50"
         :style="`fill: ${color}`"
       />
       <audio-nft-icon
         v-else-if="isAudioNft"
         :class="customClass"
-        class="fill-gray-300"
+        class="fill-gray-400 opacity-50"
         :style="`fill: ${color}`"
       />
       <video-nft-icon
         v-else-if="isVideoNft"
         :class="customClass"
-        class="fill-gray-300"
+        class="fill-gray-400 opacity-50"
         :style="`fill: ${color}`"
       />
       <empty-icon
         v-else
         :class="customClass"
-        class="fill-gray-400 opacity-60"
+        class="fill-gray-400 opacity-50"
         :style="`fill: ${color}`"
       />
     </template>
