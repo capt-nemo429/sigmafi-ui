@@ -33,7 +33,7 @@ class SpectrumService {
 
     const [ergPrice, data] = await Promise.all([
       coinGeckoService.getErgPrice(),
-      get<SpectrumPool[]>(new URL("v1/amm/markets", BASE_URL), {
+      get<SpectrumPool[]>(new URL("v1/amm/pools/summary", BASE_URL), {
         from: this._getUtcTimestamp(fromDate),
         to: this._getUtcTimestamp(new Date())
       })
