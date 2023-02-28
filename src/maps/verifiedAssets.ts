@@ -23,14 +23,6 @@ export const VERIFIED_ASSETS: VerifiedAsset[] = [
     metadata: { name: "Paideia", decimals: 4 }
   },
   {
-    tokenId: "472c3d4ecaa08fb7392ff041ee2e6af75f4a558810a74b28600549d5392810e8",
-    metadata: { name: "NETA", decimals: 6 }
-  },
-  {
-    tokenId: "e8b20745ee9d18817305f32eb21015831a48f02d40980de6e849f886dca7f807",
-    metadata: { name: "Flux", decimals: 8 }
-  },
-  {
     tokenId: "9a06d9e545a41fd51eeffc5e20d818073bf820c635e2a9d922269913e0de369d",
     metadata: { name: "SPF", decimals: 6 }
   }
