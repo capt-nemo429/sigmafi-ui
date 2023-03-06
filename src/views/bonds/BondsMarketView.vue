@@ -1,16 +1,20 @@
 <script setup lang="ts">
-import { Box, isEmpty, orderBy } from "@fleet-sdk/common";
+import { QueryBoxesArgs } from "@ergo-graphql/types";
+import { Amount, Box, isEmpty, orderBy, some } from "@fleet-sdk/common";
 import { useProgrammatic } from "@oruga-ui/oruga-next";
 import { ArrowDownIcon, ArrowUpIcon } from "@zhuowenli/vue-feather-icons";
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, reactive, Ref, ref, watch } from "vue";
+import BondCard from "./components/BondCard.vue";
 import BondOrderCard from "./components/BondOrderCard.vue";
 import { VERIFIED_ASSETS } from "@/maps";
-import { buildOrderContract } from "@/offchain/plugins";
+import { buildBondContract, buildOrderContract } from "@/offchain/plugins";
 import { graphQLService } from "@/services/graphqlService";
 import { useChainStore } from "@/stories";
 import { useWalletStore } from "@/stories/walletStore";
-import { parseOpenOrderBox } from "@/utils";
+import { parseBondBox, parseOpenOrderBox } from "@/utils";
 import NewLoanRequestView from "@/views/bonds/NewLoanRequestView.vue";
+
+type MarketTab = "orders" | "ongoing";
 
 type Sorting = {
   by: "newest" | "principal" | "interest" | "ratio" | "term" | "apr";
@@ -22,21 +26,33 @@ const { oruga } = useProgrammatic();
 const wallet = useWalletStore();
 const chain = useChainStore();
 
-const boxes = ref<Readonly<Box<string>>[]>([]);
+const orderContracts = VERIFIED_ASSETS.map((a) => buildOrderContract(a.tokenId, "on-close"));
+const loanContracts = VERIFIED_ASSETS.map((a) => buildBondContract(a.tokenId));
+
+const orderBoxes = ref<ReadonlyArray<Box<string>>>([]);
+const ongoingBoxes = ref<ReadonlyArray<Box<string>>>([]);
+
+const selectedTab = ref<MarketTab>("orders");
 const loading = reactive({ boxes: true, metadata: true });
-const filter = reactive({ hideUndercollateralized: true });
+const filter = reactive({ hideUndercollateralizedRequests: true });
 const sort = reactive<Sorting>({ by: "newest", asc: false });
 
 const orders = computed(() => {
-  return boxes.value.map((box) =>
+  return orderBoxes.value.map((box) =>
     parseOpenOrderBox(box, chain.tokensMetadata, chain.priceRates, wallet.usedAddresses)
+  );
+});
+
+const ongoingLoans = computed(() => {
+  return ongoingBoxes.value.map((box) =>
+    parseBondBox(box, chain.tokensMetadata, chain.priceRates, chain.height, wallet.usedAddresses)
   );
 });
 
 const filteredOrders = computed(() => {
   let filtered = orders.value;
 
-  if (filter.hideUndercollateralized) {
+  if (filter.hideUndercollateralizedRequests) {
     filtered = filtered.filter((order) => order.ratio && order.ratio.gte(100));
   }
 
@@ -87,28 +103,150 @@ function openNewLoanModal() {
   });
 }
 
-onMounted(async () => {
-  loading.boxes = true;
-  loading.metadata = true;
-  const contracts = VERIFIED_ASSETS.map((a) => buildOrderContract(a.tokenId, "on-close"));
-  let rawBoxes = await graphQLService.getBoxes({
-    ergoTrees: contracts,
-    spent: false
-  });
+watch(
+  () => selectedTab.value,
+  async (newVal) => {
+    if (!newVal) {
+      orderBoxes.value = [];
 
-  boxes.value = rawBoxes
-    .filter((box) => contracts.includes(box.ergoTree))
-    .map((box) => Object.freeze(box));
-  loading.boxes = false;
+      return;
+    }
 
-  await chain.loadTokensMetadata(boxes.value.flatMap((box) => box.assets.map((t) => t.tokenId)));
-  loading.metadata = false;
-});
+    switch (newVal) {
+      case "orders":
+        await loadRequests();
+        break;
+      case "ongoing":
+        await loadOngoingLoans();
+        break;
+    }
+  },
+  { immediate: true }
+);
+
+async function setLoading(state: boolean) {
+  loading.boxes = state;
+  loading.metadata = state;
+}
+
+function loadRequests() {
+  return loadData(
+    "orders",
+    [
+      {
+        args: {
+          ergoTrees: orderContracts,
+          spent: false
+        }
+      }
+    ],
+    orderBoxes,
+    (box) => orderContracts.includes(box.ergoTree)
+  );
+}
+
+function loadOngoingLoans() {
+  return loadData(
+    "ongoing",
+    [
+      {
+        args: {
+          ergoTrees: loanContracts,
+          spent: false
+        }
+      }
+    ],
+    ongoingBoxes,
+    (box) => loanContracts.includes(box.ergoTree)
+  );
+}
+
+async function loadData(
+  tab: MarketTab,
+  queries: { args: QueryBoxesArgs }[],
+  boxRef: Ref<ReadonlyArray<Box<string>>>,
+  validate: (box: Box<Amount>) => boolean
+) {
+  setLoading(true);
+
+  boxRef.value = [];
+  for (const query of queries) {
+    const chunk = await graphQLService.getBoxes(query.args);
+
+    if (selectedTab.value !== tab) {
+      break;
+    }
+
+    if (some(chunk)) {
+      boxRef.value = boxRef.value.concat(chunk.filter(validate).map((box) => Object.freeze(box)));
+
+      loading.boxes = false;
+      await chain.loadTokensMetadata(chunk.flatMap((x) => x.assets.map((t) => t.tokenId)));
+      loading.metadata = false;
+    }
+  }
+
+  setLoading(false);
+}
 </script>
 
 <template>
-  <div class="grid grid-cols-1 gap-8">
-    <div class="flex flex-wrap flex-row justify-between gap-4 items-center">
+  <div class="grid grid-cols-1 gap-10">
+    <div class="flex flex-wrap flex-row justify-between gap-4 items-center pb-2">
+      <div class="flex flex-wrap flex-row gap-4 items-center">
+        <div class="tabs h-12 tabs-boxed max-w-max">
+          <a
+            class="tab h-full text-md"
+            :class="{ 'tab-active': selectedTab === 'orders' }"
+            @click="selectedTab = 'orders'"
+            >Loan requests</a
+          >
+          <a
+            class="tab h-full text-md"
+            :class="{ 'tab-active': selectedTab === 'ongoing' }"
+            @click="selectedTab = 'ongoing'"
+            >Ongoing loans</a
+          >
+        </div>
+
+        <template v-if="selectedTab === 'orders'">
+          <div class="divider divider-horizontal py-1 mx-0"></div>
+
+          <div class="flex gap-4">
+            <div class="form-control">
+              <div class="input-group">
+                <select
+                  v-model="sort.by"
+                  class="select select-bordered font-normal select-none !outline-none border-l-0"
+                >
+                  <option value="newest">Newest</option>
+                  <option value="principal">Amount</option>
+                  <option value="interest">Interest</option>
+                  <option value="ratio">Ratio</option>
+                  <option value="term">Term</option>
+                  <option value="apr">APR</option>
+                </select>
+                <button class="btn animate-none outline-none" @click="sort.asc = !sort.asc">
+                  <arrow-up-icon v-if="sort.asc" />
+                  <arrow-down-icon v-else />
+                </button>
+              </div>
+            </div>
+            <label class="cursor-pointer label p-0 label-text-alt gap-2">
+              <input
+                v-model="filter.hideUndercollateralizedRequests"
+                type="checkbox"
+                class="checkbox"
+              />
+              <span class="label-text"
+                >Hide undercollateralized<br />
+                requests</span
+              >
+            </label>
+          </div>
+        </template>
+      </div>
+
       <button
         class="btn btn-primary shadow flex-col flex-grow sm:flex-grow-0"
         :disabled="!wallet.connected || wallet.loading"
@@ -116,55 +254,53 @@ onMounted(async () => {
       >
         New loan request
       </button>
-
-      <div class="flex flex-row gap-4 items-center">
-        <label class="cursor-pointer label gap-2">
-          <input v-model="filter.hideUndercollateralized" type="checkbox" class="checkbox" />
-          <span class="label-text">Hide undercollateralized<br />loan requests</span>
-        </label>
-        <div class="form-control">
-          <div class="input-group">
-            <select
-              v-model="sort.by"
-              class="select select-bordered select-none !outline-none border-l-0"
-            >
-              <option value="newest">Newest</option>
-              <option value="principal">Amount</option>
-              <option value="interest">Interest</option>
-              <option value="ratio">Ratio</option>
-              <option value="term">Term</option>
-              <option value="apr">APR</option>
-            </select>
-            <button class="btn animate-none outline-none" @click="sort.asc = !sort.asc">
-              <arrow-up-icon v-if="sort.asc" />
-              <arrow-down-icon v-else />
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
+
     <div
       class="grid grid-cols-1 gap-8 md:gap-12 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
     >
-      <template v-if="loading.boxes || (loading.metadata && filteredOrders.length === 0)">
-        <bond-order-card
-          v-for="n in 4"
-          :key="n"
-          :loading-box="loading.boxes || loading.metadata"
-          :loading-metadata="loading.metadata"
-        />
+      <template v-if="selectedTab === 'orders'">
+        <template v-if="loading.boxes || (loading.metadata && filteredOrders.length === 0)">
+          <bond-order-card
+            v-for="n in 4"
+            :key="n"
+            :loading-box="loading.boxes || loading.metadata"
+            :loading-metadata="loading.metadata"
+          />
+        </template>
+        <template v-else>
+          <bond-order-card
+            v-for="order in filteredOrders"
+            :key="order.box.boxId"
+            :order="order"
+            :loading-box="loading.boxes"
+            :loading-metadata="loading.metadata"
+          />
+        </template>
       </template>
       <template v-else>
-        <bond-order-card
-          v-for="order in filteredOrders"
-          :key="order.box.boxId"
-          :order="order"
-          :loading-box="loading.boxes"
-          :loading-metadata="loading.metadata"
-        />
+        <template v-if="loading.boxes || (loading.metadata && filteredOrders.length === 0)">
+          <bond-card
+            v-for="n in 4"
+            :key="n"
+            :display-lender-and-borrower="true"
+            :loading-box="loading.boxes"
+            :loading-metadata="loading.metadata"
+          />
+        </template>
+        <template v-else>
+          <bond-card
+            v-for="bond in ongoingLoans"
+            :key="bond.box.boxId"
+            :display-lender-and-borrower="true"
+            :bond="bond"
+            :loading-box="loading.boxes"
+            :loading-metadata="loading.metadata"
+          />
+        </template>
       </template>
     </div>
-    <div v-if="!loading.boxes && isEmpty(orders)" class="text-7xl text-center w-full pb-20">
+    <div v-if="!loading.boxes && isEmpty(filteredOrders)" class="text-7xl text-center w-full pb-20">
       <div class="py-20 opacity-90">No open orders for now.</div>
     </div>
   </div>

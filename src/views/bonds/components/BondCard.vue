@@ -15,6 +15,7 @@ const wallet = useWalletStore();
 
 const props = defineProps({
   bond: { type: Object as PropType<Bond>, required: false, default: undefined },
+  displayLenderAndBorrower: { type: Boolean, default: false },
   loadingBox: { type: Boolean, default: false },
   loadingMetadata: { type: Boolean, default: false }
 });
@@ -95,7 +96,6 @@ async function repay() {
     </div>
 
     <div class="stat">
-      <!-- <div class="stat-title h-fit">Collateral</div> -->
       <div class="h-fit flex justify-between items-center">
         <span class="stat-title">Collateral</span>
         <bond-ratio-badge :ratio="bond?.ratio" />
@@ -125,8 +125,10 @@ async function repay() {
                   show-badge
                   :asset="collateral"
                   :max-name-len="50"
+                  class="w-full"
                   root-class="flex-row-reverse w-full items-center gap-2"
-                  amount-class="w-full text-right"
+                  amount-class="text-right"
+                  name-class="w-full"
                   badge-class="w-5 h-5"
                 />
               </div>
@@ -138,11 +140,11 @@ async function repay() {
 
     <div class="flex-grow opacity-0"></div>
 
-    <div v-if="bond?.type === 'debit'" class="stat">
+    <div v-if="props.displayLenderAndBorrower || bond?.type === 'debit'" class="stat">
       <div class="stat-title skeleton-placeholder">Lender</div>
       <a
         :href="addressUrlFor(bond?.lender)"
-        class="link link-hover text-sm skeleton-placeholder"
+        class="link link-hover text-sm skeleton-placeholder font-mono"
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -150,11 +152,11 @@ async function repay() {
         <external-link-icon class="inline pb-1" />
       </a>
     </div>
-    <div v-else class="stat">
+    <div v-if="props.displayLenderAndBorrower || bond?.type === 'lend'" class="stat">
       <div class="stat-title skeleton-placeholder">Borrower</div>
       <a
         :href="addressUrlFor(bond?.borrower)"
-        class="link link-hover text-sm skeleton-placeholder"
+        class="link link-hover text-sm skeleton-placeholder font-mono"
         target="_blank"
         rel="noopener noreferrer"
       >

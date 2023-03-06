@@ -12,12 +12,12 @@ import { useWalletStore } from "@/stories/walletStore";
 import { parseBondBox, parseOpenOrderBox } from "@/utils";
 import BondOrderCard from "@/views/bonds/components/BondOrderCard.vue";
 
-type Tab = "orders" | "loans" | "debits";
+type DashboardTab = "orders" | "loans" | "debits";
 
 const chain = useChainStore();
 const wallet = useWalletStore();
 
-const selectedTab = ref<Tab>("orders");
+const selectedTab = ref<DashboardTab>("orders");
 const boxes = ref<Readonly<Box<string>>[]>([]);
 const loading = reactive({ boxes: true, metadata: true });
 
@@ -93,7 +93,7 @@ async function setLoading(state: boolean) {
   loading.metadata = state;
 }
 
-async function loadOpenOrders(tab: Tab) {
+async function loadOpenOrders(tab: DashboardTab) {
   await loadData(
     tab,
     publicKeys.map((pk) => ({
@@ -112,7 +112,7 @@ async function loadOpenOrders(tab: Tab) {
   );
 }
 
-async function loadLoans(tab: Tab) {
+async function loadLoans(tab: DashboardTab) {
   await loadData(
     tab,
     publicKeys.map((pk) => ({
@@ -127,7 +127,7 @@ async function loadLoans(tab: Tab) {
   );
 }
 
-async function loadDebits(tab: Tab) {
+async function loadDebits(tab: DashboardTab) {
   await loadData(
     tab,
     publicKeys.map((pk) => ({
@@ -143,7 +143,7 @@ async function loadDebits(tab: Tab) {
 }
 
 async function loadData(
-  tab: Tab,
+  tab: DashboardTab,
   queries: { args: QueryBoxesArgs; pk: string }[],
   validate: (pk: string) => (box: Box<Amount>) => boolean
 ) {
@@ -173,22 +173,22 @@ async function loadData(
 </script>
 
 <template>
-  <div class="grid grid-cols-1 gap-8">
-    <div class="tabs tabs-boxed max-w-max">
+  <div class="grid grid-cols-1 gap-10">
+    <div class="tabs h-12 tabs-boxed max-w-max mb-2">
       <a
-        class="tab text-md"
+        class="tab h-full text-md"
         :class="{ 'tab-active': selectedTab === 'orders' }"
         @click="selectedTab = 'orders'"
         >Open orders</a
       >
       <a
-        class="tab text-md"
+        class="tab h-full text-md"
         :class="{ 'tab-active': selectedTab === 'loans' }"
         @click="selectedTab = 'loans'"
         >Loans</a
       >
       <a
-        class="tab text-md"
+        class="tab h-full text-md"
         :class="{ 'tab-active': selectedTab === 'debits' }"
         @click="selectedTab = 'debits'"
         >Debits</a

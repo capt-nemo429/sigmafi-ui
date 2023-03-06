@@ -34,7 +34,7 @@ const ergBalance = computed(() => {
           <img :src="ui.isDark ? logoLightUrl : logoDarkUrl" alt="SigmaFi" width="40" height="40" />
           <span v-if="isTestnet" class="badge badge-outline font-normal">testnet</span></router-link
         >
-        <ul class="menu menu-horizontal px-1 gap-2">
+        <ul class="menu menu-horizontal px-1 gap-2 hidden sm:inline-flex">
           <li>
             <router-link to="/" active-class="active-item">Market</router-link>
           </li>

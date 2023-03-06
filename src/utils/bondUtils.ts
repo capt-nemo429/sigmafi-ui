@@ -121,7 +121,7 @@ export function parseBondBox(
 ): Bond {
   const collateral = box.assets.map((token) => ({
     tokenId: token.tokenId,
-    amount: decimalizeBigNumber(BigNumber(token.amount), metadata[token.tokenId].decimals),
+    amount: decimalizeBigNumber(BigNumber(token.amount), metadata[token.tokenId]?.decimals),
     metadata: metadata[token.tokenId]
   }));
 
