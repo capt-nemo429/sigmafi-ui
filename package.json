@@ -12,8 +12,8 @@
     "fix:lint": "eslint 'src/**/*.{js,ts,vue}' --fix"
   },
   "dependencies": {
-    "@fleet-sdk/common": "0.1.0-alpha.20",
-    "@fleet-sdk/core": "0.1.0-alpha.20",
+    "@fleet-sdk/common": "0.1.0-alpha.22",
+    "@fleet-sdk/core": "0.1.0-alpha.22",
     "@noble/hashes": "^1.1.5",
     "@oruga-ui/oruga-next": "^0.5.10",
     "@urql/core": "^3.1.1",
