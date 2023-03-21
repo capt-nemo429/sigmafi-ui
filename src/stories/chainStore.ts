@@ -1,6 +1,6 @@
 import { AddressBalance } from "@ergo-graphql/types";
 import { isEmpty, NonMandatoryRegisters } from "@fleet-sdk/common";
-import { ErgoAddress } from "@fleet-sdk/core";
+import { ErgoAddress, SParse } from "@fleet-sdk/core";
 import BigNumber from "bignumber.js";
 import { uniq } from "lodash-es";
 import { defineStore } from "pinia";
@@ -105,16 +105,22 @@ export const useChainStore = defineStore("chain", () => {
 
     for await (const tokensMetadata of graphQLService.yeldTokensMetadata(tokenIds)) {
       for (const metadata of tokensMetadata) {
-        const register = (metadata.box.additionalRegisters as NonMandatoryRegisters)?.R7;
+        const registers = metadata.box.additionalRegisters as NonMandatoryRegisters;
 
-        _metadata.value[metadata.tokenId] = {
+        const parsedMetadata: AssetMetadata = {
           name: metadata?.name || undefined,
           decimals: metadata.decimals || undefined,
           type:
-            register && register.startsWith("0e02") && register.length === 8
-              ? (register?.substring(4) as AssetType)
+            registers?.R7 && registers.R7.startsWith("0e02") && registers.R7.length === 8
+              ? (registers.R7?.substring(4) as AssetType)
               : undefined
         };
+
+        if (parsedMetadata.type === AssetType.PictureArtwork && registers.R9) {
+          parsedMetadata.url = new TextDecoder().decode(SParse(registers.R9));
+        }
+
+        _metadata.value[metadata.tokenId] = parsedMetadata;
       }
     }
 

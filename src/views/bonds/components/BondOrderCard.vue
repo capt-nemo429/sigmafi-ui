@@ -1,14 +1,18 @@
 <script setup lang="ts">
+import { isEmpty } from "@fleet-sdk/common";
 import { useProgrammatic } from "@oruga-ui/oruga-next";
-import { PropType, ref, toRaw } from "vue";
+import { computed, PropType, ref, toRaw } from "vue";
 import CloseOrderConfirm from "./CloseOrderConfirm.vue";
 import AssetIcon from "@/components/AssetIcon.vue";
 import AssetRow from "@/components/AssetRow.vue";
 import BondRatioBadge from "@/components/BondRatioBadge.vue";
 import { TransactionFactory } from "@/offchain/transactionFactory";
 import { useWalletStore } from "@/stories/walletStore";
+import { AssetType } from "@/types";
 import { formatBigNumber, Order, sendTransaction } from "@/utils";
 
+const IPFS_PROTOCOL_PREFIX = "ipfs://";
+const IPFS_GENERAL_GATEWAY = "https://cloudflare-ipfs.com/ipfs/";
 const { oruga } = useProgrammatic();
 
 const wallet = useWalletStore();
@@ -21,12 +25,42 @@ const props = defineProps({
 
 const cancelling = ref(false);
 
+function resolveIpfs(url?: string): string {
+  if (!url) {
+    return "";
+  }
+
+  if (!url.startsWith(IPFS_PROTOCOL_PREFIX)) {
+    return url;
+  } else {
+    return url.replace(IPFS_PROTOCOL_PREFIX, IPFS_GENERAL_GATEWAY);
+  }
+}
+
+const nftBackgroundUrl = computed(() => {
+  const nfts = props.order?.collateral.filter(
+    (x) => x.metadata?.type === AssetType.PictureArtwork && !!x.metadata?.url
+  );
+
+  if (isEmpty(nfts)) {
+    return;
+  }
+
+  const fileUrl = nfts[nfts.length > 1 ? randMax(nfts.length) : 0].metadata?.url;
+
+  return resolveIpfs(fileUrl);
+});
+
 function openModal() {
   oruga.modal.open({
     component: CloseOrderConfirm,
     props: { order: props.order },
     width: "30rem"
   });
+}
+
+function randMax(max: number): number {
+  return Math.floor(Math.random() * max);
 }
 
 async function cancelOrder() {
@@ -43,9 +77,14 @@ async function cancelOrder() {
 
 <template>
   <div
-    class="stats flex flex-col bg-base-100 stats-vertical shadow"
+    class="stats flex flex-col bg-base-100 stats-vertical shadow relative"
     :class="{ skeleton: loadingBox }"
   >
+    <img
+      v-if="nftBackgroundUrl"
+      :src="nftBackgroundUrl"
+      class="h-full absolute opacity-20 object-cover z-0 dark:opacity-10"
+    />
     <div class="stat">
       <div class="stat-title skeleton-placeholder">
         {{ order?.term.value }} {{ order?.term.interval }} loan
@@ -146,3 +185,9 @@ async function cancelOrder() {
     </div>
   </div>
 </template>
+
+<style scoped>
+.stat {
+  @apply z-10;
+}
+</style>

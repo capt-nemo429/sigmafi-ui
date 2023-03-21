@@ -14,6 +14,7 @@ export type AssetMetadata = {
   name?: string;
   decimals?: number;
   type?: AssetType;
+  url?: string;
 };
 
 export type AssetInfo<AmountType> = {
