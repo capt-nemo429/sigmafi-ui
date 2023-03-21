@@ -27,6 +27,6 @@ const price = computed(() => {
     :class="customClass"
   >
     <span v-if="!asset" :class="customClass" class="skeleton-placeholder">loading...</span>
-    <span v-else>~{{ formatBigNumber(price, 2) }} USD</span>
+    <span v-else-if="!asset.metadata?.type">~{{ formatBigNumber(price, 2) }} USD</span>
   </div>
 </template>
