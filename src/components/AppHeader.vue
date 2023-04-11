@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { decimalize, Network } from "@fleet-sdk/common";
-import { MoonIcon, SunIcon } from "@zhuowenli/vue-feather-icons";
+import { MoonIcon, SunIcon, FileTextIcon } from "@zhuowenli/vue-feather-icons";
 import { computed } from "vue";
 import logoDarkUrl from "@/assets/sigmafi-black.svg?url";
 import logoLightUrl from "@/assets/sigmafi-white.svg?url";
@@ -100,6 +100,14 @@ const ergBalance = computed(() => {
               <moon-icon v-if="ui.isDark" />
               <sun-icon v-else />
             </a>
+          </li>
+          <li>
+            <a
+              href="https://sigmafi.gitbook.io/sigmafi-docs/"
+              target="_blank"
+              rel="noopener noreferrer"
+              ><file-text-icon /> Docs</a
+            >
           </li>
         </ul>
       </div>

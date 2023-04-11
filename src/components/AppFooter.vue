@@ -73,6 +73,13 @@ function openKYAModal() {
     <div>
       <span class="footer-title">KYA</span>
       <a class="link link-hover" @click="openKYAModal">Know Your Assumptions</a>
+      <a
+        href="https://sigmafi.gitbook.io/sigmafi-docs/"
+        target="_blank"
+        class="link link-hover"
+        rel="noopener noreferrer"
+        ><file-text-icon /> Docs</a
+      >
     </div>
   </footer>
 </template>
