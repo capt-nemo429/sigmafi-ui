@@ -43,8 +43,7 @@ const HI_LIQ_ASSETS = [
 // https://api.spectrum.fi/v1/docs
 const BASE_URL = "https://api.spectrum.fi";
 const SPECTRUM_ERG_TOKEN_ID = "0000000000000000000000000000000000000000000000000000000000000000";
-const MIN_REQ_LIQUIDITY = Number(10000000000000);
-// 360305863153917;
+
 class SpectrumService {
   public async getTokenRates(): Promise<AssetPriceRate> {
     const fromDate = new Date();
