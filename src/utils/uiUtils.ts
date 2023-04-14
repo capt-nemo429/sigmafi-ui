@@ -42,7 +42,7 @@ export async function sendTransaction(
     console.error(e);
 
     let message = "Unknown error.";
-    if (e instanceof Error) {
+    if (isDefined(e.message)) {
       message = e.message;
     } else if (isDefined(e.info)) {
       if (e.code === 2) {
@@ -52,6 +52,8 @@ export async function sendTransaction(
       }
 
       message = "dApp Connector: " + e.info;
+    } else if (typeof e === "string") {
+      message = e;
     }
 
     showToast(message, "alert-error");
