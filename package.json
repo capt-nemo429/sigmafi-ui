@@ -33,6 +33,7 @@
     "@nautilus-js/eip12-types": "^0.1.9",
     "@types/cleave.js": "^1.4.8",
     "@types/lodash-es": "^4.17.9",
+    "@types/node": "^20.5.9",
     "@typescript-eslint/eslint-plugin": "^6.6.0",
     "@typescript-eslint/parser": "^6.6.0",
     "@vitejs/plugin-vue": "^4.3.4",

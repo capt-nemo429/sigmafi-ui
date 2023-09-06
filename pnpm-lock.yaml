@@ -20,6 +20,9 @@ dependencies:
   '@oruga-ui/oruga-next':
     specifier: ^0.5.10
     version: 0.5.10(vue@3.3.4)
+  '@types/node':
+    specifier: ^20.5.9
+    version: 20.5.9
   '@urql/core':
     specifier: ^4.1.2
     version: 4.1.2(graphql@16.8.0)
@@ -108,7 +111,7 @@ devDependencies:
     version: 5.2.2
   vite:
     specifier: ^4.4.9
-    version: 4.4.9
+    version: 4.4.9(@types/node@20.5.9)
   vite-svg-loader:
     specifier: ^4.0.0
     version: 4.0.0
@@ -555,6 +558,9 @@ packages:
     resolution: {integrity: sha512-trNJ/vtMZYMLhfN45uLq4ShQSw0/S7xCTLLVM+WM1rmFpba/VS42jVUgaO3w/NOLiWR/09lnYk0yMaA/atdIsg==}
     dev: true
 
+  /@types/node@20.5.9:
+    resolution: {integrity: sha512-PcGNd//40kHAS3sTlzKB9C9XL4K0sTup8nbG5lC14kzEteTNuAFh9u5nA0o5TWnSG2r/JNPRXFVcHJIIeRlmqQ==}
+
   /@types/prop-types@15.7.5:
     resolution: {integrity: sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w==}
     dev: true
@@ -722,7 +728,7 @@ packages:
       vite: ^4.0.0
       vue: ^3.2.25
     dependencies:
-      vite: 4.4.9
+      vite: 4.4.9(@types/node@20.5.9)
       vue: 3.3.4
     dev: true
 
@@ -2865,7 +2871,7 @@ packages:
       svgo: 3.0.2
     dev: true
 
-  /vite@4.4.9:
+  /vite@4.4.9(@types/node@20.5.9):
     resolution: {integrity: sha512-2mbUn2LlUmNASWwSCNSJ/EG2HuSRTnVNaydp6vMCm5VIqJsjMfbIWtbH2kDuwUVW5mMUKKZvGPX/rqeqVvv1XA==}
     engines: {node: ^14.18.0 || >=16.0.0}
     hasBin: true
@@ -2893,6 +2899,7 @@ packages:
       terser:
         optional: true
     dependencies:
+      '@types/node': 20.5.9
       esbuild: 0.18.20
       postcss: 8.4.29
       rollup: 3.29.0
