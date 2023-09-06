@@ -162,7 +162,7 @@ async function cancelOrder() {
         />
       </div>
       <div class="stat-desc skeleton-placeholder">
-        {{ formatBigNumber(order?.interest?.apr, 3) }}% APR
+        {{ formatBigNumber(order?.interest?.apr, 2) }}% APR
       </div>
       <div class="stat-actions text-center flex gap-2">
         <button

@@ -7,11 +7,11 @@ import BigNumber from "bignumber.js";
 import { uniq } from "lodash-es";
 import { defineStore } from "pinia";
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { AssetPriceRates, assetPricingService } from "../services/assetPricingService";
 import { ERG_DECIMALS, ERG_TOKEN_ID } from "@/constants";
 import { VERIFIED_ASSETS } from "@/maps/verifiedAssets";
 import { buildBondContract, buildOrderContract } from "@/offchain/plugins";
 import { graphQLService } from "@/services/graphqlService";
-import { AssetPriceRate, spectrumService } from "@/services/spectrumService";
 import { AssetMetadata, AssetType } from "@/types";
 import { decimalizeBigNumber, getNetworkType, toDict } from "@/utils";
 
@@ -29,7 +29,7 @@ export const useChainStore = defineStore("chain", () => {
   // private state
   const _loading = ref(true);
   const _height = ref<number>(0);
-  const _priceRates = ref<AssetPriceRate>({});
+  const _priceRates = ref<AssetPriceRates>({});
   const _tvl = ref<AddressBalance[]>([]);
 
   const _metadata = ref<StateTokenMetadata>(
@@ -139,7 +139,7 @@ export const useChainStore = defineStore("chain", () => {
   }
 
   async function loadPriceRates() {
-    const tokens = await spectrumService.getTokenRates();
+    const tokens = await assetPricingService.getTokenRates();
     _priceRates.value = tokens;
 
     localStorage.setItem("prices", JSON.stringify(tokens));
