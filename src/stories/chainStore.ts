@@ -1,6 +1,8 @@
 import { AddressBalance } from "@ergo-graphql/types";
-import { isEmpty, NonMandatoryRegisters } from "@fleet-sdk/common";
-import { ErgoAddress, SParse } from "@fleet-sdk/core";
+import { first, isEmpty, NonMandatoryRegisters } from "@fleet-sdk/common";
+import { ErgoAddress } from "@fleet-sdk/core";
+import { utf8 } from "@fleet-sdk/crypto";
+import { parse } from "@fleet-sdk/serializer";
 import BigNumber from "bignumber.js";
 import { uniq } from "lodash-es";
 import { defineStore } from "pinia";
@@ -22,7 +24,7 @@ const CONTRACT_ADDRESSES = [
 
 export const useChainStore = defineStore("chain", () => {
   // private
-  let _timer: NodeJS.Timer;
+  let _timer: number;
 
   // private state
   const _loading = ref(true);
@@ -117,7 +119,14 @@ export const useChainStore = defineStore("chain", () => {
         };
 
         if (parsedMetadata.type === AssetType.PictureArtwork && registers.R9) {
-          parsedMetadata.url = new TextDecoder().decode(SParse(registers.R9));
+          let r9 = parse<Uint8Array | Uint8Array[]>(registers.R9, "safe");
+          if (r9 instanceof Array) {
+            r9 = first(r9);
+          }
+
+          if (r9) {
+            parsedMetadata.url = utf8.encode(r9);
+          }
         }
 
         _metadata.value[metadata.tokenId] = parsedMetadata;
