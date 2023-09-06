@@ -96,7 +96,7 @@ export function OpenOrderPlugin(order: OpenOrderParams): FleetPlugin {
   // todo: add collateral inclusion guard
   // todo: add maturity check based on contract type
 
-  if (order.maturityLength > STORAGE_PERIOD) {
+  if (order.maturityLength >= STORAGE_PERIOD) {
     throw `The term is over storage rent period of ${STORAGE_PERIOD} blocks.`;
   }
 
@@ -182,7 +182,7 @@ export function CloseOrderPlugin(
 
     const amount = parse<bigint>(orderBox.additionalRegisters.R5);
     const term = parse<number>(orderBox.additionalRegisters.R7);
-    if (term > STORAGE_PERIOD) {
+    if (term >= STORAGE_PERIOD) {
       throw `The term is over storage rent period of ${STORAGE_PERIOD} blocks.`;
     }
 
