@@ -64,7 +64,7 @@ export function buildOrderContract(tokenId: string, type: OpenOrderType) {
     return type === "on-close" ? ORDER_ON_CLOSE_ERG_CONTRACT : ORDER_FIXED_ERG_CONTRACT;
   }
 
-  const hash = hex.encode(blake2b256(buildBondContract(tokenId)));
+  const hash = hex.encode(blake2b256(hex.decode(buildBondContract(tokenId))));
   const template =
     type === "on-close"
       ? ORDER_ON_CLOSE_TOKEN_CONTRACT_TEMPLATE
