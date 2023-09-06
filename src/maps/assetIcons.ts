@@ -17,5 +17,6 @@ export const ASSET_ICONS: { [tokenId: string]: string } = {
   ["3405d8f709a19479839597f9a22a7553bdfc1a590a427572787d7c44a88b6386"]: "love.svg",
   ["4c8ac00a28b198219042af9c03937eecb422b34490d55537366dc9245e85d4e1"]: "woodennickels.svg",
   ["9a06d9e545a41fd51eeffc5e20d818073bf820c635e2a9d922269913e0de369d"]: "spf.svg",
-  ["089990451bb430f05a85f4ef3bcb6ebf852b3d6ee68d86d78658b9ccef20074f"]: "quacks.svg"
+  ["089990451bb430f05a85f4ef3bcb6ebf852b3d6ee68d86d78658b9ccef20074f"]: "quacks.svg",
+  ["cbd75cfe1a4f37f9a22eaee516300e36ea82017073036f07a09c1d2e10277cda"]: "empty.svg"
 };

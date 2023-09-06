@@ -8,13 +8,14 @@ import {
   Token
 } from "@ergo-graphql/types";
 import { Box, chunk, Network, NonMandatoryRegisters, some } from "@fleet-sdk/common";
-import { Client, createClient, gql } from "@urql/core";
+import { Client, createClient, fetchExchange, gql } from "@urql/core";
 import { getNetworkType } from "@/utils/otherUtils";
 
 class GraphQLService {
   private _client: Client;
   constructor() {
     this._client = createClient({
+      exchanges: [fetchExchange],
       url:
         getNetworkType() === Network.Mainnet
           ? "https://explore.sigmaspace.io/api/graphql"
