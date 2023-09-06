@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { decimalize, Network } from "@fleet-sdk/common";
-import { MoonIcon, SunIcon, FileTextIcon } from "@zhuowenli/vue-feather-icons";
+import { FileTextIcon, MoonIcon, SunIcon } from "@zhuowenli/vue-feather-icons";
 import { computed } from "vue";
 import logoDarkUrl from "@/assets/sigmafi-black.svg?url";
 import logoLightUrl from "@/assets/sigmafi-white.svg?url";
@@ -73,8 +73,7 @@ const ergBalance = computed(() => {
               <template v-if="!wallet.connected">
                 <li>
                   <a
-                    class="opacity-50"
-                    :class="{ 'opacity-100': wallet.wallets.nautilus }"
+                    :class="{ 'opacity-50': !wallet.wallets.nautilus }"
                     @click="wallet.connect('nautilus')"
                   >
                     <div class="flex-grow text-left">Nautilus</div>
@@ -83,8 +82,7 @@ const ergBalance = computed(() => {
                 </li>
                 <li>
                   <a
-                    class="opacity-50"
-                    :class="{ 'opacity-100': wallet.wallets.safew }"
+                    :class="{ 'opacity-50': !wallet.wallets.safew }"
                     @click="wallet.connect('safew')"
                   >
                     <div class="flex-grow text-left">SAFEW</div>

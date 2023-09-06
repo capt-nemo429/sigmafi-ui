@@ -25,5 +25,9 @@ export const VERIFIED_ASSETS: VerifiedAsset[] = [
   {
     tokenId: "9a06d9e545a41fd51eeffc5e20d818073bf820c635e2a9d922269913e0de369d",
     metadata: { name: "SPF", decimals: 6 }
+  },
+  {
+    tokenId: "cbd75cfe1a4f37f9a22eaee516300e36ea82017073036f07a09c1d2e10277cda",
+    metadata: { name: "hodlERG3", decimals: 9 }
   }
 ];

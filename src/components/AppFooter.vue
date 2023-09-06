@@ -78,7 +78,7 @@ function openKYAModal() {
         target="_blank"
         class="link link-hover"
         rel="noopener noreferrer"
-        ><file-text-icon /> Docs</a
+        >Docs</a
       >
     </div>
   </footer>

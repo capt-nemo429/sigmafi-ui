@@ -1,5 +1,6 @@
 import { Box, isDefined } from "@fleet-sdk/common";
-import { ErgoAddress, SAFE_MIN_BOX_VALUE, SParse } from "@fleet-sdk/core";
+import { ErgoAddress, SAFE_MIN_BOX_VALUE } from "@fleet-sdk/core";
+import { parse } from "@fleet-sdk/serializer";
 import BigNumber from "bignumber.js";
 import { ERG_DECIMALS, ERG_TOKEN_ID } from "@/constants";
 import { ASSET_ICONS } from "@/maps/assetIcons";
@@ -7,7 +8,7 @@ import {
   extractTokenIdFromBondContract,
   extractTokenIdFromOrderContract
 } from "@/offchain/plugins";
-import { AssetPriceRate } from "@/services/spectrumService";
+import { AssetPriceRates } from "@/services/assetPricingService";
 import { StateTokenMetadata } from "@/stories";
 import { AssetMetadata } from "@/types";
 import { blockToTime, decimalizeBigNumber, getNetworkType, LoanTerm } from "@/utils/otherUtils";
@@ -45,16 +46,15 @@ export type Bond = Loan & {
 export function parseOpenOrderBox(
   box: Box<string>,
   metadata: StateTokenMetadata,
-  priceRates: AssetPriceRate,
+  priceRates: AssetPriceRates,
   ownAddresses: string[]
 ): Order {
   const collateral = box.assets.map(
-    (token) =>
-      ({
-        tokenId: token.tokenId,
-        amount: decimalizeBigNumber(BigNumber(token.amount), metadata[token.tokenId]?.decimals),
-        metadata: metadata[token.tokenId]
-      } as LoanAsset)
+    (token): LoanAsset => ({
+      tokenId: token.tokenId,
+      amount: decimalizeBigNumber(BigNumber(token.amount), metadata[token.tokenId]?.decimals),
+      metadata: metadata[token.tokenId]
+    })
   );
 
   if (BigInt(box.value) > SAFE_MIN_BOX_VALUE) {
@@ -115,7 +115,7 @@ export function parseOpenOrderBox(
 export function parseBondBox(
   box: Box<string>,
   metadata: StateTokenMetadata,
-  priceRates: AssetPriceRate,
+  priceRates: AssetPriceRates,
   currentHeight: number,
   ownAddresses: string[]
 ): Bond {
@@ -167,7 +167,7 @@ export function parseBondBox(
   return bond;
 }
 
-function calculateRatio(loan: Loan, rates: AssetPriceRate) {
+function calculateRatio(loan: Loan, rates: AssetPriceRates) {
   if (!rates[loan.principal.tokenId]) {
     return;
   }
@@ -186,7 +186,7 @@ function calculateRatio(loan: Loan, rates: AssetPriceRate) {
 }
 
 function parseOr<T>(value: string | undefined, or: T) {
-  return value ? SParse<T>(value) : or;
+  return parse<T>(value ?? "", "safe") ?? or;
 }
 
 export function verifiedToken(tokenId: string) {

@@ -6,18 +6,10 @@ import {
   FleetPlugin,
   OutputBuilder,
   SAFE_MIN_BOX_VALUE,
-  SByte,
-  SColl,
-  SConstant,
-  SGroupElement,
-  SInt,
-  SLong,
-  SParse,
-  SSigmaProp,
   TokenAmount
 } from "@fleet-sdk/core";
-import { blake2b } from "@noble/hashes/blake2b";
-import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
+import { blake2b256, hex } from "@fleet-sdk/crypto";
+import { parse, SByte, SColl, SGroupElement, SInt, SLong, SSigmaProp } from "@fleet-sdk/serializer";
 import { ERG_TOKEN_ID } from "@/constants";
 
 export type OpenOrderType = "on-close" | "fixed-height";
@@ -36,6 +28,8 @@ export type OpenOrderParams = {
     tokens?: TokenAmount<Amount>[];
   } & ({ nanoErgs: Amount } | { tokens: TokenAmount<Amount>[] });
 };
+
+const STORAGE_PERIOD = 1_051_200;
 
 export const ORDER_ON_CLOSE_ERG_CONTRACT =
   "1012040005e80705c09a0c08cd03a11d3028b9bc57b6ac724485e99960b89c278db6bab5d2b961b01aee29405a0205a0060601000e20eccbd70bb2ed259a3f6888c4b68bbd963ff61e2d71cdfda3c7234231e1e4b76604020400043c04100400040401010402040601010101d80bd601b2a5730000d602e4c6a70408d603e4c6a70704d604e4c6a70505d605e30008d606e67205d6077301d6087302d6097303d60a957206d801d60a7e72040683024406860272099d9c7e720706720a7e7208068602e472059d9c7e730406720a7e72080683014406860272099d9c7e7207067e7204067e720806d60b730595937306cbc27201d804d60c999aa37203e4c672010704d60db2a5730700d60eb2720a730800d60f8c720e02d1ed96830b0193e4c67201040ec5a793e4c672010508720293e4c672010605e4c6a70605e6c67201080893db63087201db6308a793c17201c1a7927203730990720c730a92720c730b93c2720dd0720293c1720d7204ed9591720f720bd801d610b2a5730c009683020193c27210d08c720e01937ec1721006720f730d957206d802d610b2720a730e00d6118c72100295917211720bd801d612b2a5730f009683020193c27212d08c721001937ec17212067211731073117202";
@@ -67,16 +61,12 @@ export function extractTokenIdFromOrderContract(contract: string) {
   return ERG_TOKEN_ID;
 }
 
-function blake2b256(input: Uint8Array): Uint8Array {
-  return blake2b(input, { dkLen: 32 });
-}
-
 export function buildOrderContract(tokenId: string, type: OpenOrderType) {
   if (tokenId === ERG_TOKEN_ID) {
     return type === "on-close" ? ORDER_ON_CLOSE_ERG_CONTRACT : ORDER_FIXED_ERG_CONTRACT;
   }
 
-  const hash = bytesToHex(blake2b256(hexToBytes(buildBondContract(tokenId))));
+  const hash = hex.encode(blake2b256(hex.decode(buildBondContract(tokenId))));
   const template =
     type === "on-close"
       ? ORDER_ON_CLOSE_TOKEN_CONTRACT_TEMPLATE
@@ -106,6 +96,10 @@ export function OpenOrderPlugin(order: OpenOrderParams): FleetPlugin {
   // todo: add collateral inclusion guard
   // todo: add maturity check based on contract type
 
+  if (order.maturityLength >= STORAGE_PERIOD) {
+    throw `The term is over storage rent period of ${STORAGE_PERIOD} blocks.`;
+  }
+
   return ({ addOutputs }) => {
     let amount = ensureBigInt(order.collateral.nanoErgs || 0n);
     if (amount <= 0n) {
@@ -116,10 +110,10 @@ export function OpenOrderPlugin(order: OpenOrderParams): FleetPlugin {
     const output = new OutputBuilder(amount, contract)
       .addTokens(order.collateral.tokens || [])
       .setAdditionalRegisters({
-        R4: SConstant(SSigmaProp(SGroupElement(first(order.borrower.getPublicKeys())))),
-        R5: SConstant(SLong(order.loan.amount)),
-        R6: SConstant(SLong(order.loan.repayment)),
-        R7: SConstant(SInt(order.maturityLength))
+        R4: SSigmaProp(SGroupElement(first(order.borrower.getPublicKeys()))).toHex(),
+        R5: SLong(order.loan.amount).toHex(),
+        R6: SLong(order.loan.repayment).toHex(),
+        R7: SInt(order.maturityLength).toHex()
       });
 
     addOutputs(output, { index: 0 });
@@ -173,34 +167,38 @@ export function CloseOrderPlugin(
   return ({ addInputs, addOutputs }) => {
     addInputs(
       new ErgoUnsignedInput(orderBox).setContextVars({
-        0: SConstant(SSigmaProp(SGroupElement(first(params.uiImplementor.getPublicKeys()))))
+        0: SSigmaProp(SGroupElement(first(params.uiImplementor.getPublicKeys()))).toHex()
       })
     );
 
-    if (!orderBox.additionalRegisters.R4) {
+    if (!orderBox.additionalRegisters.R4)
       throw new Error("Invalid order. Borrower public key is not present.");
-    }
-    if (!orderBox.additionalRegisters.R5) {
+    if (!orderBox.additionalRegisters.R5)
       throw new Error("Invalid order. Lend amount is not present.");
-    }
-    if (!orderBox.additionalRegisters.R7) {
+    if (!orderBox.additionalRegisters.R6)
+      throw new Error("Invalid order. Total repayment amount is not present.");
+    if (!orderBox.additionalRegisters.R7)
       throw new Error("Invalid order. Lend term is no present.");
+
+    const amount = parse<bigint>(orderBox.additionalRegisters.R5);
+    const term = parse<number>(orderBox.additionalRegisters.R7);
+    if (term >= STORAGE_PERIOD) {
+      throw `The term is over storage rent period of ${STORAGE_PERIOD} blocks.`;
     }
 
-    const amount = SParse<bigint>(orderBox.additionalRegisters.R5);
     const tokenId = extractTokenIdFromOrderContract(orderBox.ergoTree);
     const isErg = tokenId === ERG_TOKEN_ID;
     const bond = new OutputBuilder(orderBox.value, buildBondContract(tokenId))
       .addTokens(orderBox.assets)
       .setAdditionalRegisters({
-        R4: SConstant(SColl(SByte, orderBox.boxId)),
+        R4: SColl(SByte, orderBox.boxId).toHex(),
         R5: orderBox.additionalRegisters.R4,
         R6: orderBox.additionalRegisters.R6,
-        R7: SConstant(SInt(params.currentHeight + SParse<number>(orderBox.additionalRegisters.R7))),
-        R8: SConstant(SSigmaProp(SGroupElement(first(params.lender.getPublicKeys()))))
+        R7: SInt(params.currentHeight + term).toHex(),
+        R8: SSigmaProp(SGroupElement(first(params.lender.getPublicKeys()))).toHex()
       });
 
-    const loanAmount = SParse<bigint>(orderBox.additionalRegisters.R5);
+    const loanAmount = parse<bigint>(orderBox.additionalRegisters.R5);
     const loan = new OutputBuilder(
       isErg ? loanAmount : SAFE_MIN_BOX_VALUE,
       ErgoAddress.fromPublicKey(orderBox.additionalRegisters.R4.substring(4))
@@ -253,7 +251,7 @@ export function LiquidatePlugin(bondBox: Box<Amount>, recipient: ErgoAddress): F
     addOutputs(
       new OutputBuilder(bondBox.value, recipient)
         .addTokens(bondBox.assets)
-        .setAdditionalRegisters({ R4: SConstant(SColl(SByte, bondBox.boxId)) }),
+        .setAdditionalRegisters({ R4: SColl(SByte, bondBox.boxId).toHex() }),
       { index: 0 }
     );
   };
@@ -271,7 +269,7 @@ export function RepayPlugin(bondBox: Box<Amount>): FleetPlugin {
       throw new Error("Invalid bond. Lender public key is not present.");
     }
 
-    const repaymentAmount = SParse<bigint>(bondBox.additionalRegisters.R6);
+    const repaymentAmount = parse<bigint>(bondBox.additionalRegisters.R6);
     const borrower = ErgoAddress.fromPublicKey(bondBox.additionalRegisters.R5.substring(4));
     const lender = ErgoAddress.fromPublicKey(bondBox.additionalRegisters.R8.substring(4));
     const tokenId = extractTokenIdFromBondContract(bondBox.ergoTree);
@@ -284,7 +282,7 @@ export function RepayPlugin(bondBox: Box<Amount>): FleetPlugin {
             tokenId,
             amount: repaymentAmount
           })
-    ).setAdditionalRegisters({ R4: SConstant(SColl(SByte, bondBox.boxId)) });
+    ).setAdditionalRegisters({ R4: SColl(SByte, bondBox.boxId).toHex() });
 
     addInputs(bondBox);
     addOutputs([repayment, returnCollateral], { index: 0 });

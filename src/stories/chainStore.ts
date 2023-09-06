@@ -1,15 +1,17 @@
 import { AddressBalance } from "@ergo-graphql/types";
-import { isEmpty, NonMandatoryRegisters } from "@fleet-sdk/common";
-import { ErgoAddress, SParse } from "@fleet-sdk/core";
+import { first, isEmpty, NonMandatoryRegisters } from "@fleet-sdk/common";
+import { ErgoAddress } from "@fleet-sdk/core";
+import { utf8 } from "@fleet-sdk/crypto";
+import { parse } from "@fleet-sdk/serializer";
 import BigNumber from "bignumber.js";
 import { uniq } from "lodash-es";
 import { defineStore } from "pinia";
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { AssetPriceRates, assetPricingService } from "../services/assetPricingService";
 import { ERG_DECIMALS, ERG_TOKEN_ID } from "@/constants";
 import { VERIFIED_ASSETS } from "@/maps/verifiedAssets";
 import { buildBondContract, buildOrderContract } from "@/offchain/plugins";
 import { graphQLService } from "@/services/graphqlService";
-import { AssetPriceRate, spectrumService } from "@/services/spectrumService";
 import { AssetMetadata, AssetType } from "@/types";
 import { decimalizeBigNumber, getNetworkType, toDict } from "@/utils";
 
@@ -22,12 +24,12 @@ const CONTRACT_ADDRESSES = [
 
 export const useChainStore = defineStore("chain", () => {
   // private
-  let _timer: NodeJS.Timer;
+  let _timer: number;
 
   // private state
   const _loading = ref(true);
   const _height = ref<number>(0);
-  const _priceRates = ref<AssetPriceRate>({});
+  const _priceRates = ref<AssetPriceRates>({});
   const _tvl = ref<AddressBalance[]>([]);
 
   const _metadata = ref<StateTokenMetadata>(
@@ -117,7 +119,14 @@ export const useChainStore = defineStore("chain", () => {
         };
 
         if (parsedMetadata.type === AssetType.PictureArtwork && registers.R9) {
-          parsedMetadata.url = new TextDecoder().decode(SParse(registers.R9));
+          let r9 = parse<Uint8Array | Uint8Array[]>(registers.R9, "safe");
+          if (r9 instanceof Array) {
+            r9 = first(r9);
+          }
+
+          if (r9) {
+            parsedMetadata.url = utf8.encode(r9);
+          }
         }
 
         _metadata.value[metadata.tokenId] = parsedMetadata;
@@ -130,7 +139,7 @@ export const useChainStore = defineStore("chain", () => {
   }
 
   async function loadPriceRates() {
-    const tokens = await spectrumService.getTokenRates();
+    const tokens = await assetPricingService.getTokenRates();
     _priceRates.value = tokens;
 
     localStorage.setItem("prices", JSON.stringify(tokens));
