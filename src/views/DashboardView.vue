@@ -100,7 +100,7 @@ async function loadOpenOrders(tab: DashboardTab) {
       pk,
       query: {
         where: {
-          ergoTrees: [...VERIFIED_ASSETS.map((a) => buildOrderContract(a.tokenId, "on-close"))],
+          ergoTrees: VERIFIED_ASSETS.map((a) => buildOrderContract(a.tokenId, "on-close")),
           registers: { R4: pk }
         }
       }
