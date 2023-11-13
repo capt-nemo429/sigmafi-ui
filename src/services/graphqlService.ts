@@ -1,14 +1,12 @@
 import {
   AddressBalance,
   QueryAddressesArgs as BalanceArgs,
-  Box as GraphQLBox,
   Header,
-  QueryBoxesArgs,
   Token,
   QueryTokensArgs as TokenArgs
 } from "@ergo-graphql/types";
 import { ErgoGraphQLProvider } from "@fleet-sdk/blockchain-providers";
-import { Box, chunk, Network, NonMandatoryRegisters, some } from "@fleet-sdk/common";
+import { chunk, Network } from "@fleet-sdk/common";
 import { getNetworkType } from "@/utils/otherUtils";
 
 const BALANCE_QUERY = `query balances($addresses: [String!]!) { addresses(addresses: $addresses) { balance { nanoErgs assets { tokenId amount decimals } } } }`;
@@ -55,64 +53,6 @@ class GraphQLService extends ErgoGraphQLProvider {
         yield response.data.tokens;
       }
     }
-  }
-
-  public async *yeldBoxes(args: QueryBoxesArgs) {
-    const take = 50;
-
-    let len = 0;
-    let skip = 0;
-
-    do {
-      const chunk = await this.getBoxess({ ...args, take, skip });
-      skip += take;
-      len = chunk.length;
-
-      if (some(chunk)) {
-        yield chunk;
-      }
-    } while (len === take);
-  }
-
-  public async getBoxess(args: QueryBoxesArgs): Promise<Box<string>[]> {
-    const query = this.createOperation<{ boxes: GraphQLBox[] }, QueryBoxesArgs>(`
-      query SigFiBoxes(
-        $ergoTrees: [String!]
-        $registers: Registers
-        $spent: Boolean!
-        $skip: Int
-        $take: Int
-      ) {
-        boxes(
-          ergoTrees: $ergoTrees
-          registers: $registers
-          spent: $spent
-          skip: $skip
-          take: $take
-        ) {
-          boxId
-          transactionId
-          value
-          creationHeight
-          index
-          ergoTree
-          additionalRegisters
-          assets {
-            tokenId
-            amount
-          }
-        }
-      }
-    `);
-
-    const response = await query(args);
-
-    return (
-      response.data?.boxes.map((box) => ({
-        ...box,
-        additionalRegisters: box.additionalRegisters as NonMandatoryRegisters
-      })) || []
-    );
   }
 }
 
