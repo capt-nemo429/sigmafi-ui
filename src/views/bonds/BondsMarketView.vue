@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { QueryBoxesArgs } from "@ergo-graphql/types";
+import { GraphQLBoxQuery } from "@fleet-sdk/blockchain-providers";
 import { Amount, Box, isEmpty, orderBy, some } from "@fleet-sdk/common";
 import { useProgrammatic } from "@oruga-ui/oruga-next";
 import { ArrowDownIcon, ArrowUpIcon } from "@zhuowenli/vue-feather-icons";
@@ -11,7 +11,7 @@ import { buildBondContract, buildOrderContract } from "@/offchain/plugins";
 import { graphQLService } from "@/services/graphqlService";
 import { useChainStore } from "@/stories";
 import { useWalletStore } from "@/stories/walletStore";
-import { parseBondBox, parseOpenOrderBox } from "@/utils";
+import { parseBondBox, parseOpenOrderBox, stringifyBoxAmounts } from "@/utils";
 import NewLoanRequestView from "@/views/bonds/NewLoanRequestView.vue";
 
 type MarketTab = "orders" | "ongoing";
@@ -130,40 +130,20 @@ async function setLoading(state: boolean) {
 }
 
 function loadRequests() {
-  return loadData(
-    "orders",
-    [
-      {
-        args: {
-          ergoTrees: orderContracts,
-          spent: false
-        }
-      }
-    ],
-    orderBoxes,
-    (box) => orderContracts.includes(box.ergoTree)
+  return loadData("orders", [{ where: { ergoTrees: orderContracts } }], orderBoxes, (box) =>
+    orderContracts.includes(box.ergoTree)
   );
 }
 
 function loadOngoingLoans() {
-  return loadData(
-    "ongoing",
-    [
-      {
-        args: {
-          ergoTrees: loanContracts,
-          spent: false
-        }
-      }
-    ],
-    ongoingBoxes,
-    (box) => loanContracts.includes(box.ergoTree)
+  return loadData("ongoing", [{ where: { ergoTrees: loanContracts } }], ongoingBoxes, (box) =>
+    loanContracts.includes(box.ergoTree)
   );
 }
 
 async function loadData(
   tab: MarketTab,
-  queries: { args: QueryBoxesArgs }[],
+  queries: GraphQLBoxQuery[],
   boxRef: Ref<ReadonlyArray<Box<string>>>,
   validate: (box: Box<Amount>) => boolean
 ) {
@@ -171,18 +151,20 @@ async function loadData(
 
   boxRef.value = [];
   for (const query of queries) {
-    const chunk = await graphQLService.getBoxes(query.args);
+    for await (const chunk of graphQLService.streamBoxes(query)) {
+      if (selectedTab.value !== tab) {
+        break;
+      }
 
-    if (selectedTab.value !== tab) {
-      break;
-    }
+      if (some(chunk)) {
+        boxRef.value = boxRef.value.concat(
+          chunk.filter(validate).map((box) => Object.freeze(stringifyBoxAmounts(box)))
+        );
 
-    if (some(chunk)) {
-      boxRef.value = boxRef.value.concat(chunk.filter(validate).map((box) => Object.freeze(box)));
-
-      loading.boxes = false;
-      await chain.loadTokensMetadata(chunk.flatMap((x) => x.assets.map((t) => t.tokenId)));
-      loading.metadata = false;
+        loading.boxes = false;
+        await chain.loadTokensMetadata(chunk.flatMap((x) => x.assets.map((t) => t.tokenId)));
+        loading.metadata = false;
+      }
     }
   }
 
