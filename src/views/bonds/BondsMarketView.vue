@@ -136,17 +136,8 @@ function loadRequests() {
 }
 
 function loadOngoingLoans() {
-  return loadData(
-    "ongoing",
-    [
-      {
-        where: {
-          ergoTrees: loanContracts
-        }
-      }
-    ],
-    ongoingBoxes,
-    (box) => loanContracts.includes(box.ergoTree)
+  return loadData("ongoing", [{ where: { ergoTrees: loanContracts } }], ongoingBoxes, (box) =>
+    loanContracts.includes(box.ergoTree)
   );
 }
 
