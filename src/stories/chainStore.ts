@@ -105,7 +105,7 @@ export const useChainStore = defineStore("chain", () => {
 
     tokenIds = uniq(tokenIds);
 
-    for await (const tokensMetadata of graphQLService.yeldTokensMetadata(tokenIds)) {
+    for await (const tokensMetadata of graphQLService.streamTokenMetadata(tokenIds)) {
       for (const metadata of tokensMetadata) {
         const registers = metadata.box.additionalRegisters as NonMandatoryRegisters;
 

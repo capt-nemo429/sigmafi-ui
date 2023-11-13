@@ -13,7 +13,6 @@
   ],
   "globals": { "BigInt": true, "console": true, "WebAssembly": true },
   "rules": {
-    "newline-before-return": "warn",
     "camelcase": "off",
     "no-console": "error",
     "@typescript-eslint/explicit-module-boundary-types": "off",

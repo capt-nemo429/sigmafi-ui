@@ -121,7 +121,7 @@ export const useWalletStore = defineStore("wallet", () => {
 
   async function disconnect() {
     const connector =
-      typeof ergoConnector !== undefined && ergoConnector && _connectedWallet.value
+      typeof ergoConnector !== "undefined" && ergoConnector && _connectedWallet.value
         ? ergoConnector[_connectedWallet.value]
         : undefined;
 

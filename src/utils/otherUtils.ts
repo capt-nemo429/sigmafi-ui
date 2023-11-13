@@ -1,4 +1,4 @@
-import { isUndefined, Network } from "@fleet-sdk/common";
+import { Box, isUndefined, Network } from "@fleet-sdk/common";
 import { BigNumber } from "bignumber.js";
 
 export type LoanTerm = {
@@ -121,4 +121,15 @@ export function getNetworkType(): Network {
   }
 
   return import.meta.env.VITE_NETWORK === "testnet" ? Network.Testnet : Network.Mainnet;
+}
+
+export function stringifyAmounts(box: Box): Box<string> {
+  return {
+    ...box,
+    value: box.value.toString(),
+    assets: box.assets.map((asset) => ({
+      tokenId: asset.tokenId,
+      amount: asset.amount.toString()
+    }))
+  };
 }

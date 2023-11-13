@@ -48,8 +48,8 @@ async function getTokenRatesFromSpectrum(): Promise<Map<string, BigNumber>> {
 
 async function getHodlErg3TokenRate(): Promise<BigNumber | undefined> {
   let boxes = await graphQLService.getBoxes({
-    spent: false,
-    ergoTrees: [HODLERG_CONTRACT]
+    from: "blockchain",
+    where: { ergoTrees: [HODLERG_CONTRACT] }
   });
 
   boxes = boxes.filter((b) => some(b.assets) && b.assets[0].tokenId === HODLERG3_NFT_ID);

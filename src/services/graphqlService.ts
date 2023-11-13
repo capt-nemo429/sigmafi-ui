@@ -1,88 +1,60 @@
 import {
   AddressBalance,
+  QueryAddressesArgs as BalanceArgs,
   Box as GraphQLBox,
   Header,
-  QueryAddressesArgs,
-  QueryBlockHeadersArgs,
   QueryBoxesArgs,
-  Token
+  Token,
+  QueryTokensArgs as TokenArgs
 } from "@ergo-graphql/types";
+import { ErgoGraphQLProvider } from "@fleet-sdk/blockchain-providers";
 import { Box, chunk, Network, NonMandatoryRegisters, some } from "@fleet-sdk/common";
-import { Client, createClient, fetchExchange, gql } from "@urql/core";
 import { getNetworkType } from "@/utils/otherUtils";
 
-class GraphQLService {
-  private _client: Client;
+const BALANCE_QUERY = `query balances($addresses: [String!]!) { addresses(addresses: $addresses) { balance { nanoErgs assets { tokenId amount decimals } } } }`;
+const HEIGHT_QUERY = `query height { blockHeaders(take: 1) { height } }`;
+const TOKEN_METADATA_QUERY = `query tokens($tokenIds: [String!]!) { tokens(tokenIds: $tokenIds) { tokenId name decimals box { additionalRegisters } } }`;
+
+type BalanceResponse = { addresses: { balance: AddressBalance }[] };
+type HeightResponse = { blockHeaders: Header[] };
+type TokenResponse = { tokens: Token[] };
+
+class GraphQLService extends ErgoGraphQLProvider {
+  #getBalance;
+  #getHeight;
+  #getTokenMetadata;
+
   constructor() {
-    this._client = createClient({
-      exchanges: [fetchExchange],
-      url:
-        getNetworkType() === Network.Mainnet
-          ? "https://explore.sigmaspace.io/api/graphql"
-          : "https://tn-ergo-explorer.anetabtc.io/graphql",
-      requestPolicy: "network-only"
-    });
+    super(
+      getNetworkType() === Network.Mainnet
+        ? "https://explore.sigmaspace.io/api/graphql"
+        : "https://tn-ergo-explorer.anetabtc.io/graphql"
+    );
+
+    this.#getBalance = this.createOperation<BalanceResponse, BalanceArgs>(BALANCE_QUERY);
+    this.#getHeight = this.createOperation<HeightResponse>(HEIGHT_QUERY);
+    this.#getTokenMetadata = this.createOperation<TokenResponse, TokenArgs>(TOKEN_METADATA_QUERY);
   }
 
   public async getCurrentHeight(): Promise<number | undefined> {
-    const query = gql<{ blockHeaders: Header[] }, QueryBlockHeadersArgs>`
-      query height {
-        blockHeaders(take: 1) {
-          height
-        }
-      }
-    `;
-
-    const response = await this._client.query(query, {}).toPromise();
-
+    const response = await this.#getHeight();
     return response.data?.blockHeaders[0].height;
   }
 
   public async getBalance(addresses: string[]) {
-    const query = gql<{ addresses: { balance: AddressBalance }[] }, QueryAddressesArgs>`
-      query balances($addresses: [String!]!) {
-        addresses(addresses: $addresses) {
-          balance {
-            nanoErgs
-            assets {
-              tokenId
-              amount
-              decimals
-            }
-          }
-        }
-      }
-    `;
-
-    const response = await this._client.query(query, { addresses }).toPromise();
-
+    const response = await this.#getBalance({ addresses });
     return response.data?.addresses.flatMap((x) => x.balance) || [];
   }
 
-  public async *yeldTokensMetadata(tokenIds: string[]) {
-    const query = gql<{ tokens: Token[] }, { tokenIds: string[] }>`
-      query tokens($tokenIds: [String!]!) {
-        tokens(tokenIds: $tokenIds) {
-          tokenId
-          name
-          decimals
-          box {
-            additionalRegisters
-          }
-        }
-      }
-    `;
-
+  public async *streamTokenMetadata(tokenIds: string[]) {
     const chunks = chunk(tokenIds, 20);
-    for (const chunk of chunks) {
-      const response = await this._client.query(query, { tokenIds: chunk }).toPromise();
+    for (const tokenIds of chunks) {
+      const response = await this.#getTokenMetadata({ tokenIds });
 
       if (response.data?.tokens) {
         yield response.data.tokens;
       }
     }
-
-    return [];
   }
 
   public async *yeldBoxes(args: QueryBoxesArgs) {
@@ -92,7 +64,7 @@ class GraphQLService {
     let skip = 0;
 
     do {
-      const chunk = await this.getBoxes({ ...args, take, skip });
+      const chunk = await this.getBoxess({ ...args, take, skip });
       skip += take;
       len = chunk.length;
 
@@ -102,8 +74,8 @@ class GraphQLService {
     } while (len === take);
   }
 
-  public async getBoxes(args: QueryBoxesArgs): Promise<Box<string>[]> {
-    const query = gql<{ boxes: GraphQLBox[] }, QueryBoxesArgs>`
+  public async getBoxess(args: QueryBoxesArgs): Promise<Box<string>[]> {
+    const query = this.createOperation<{ boxes: GraphQLBox[] }, QueryBoxesArgs>(`
       query SigFiBoxes(
         $ergoTrees: [String!]
         $registers: Registers
@@ -131,9 +103,9 @@ class GraphQLService {
           }
         }
       }
-    `;
+    `);
 
-    const response = await this._client.query(query, args).toPromise();
+    const response = await query(args);
 
     return (
       response.data?.boxes.map((box) => ({
