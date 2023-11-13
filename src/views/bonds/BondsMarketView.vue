@@ -11,7 +11,7 @@ import { buildBondContract, buildOrderContract } from "@/offchain/plugins";
 import { graphQLService } from "@/services/graphqlService";
 import { useChainStore } from "@/stories";
 import { useWalletStore } from "@/stories/walletStore";
-import { parseBondBox, parseOpenOrderBox, stringifyAmounts } from "@/utils";
+import { parseBondBox, parseOpenOrderBox, stringifyBoxAmounts } from "@/utils";
 import NewLoanRequestView from "@/views/bonds/NewLoanRequestView.vue";
 
 type MarketTab = "orders" | "ongoing";
@@ -167,7 +167,7 @@ async function loadData(
 
       if (some(chunk)) {
         boxRef.value = boxRef.value.concat(
-          chunk.filter(validate).map((box) => Object.freeze(stringifyAmounts(box)))
+          chunk.filter(validate).map((box) => Object.freeze(stringifyBoxAmounts(box)))
         );
 
         loading.boxes = false;

@@ -123,7 +123,7 @@ export function getNetworkType(): Network {
   return import.meta.env.VITE_NETWORK === "testnet" ? Network.Testnet : Network.Mainnet;
 }
 
-export function stringifyAmounts(box: Box): Box<string> {
+export function stringifyBoxAmounts(box: Box): Box<string> {
   return {
     ...box,
     value: box.value.toString(),

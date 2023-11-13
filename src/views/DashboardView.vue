@@ -9,7 +9,7 @@ import { buildBondContract, buildOrderContract } from "@/offchain/plugins";
 import { graphQLService } from "@/services/graphqlService";
 import { useChainStore } from "@/stories";
 import { useWalletStore } from "@/stories/walletStore";
-import { parseBondBox, parseOpenOrderBox, stringifyAmounts } from "@/utils";
+import { parseBondBox, parseOpenOrderBox, stringifyBoxAmounts } from "@/utils";
 import BondOrderCard from "@/views/bonds/components/BondOrderCard.vue";
 
 type DashboardTab = "orders" | "loans" | "debits";
@@ -162,7 +162,7 @@ async function loadData(
 
     if (some(chunk)) {
       boxes.value = boxes.value.concat(
-        chunk.filter(validate(request.pk)).map((box) => Object.freeze(stringifyAmounts(box)))
+        chunk.filter(validate(request.pk)).map((box) => Object.freeze(stringifyBoxAmounts(box)))
       );
 
       loading.boxes = false;
