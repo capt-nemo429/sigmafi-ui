@@ -37,5 +37,9 @@ export const VERIFIED_ASSETS: VerifiedAsset[] = [
   {
     tokenId: "8b08cdd5449a9592a9e79711d7d79249d7a03c535d17efaee83e216e80a44c4b",
     metadata: { name: "RSN", decimals: 3 }
+  },
+  {
+    tokenId: "e023c5f382b6e96fbd878f6811aac73345489032157ad5affb84aefd4956c297",
+    metadata: { name: "rsADA", decimals: 6 }
   }
 ];
