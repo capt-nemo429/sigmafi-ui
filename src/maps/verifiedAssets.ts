@@ -7,6 +7,18 @@ export const VERIFIED_ASSETS: VerifiedAsset[] = [
     metadata: { name: "ERG", decimals: ERG_DECIMALS }
   },
   {
+    tokenId: "7a51950e5f548549ec1aa63ffdc38279505b11e7e803d01bcf8347e0123c88b0",
+    metadata: { name: "rsBTC", decimals: 8 }
+  },
+  {
+    tokenId: "e023c5f382b6e96fbd878f6811aac73345489032157ad5affb84aefd4956c297",
+    metadata: { name: "rsADA", decimals: 6 }
+  },
+  {
+    tokenId: "8b08cdd5449a9592a9e79711d7d79249d7a03c535d17efaee83e216e80a44c4b",
+    metadata: { name: "RSN", decimals: 3 }
+  },
+  {
     tokenId: "03faf2cb329f2e90d6d23b58d91bbb6c046aa143261cc21f52fbe2824bfcbf04",
     metadata: { name: "SigUSD", decimals: 2 }
   },
@@ -33,17 +45,5 @@ export const VERIFIED_ASSETS: VerifiedAsset[] = [
   {
     tokenId: "7ba2a85fdb302a181578b1f64cb4a533d89b3f8de4159efece75da41041537f9",
     metadata: { name: "GORT", decimals: 0 }
-  },
-  {
-    tokenId: "8b08cdd5449a9592a9e79711d7d79249d7a03c535d17efaee83e216e80a44c4b",
-    metadata: { name: "RSN", decimals: 3 }
-  },
-  {
-    tokenId: "e023c5f382b6e96fbd878f6811aac73345489032157ad5affb84aefd4956c297",
-    metadata: { name: "rsADA", decimals: 6 }
-  },
-  {
-    tokenId: "7a51950e5f548549ec1aa63ffdc38279505b11e7e803d01bcf8347e0123c88b0",
-    metadata: { name: "rsBTC", decimals: 8 }
   }
 ];
