@@ -41,5 +41,9 @@ export const VERIFIED_ASSETS: VerifiedAsset[] = [
   {
     tokenId: "e023c5f382b6e96fbd878f6811aac73345489032157ad5affb84aefd4956c297",
     metadata: { name: "rsADA", decimals: 6 }
+  },
+  {
+    tokenId: "7a51950e5f548549ec1aa63ffdc38279505b11e7e803d01bcf8347e0123c88b0",
+    metadata: { name: "rsBTC", decimals: 8 }
   }
 ];
