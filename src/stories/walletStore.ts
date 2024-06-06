@@ -16,6 +16,9 @@ import { ERG_TOKEN_ID } from "@/constants";
 import { AssetInfo } from "@/types";
 import { getNetworkType, showToast } from "@/utils";
 
+console.log("listening");
+addEventListener("ergo-wallet:injected", (ev) => console.log(ev));
+
 export const useWalletStore = defineStore("wallet", () => {
   const chain = useChainStore();
 
