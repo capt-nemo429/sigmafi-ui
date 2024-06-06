@@ -10,7 +10,7 @@ import {
 import { ErgoAddress } from "@fleet-sdk/core";
 import { EIP12ErgoAPI, SignedTransaction } from "@nautilus-js/eip12-types";
 import { acceptHMRUpdate, defineStore } from "pinia";
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, nextTick, onBeforeMount, onUnmounted, ref, watch } from "vue";
 import { useChainStore } from "./chainStore";
 import { ERG_TOKEN_ID } from "@/constants";
 import { AssetInfo } from "@/types";
@@ -65,9 +65,12 @@ export const useWalletStore = defineStore("wallet", () => {
   });
 
   // hooks
-  onMounted(async () => {
+  onBeforeMount(async () => {
     addEventListener(WALLET_INJECTED_EVENT, lookupWallets);
-    lookupWallets();
+
+    nextTick(() => {
+      lookupWallets();
+    });
   });
 
   onUnmounted(() => removeEventListener(WALLET_INJECTED_EVENT, lookupWallets));
