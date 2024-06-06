@@ -89,15 +89,8 @@ export const useWalletStore = defineStore("wallet", () => {
       return;
     }
 
-    if (await walletConnector.isConnected()) {
-      return;
-    }
-
-    const granted = await walletConnector.connect({
-      createErgoObject: false
-    });
-
-    if (granted) {
+    const connected = await walletConnector.connect({ createErgoObject: false });
+    if (connected) {
       _loading.value = true;
       _context = await walletConnector.getContext();
       const change = ErgoAddress.fromBase58(await _context.get_change_address());
