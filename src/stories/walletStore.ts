@@ -10,7 +10,7 @@ import {
 import { ErgoAddress } from "@fleet-sdk/core";
 import { EIP12ErgoAPI, SignedTransaction } from "@nautilus-js/eip12-types";
 import { acceptHMRUpdate, defineStore } from "pinia";
-import { computed, onBeforeMount, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useChainStore } from "./chainStore";
 import { ERG_TOKEN_ID } from "@/constants";
 import { AssetInfo } from "@/types";
@@ -63,7 +63,7 @@ export const useWalletStore = defineStore("wallet", () => {
   });
 
   // hooks
-  onBeforeMount(async () => {
+  onMounted(async () => {
     if (typeof ergoConnector !== "undefined") {
       Object.keys(ergoConnector).map((key) => (_wallets.value[key] = true));
     }
@@ -78,14 +78,13 @@ export const useWalletStore = defineStore("wallet", () => {
   async function connect(walletName: "nautilus" | "safew" | string) {
     if (typeof ergoConnector === "undefined") {
       showToast("Ergo wallet not detected.", "alert-error");
-
       return;
     }
 
     const walletConnector = ergoConnector[walletName];
-    if (typeof ergoConnector === "undefined" || !walletConnector) {
+    if (!walletConnector) {
       showToast(`${walletName} wallet is not detected.`, "alert-error");
-
+      disconnect();
       return;
     }
 
@@ -97,7 +96,6 @@ export const useWalletStore = defineStore("wallet", () => {
       if (change.network !== getNetworkType()) {
         disconnect();
         showToast("Wrong wallet network.", "alert-error");
-
         return;
       }
 
