@@ -10,14 +10,13 @@ import {
 import { ErgoAddress } from "@fleet-sdk/core";
 import { EIP12ErgoAPI, SignedTransaction } from "@nautilus-js/eip12-types";
 import { acceptHMRUpdate, defineStore } from "pinia";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useChainStore } from "./chainStore";
 import { ERG_TOKEN_ID } from "@/constants";
 import { AssetInfo } from "@/types";
 import { getNetworkType, showToast } from "@/utils";
 
-console.log("listening");
-addEventListener("ergo-wallet:injected", (ev) => console.log(ev));
+const WALLET_INJECTED_EVENT = "ergo-wallet:injected";
 
 export const useWalletStore = defineStore("wallet", () => {
   const chain = useChainStore();
@@ -67,15 +66,21 @@ export const useWalletStore = defineStore("wallet", () => {
 
   // hooks
   onMounted(async () => {
-    if (typeof ergoConnector !== "undefined") {
-      Object.keys(ergoConnector).map((key) => (_wallets.value[key] = true));
-    }
-
-    const connectedWallet = localStorage.getItem("connectedWallet");
-    if (connectedWallet) {
-      await connect(connectedWallet);
-    }
+    addEventListener(WALLET_INJECTED_EVENT, lookupWallets);
+    lookupWallets();
   });
+
+  onUnmounted(() => removeEventListener(WALLET_INJECTED_EVENT, lookupWallets));
+
+  async function lookupWallets() {
+    if (typeof ergoConnector === "undefined") return;
+
+    Object.keys(ergoConnector).map((key) => (_wallets.value[key] = true));
+    const walletId = localStorage.getItem("connectedWallet");
+    if (walletId) {
+      await connect(walletId);
+    }
+  }
 
   // actions
   async function connect(walletName: "nautilus" | "safew" | string) {
