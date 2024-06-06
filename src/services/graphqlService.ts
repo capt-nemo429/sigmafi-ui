@@ -40,8 +40,15 @@ class GraphQLService extends ErgoGraphQLProvider {
   }
 
   public async getBalance(addresses: string[]) {
-    const response = await this.#getBalance({ addresses });
-    return response.data?.addresses.flatMap((x) => x.balance) || [];
+    const chunks = chunk(addresses, 20);
+    let balances = [] as AddressBalance[];
+
+    for (const addresses of chunks) {
+      const response = await this.#getBalance({ addresses });
+      balances = balances.concat(response.data?.addresses.flatMap((x) => x.balance) || []);
+    }
+
+    return balances;
   }
 
   public async *streamTokenMetadata(tokenIds: string[]) {
