@@ -18,7 +18,7 @@ import { useChainStore } from "@/stories";
 import { useWalletStore } from "@/stories/walletStore";
 import { AssetInfo } from "@/types";
 import { formatBigNumber, sendTransaction, shortenString, undecimalizeBigNumber } from "@/utils";
-import { minValue } from "@/validators/bigNumbers";
+import { greaterThanValue, minValue } from "@/validators/bigNumbers";
 
 const chain = useChainStore();
 const wallet = useWalletStore();
@@ -133,11 +133,11 @@ const rules = {
   loan: {
     amount: {
       required,
-      minValue: minValue("0.1")
+      gt: greaterThanValue("0")
     }
   },
   collateral: {
-    required: helpers.withMessage("At least one asset should be added as collateral.", required)
+    required: helpers.withMessage("At least one asset must be added as collateral.", required)
   },
   term: {
     value: {

@@ -8,21 +8,22 @@ function valOf<T>(val: T | Ref<T>) {
 
 function maxValidator(max: string | Ref<string>) {
   return (value?: string) => {
-    if (!value) {
-      return true;
-    }
-
-    return new BigNumber(valOf(max)).isGreaterThanOrEqualTo(value);
+    if (!value) return true;
+    return BigNumber(valOf(max)).gte(value);
   };
 }
 
 function minValidator(min: string | Ref<string>) {
   return (value?: string) => {
-    if (!value) {
-      return true;
-    }
+    if (!value) return true;
+    return BigNumber(valOf(min)).lte(value);
+  };
+}
 
-    return new BigNumber(valOf(min)).isLessThanOrEqualTo(value.toString());
+function greaterThanValidator(min: string | Ref<string>) {
+  return (value?: string) => {
+    if (!value) return true;
+    return BigNumber(valOf(min)).lt(value);
   };
 }
 
@@ -43,5 +44,15 @@ export function minValue(
     $validator: minValidator(min),
     $message: ({ $params }) => `The amount should be greater than or equal to  ${$params.min}.`,
     $params: { min: valOf(min) }
+  };
+}
+
+export function greaterThanValue(
+  gt: string | Ref<string>
+): ValidationRuleWithParams<{ gt: string }, string> {
+  return {
+    $validator: greaterThanValidator(gt),
+    $message: ({ $params }) => `The amount should be greater than ${$params.gt}.`,
+    $params: { gt: valOf(gt) }
   };
 }
