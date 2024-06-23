@@ -237,7 +237,7 @@ async function loadData(
       </div>
 
       <button
-        class="btn dark:invert shadow-lg flex-col flex-grow sm:flex-grow-0"
+        class="btn btn-cta shadow-lg flex-col flex-grow sm:flex-grow-0"
         :disabled="!wallet.connected || wallet.loading"
         @click="openNewLoanModal()"
       >

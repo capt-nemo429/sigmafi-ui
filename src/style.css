@@ -63,5 +63,9 @@
 }
 
 .tabs-boxed .tab-active:not(.tab-disabled):not([disabled]) {
-  @apply bg-neutral text-neutral-content dark:invert;
+  @apply bg-neutral text-neutral-content dark:bg-slate-300 dark:text-base-100 dark:hover:bg-slate-200;
+}
+
+.btn-cta {
+  @apply dark:bg-slate-300 dark:text-base-100 dark:hover:bg-slate-200;
 }
