@@ -105,12 +105,6 @@ const ratio = computed(() => {
     .times(100);
 });
 
-// const uiFee = computed(() => {
-//   if (!ratio?.value || ratio.value.isNaN() || ratio.value.gte(100)) return BigNumber(0);
-//   const maxFee = BigNumber("1000000000").times(10);
-//   return maxFee.times(ratio.value.div(100).minus(1).negated());
-// });
-
 const interestAmount = computed(() => {
   if (
     !state.loan.amount ||
