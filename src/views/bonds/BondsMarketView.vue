@@ -108,7 +108,6 @@ watch(
   async (newVal) => {
     if (!newVal) {
       orderBoxes.value = [];
-
       return;
     }
 
@@ -130,14 +129,20 @@ async function setLoading(state: boolean) {
 }
 
 function loadRequests() {
-  return loadData("orders", [{ where: { ergoTrees: orderContracts } }], orderBoxes, (box) =>
-    orderContracts.includes(box.ergoTree)
+  return loadData(
+    "orders",
+    [{ where: { ergoTrees: orderContracts } }],
+    orderBoxes,
+    (box) => orderContracts.includes(box.ergoTree) && some(box.additionalRegisters)
   );
 }
 
 function loadOngoingLoans() {
-  return loadData("ongoing", [{ where: { ergoTrees: loanContracts } }], ongoingBoxes, (box) =>
-    loanContracts.includes(box.ergoTree)
+  return loadData(
+    "ongoing",
+    [{ where: { ergoTrees: loanContracts } }],
+    ongoingBoxes,
+    (box) => loanContracts.includes(box.ergoTree) && some(box.additionalRegisters)
   );
 }
 
@@ -152,9 +157,7 @@ async function loadData(
   boxRef.value = [];
   for (const query of queries) {
     for await (const chunk of graphQLService.streamBoxes(query)) {
-      if (selectedTab.value !== tab) {
-        break;
-      }
+      if (selectedTab.value !== tab) break;
 
       if (some(chunk)) {
         boxRef.value = boxRef.value.concat(
@@ -179,15 +182,19 @@ async function loadData(
         <div class="tabs h-12 tabs-boxed max-w-max">
           <a
             class="tab h-full text-md"
-            :class="{ 'tab-active': selectedTab === 'orders' }"
+            :class="{
+              'tab-active': selectedTab === 'orders'
+            }"
             @click="selectedTab = 'orders'"
             >Loan requests</a
           >
           <a
             class="tab h-full text-md"
-            :class="{ 'tab-active': selectedTab === 'ongoing' }"
+            :class="{
+              'tab-active': selectedTab === 'ongoing'
+            }"
             @click="selectedTab = 'ongoing'"
-            >Ongoing loans</a
+            >Active bonds</a
           >
         </div>
 
@@ -230,7 +237,7 @@ async function loadData(
       </div>
 
       <button
-        class="btn btn-primary shadow flex-col flex-grow sm:flex-grow-0"
+        class="btn btn-cta shadow-lg flex-col flex-grow sm:flex-grow-0"
         :disabled="!wallet.connected || wallet.loading"
         @click="openNewLoanModal()"
       >

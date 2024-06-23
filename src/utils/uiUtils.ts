@@ -81,10 +81,6 @@ export function getCurrentTheme(): "light" | "dark" {
 }
 
 export function setTheme(theme: "light" | "dark") {
-  if (getCurrentTheme() === theme) {
-    return;
-  }
-
   if (theme === "dark") {
     document.documentElement.classList.add("dark");
   } else {

@@ -9,7 +9,7 @@ const chain = useChainStore();
 
 <template>
   <div
-    class="min-h-screen flex flex-col justify-between bg-gradient-to-tr from-fuchsia-400 to-blue-400 dark:from-purple-800 dark:to-cyan-800"
+    class="min-h-screen flex flex-col justify-between bg-gradient-to-tl from-slate-300 to-slate-200 dark:from-slate-700 dark:to-slate-600"
   >
     <app-header />
 
@@ -18,9 +18,10 @@ const chain = useChainStore();
     </main>
 
     <app-footer />
+
     <div
       v-if="chain.height"
-      class="flex items-center gap-1 z-50 text-sm cursor-default text-primary fixed right-3 bottom-2 drop-shadow-md opacity-70 hover:opacity-100"
+      class="flex items-center gap-1 z-50 text-sm cursor-default text-accent-content fixed right-3 bottom-2 drop-shadow-md opacity-40 hover:opacity-100"
     >
       <box-icon /> <span>{{ chain.height.toLocaleString() }}</span>
     </div>

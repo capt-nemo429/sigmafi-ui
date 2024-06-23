@@ -34,6 +34,10 @@ export type Loan = {
 
 export type Order = Loan & {
   cancellable: boolean;
+  fees: {
+    contract: BigNumber;
+    ui: BigNumber;
+  };
 };
 
 export type Bond = Loan & {
@@ -85,15 +89,17 @@ export function parseOpenOrderBox(
 
   const tokenId = extractTokenIdFromOrderContract(box.ergoTree);
 
+  const principal = {
+    tokenId: tokenId,
+    amount: decimalizeBigNumber(
+      BigNumber(parseOr(box.additionalRegisters.R5, "0")),
+      metadata[tokenId].decimals
+    ),
+    metadata: metadata[tokenId]
+  };
+
   const order: Order = {
-    principal: {
-      tokenId: tokenId,
-      amount: decimalizeBigNumber(
-        BigNumber(parseOr(box.additionalRegisters.R5, "0")),
-        metadata[tokenId].decimals
-      ),
-      metadata: metadata[tokenId]
-    },
+    principal,
     term: blockToTime(parseOr(box.additionalRegisters.R7, 0)),
     collateral,
     interest: {
@@ -105,6 +111,10 @@ export function parseOpenOrderBox(
     },
     borrower,
     cancellable: borrower ? ownAddresses.includes(borrower) : false,
+    fees: {
+      contract: principal.amount.multipliedBy(0.005),
+      ui: principal.amount.multipliedBy(0.004)
+    },
     box: Object.freeze(box)
   };
   order.ratio = calculateRatio(order, priceRates);

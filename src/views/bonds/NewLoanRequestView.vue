@@ -10,9 +10,8 @@ import AssetInput from "@/components/AssetInput.vue";
 import BondRatioBadge from "@/components/BondRatioBadge.vue";
 import CleaveInput from "@/components/CleaveInput.vue";
 import SigDropdown from "@/components/SigDropdown.vue";
-import { ERG_DECIMALS, ERG_TOKEN_ID, MIN_FEE } from "@/constants";
+import { ERG_TOKEN_ID } from "@/constants";
 import { VERIFIED_ASSETS } from "@/maps";
-import { OPEN_ORDER_UI_FEE } from "@/offchain/transactionFactory";
 import { TransactionFactory } from "@/offchain/transactionFactory";
 import { useChainStore } from "@/stories";
 import { useWalletStore } from "@/stories/walletStore";
@@ -70,35 +69,25 @@ const blocks = computed(() => {
 });
 
 const loanAmountInFiat = computed(() => {
-  if (!state.loan.amount) {
-    return BigNumber(0);
-  }
+  if (!state.loan.amount) return BigNumber(0);
 
   const fiatRate = chain.priceRates[state.loan.asset.tokenId]?.fiat || 0;
-
   return BigNumber(state.loan.amount).multipliedBy(fiatRate);
 });
 
 const interestAmountInFiat = computed(() => {
-  if (!state.loan.amount || !state.interest) {
-    return BigNumber(0);
-  }
+  if (!state.loan.amount || !state.interest) return BigNumber(0);
 
   const fiatRate = chain.priceRates[state.loan.asset.tokenId]?.fiat || 0;
-
   return interestAmount.value.multipliedBy(fiatRate);
 });
 
 const collateralTotalInFiat = computed(() => {
-  if (isEmpty(state.collateral)) {
-    return BigNumber(0);
-  }
+  if (isEmpty(state.collateral)) return BigNumber(0);
 
   let acc = BigNumber(0);
   for (const asset of state.collateral) {
-    if (!asset.amount) {
-      continue;
-    }
+    if (!asset.amount) continue;
 
     const fiatRate = chain.priceRates[asset.tokenId]?.fiat || 0;
     if (fiatRate !== 0) {
@@ -369,12 +358,8 @@ async function submit() {
     </div>
 
     <div class="modal-action">
-      <div class="w-full h-full text-sm opacity-70">
-        <p>Miner Fee: {{ decimalize(MIN_FEE, ERG_DECIMALS) }} ERG</p>
-        <p>UI Fee: {{ decimalize(OPEN_ORDER_UI_FEE, ERG_DECIMALS) }} ERG</p>
-      </div>
       <button class="btn btn-ghost" :disabled="loading" @click="emit('close')">Cancel</button>
-      <button class="btn btn-primary" :class="{ loading: loading }" @click="submit()">
+      <button class="btn btn-outline" :class="{ loading: loading }" @click="submit()">
         Confirm
       </button>
     </div>
