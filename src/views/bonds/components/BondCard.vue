@@ -75,7 +75,7 @@ async function repay() {
 
 <template>
   <div
-    class="stats flex flex-col bg-base-100 stats-vertical shadow"
+    class="stats flex flex-col bg-base-100 stats-vertical shadow-xl"
     :class="{ skeleton: loadingBox }"
   >
     <div class="stat">
@@ -140,29 +140,33 @@ async function repay() {
 
     <div class="flex-grow opacity-0"></div>
 
-    <div v-if="props.displayLenderAndBorrower || bond?.type === 'debit'" class="stat">
-      <div class="stat-title skeleton-placeholder">Lender</div>
-      <a
-        :href="addressUrlFor(bond?.lender)"
-        class="link link-hover text-sm skeleton-placeholder font-mono"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {{ shortenString(bond?.lender, 25) }}
-        <external-link-icon class="inline pb-1" />
-      </a>
-    </div>
-    <div v-if="props.displayLenderAndBorrower || bond?.type === 'lend'" class="stat">
-      <div class="stat-title skeleton-placeholder">Borrower</div>
-      <a
-        :href="addressUrlFor(bond?.borrower)"
-        class="link link-hover text-sm skeleton-placeholder font-mono"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {{ shortenString(bond?.borrower, 25) }}
-        <external-link-icon class="inline pb-1" />
-      </a>
+    <div class="stat">
+      <div class="flex justify-between">
+        <div v-if="props.displayLenderAndBorrower || bond?.type === 'debit'">
+          <div class="stat-title skeleton-placeholder">Lender</div>
+          <a
+            :href="addressUrlFor(bond?.lender)"
+            class="link link-hover text-sm skeleton-placeholder font-mono"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {{ shortenString(bond?.lender, 10) }}
+            <external-link-icon class="inline pb-1" />
+          </a>
+        </div>
+        <div v-if="props.displayLenderAndBorrower || bond?.type === 'lend'">
+          <div class="stat-title skeleton-placeholder">Borrower</div>
+          <a
+            :href="addressUrlFor(bond?.borrower)"
+            class="link link-hover text-sm skeleton-placeholder font-mono"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {{ shortenString(bond?.lender, 10) }}
+            <external-link-icon class="inline pb-1" />
+          </a>
+        </div>
+      </div>
     </div>
     <div class="stat">
       <div class="flex">
@@ -175,18 +179,19 @@ async function repay() {
             {{ blocksLeft }}
           </div>
         </div>
-        <div
-          class="radial-progress text-xs"
-          :style="`--value: ${termProgress}; --size: 3rem; --thickness: 0.2rem;`"
-        >
-          {{ termProgress }}%
-        </div>
+      </div>
+      <div>
+        <progress
+          class="progress progress-accent h-1 p-0 m-0"
+          :value="termProgress"
+          max="100"
+        ></progress>
       </div>
 
       <div class="stat-actions text-center flex gap-2">
         <button
           v-if="bond?.liquidable"
-          class="btn btn-sm btn-primary flex-grow"
+          class="btn btn-sm btn-outline flex-grow"
           :class="{ loading }"
           :disabled="!wallet.connected || loadingBox"
           @click="liquidate()"
@@ -196,7 +201,7 @@ async function repay() {
         <button
           v-else-if="bond?.repayable"
           :class="{ loading }"
-          class="btn btn-sm btn-primary flex-grow"
+          class="btn btn-sm btn-outline flex-grow"
           :disabled="!wallet.connected || loadingBox"
           @click="repay()"
         >

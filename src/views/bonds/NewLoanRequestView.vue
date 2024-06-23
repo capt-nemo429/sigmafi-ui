@@ -374,7 +374,7 @@ async function submit() {
         <p>UI Fee: {{ decimalize(OPEN_ORDER_UI_FEE, ERG_DECIMALS) }} ERG</p>
       </div>
       <button class="btn btn-ghost" :disabled="loading" @click="emit('close')">Cancel</button>
-      <button class="btn btn-primary" :class="{ loading: loading }" @click="submit()">
+      <button class="btn btn-outline" :class="{ loading: loading }" @click="submit()">
         Confirm
       </button>
     </div>

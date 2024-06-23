@@ -1,19 +1,20 @@
 <script setup lang="ts">
 import { isEmpty } from "@fleet-sdk/common";
-import { useProgrammatic } from "@oruga-ui/oruga-next";
+import { ExternalLinkIcon, InfoIcon } from "@zhuowenli/vue-feather-icons";
 import { computed, PropType, ref, toRaw } from "vue";
-import CloseOrderConfirm from "./CloseOrderConfirm.vue";
 import AssetIcon from "@/components/AssetIcon.vue";
 import AssetRow from "@/components/AssetRow.vue";
 import BondRatioBadge from "@/components/BondRatioBadge.vue";
+import SigTooltip from "@/components/SigTooltip.vue";
 import { TransactionFactory } from "@/offchain/transactionFactory";
 import { useWalletStore } from "@/stories/walletStore";
 import { AssetType } from "@/types";
+import { addressUrlFor, shortenString } from "@/utils";
 import { formatBigNumber, Order, sendTransaction } from "@/utils";
+import { ERG_TOKEN_ID, MIN_FEE } from "@/constants";
 
 const IPFS_PROTOCOL_PREFIX = "ipfs://";
 const IPFS_GENERAL_GATEWAY = "https://cloudflare-ipfs.com/ipfs/";
-const { oruga } = useProgrammatic();
 
 const wallet = useWalletStore();
 
@@ -24,6 +25,7 @@ const props = defineProps({
 });
 
 const cancelling = ref(false);
+const closing = ref(false);
 
 function resolveIpfs(url?: string): string {
   if (!url) {
@@ -42,22 +44,51 @@ const nftBackgroundUrl = computed(() => {
     (x) => x.metadata?.type === AssetType.PictureArtwork && !!x.metadata?.url
   );
 
-  if (isEmpty(nfts)) {
-    return;
-  }
-
+  if (isEmpty(nfts)) return;
   const fileUrl = nfts[nfts.length > 1 ? randMax(nfts.length) : 0].metadata?.url;
-
   return resolveIpfs(fileUrl);
 });
 
-function openModal() {
-  oruga.modal.open({
-    component: CloseOrderConfirm,
-    props: { order: props.order },
-    width: "30rem"
-  });
-}
+const closable = computed(() => {
+  if (props.loadingBox || !wallet.connected || !props.order || isEmpty(wallet.balance)) {
+    return false;
+  }
+
+  const { principal } = props.order;
+  const principalBalance = wallet.balance.find((x) => x.tokenId === principal.tokenId);
+  if (!principalBalance) return false;
+
+  return props.order.principal.amount.lte(
+    String(
+      principalBalance.tokenId === ERG_TOKEN_ID
+        ? principalBalance.amount - MIN_FEE
+        : principalBalance.amount
+    )
+  );
+});
+
+const interest = computed(() => {
+  if (!props.order?.interest) return "";
+  const { interest } = props.order;
+
+  const amount = formatBigNumber(interest?.amount, interest?.metadata?.decimals);
+  const name = shortenString(interest?.metadata?.name || interest?.tokenId, 10);
+  return `${amount} ${name}`;
+});
+
+const fees = computed(() => {
+  if (!props.order) return "";
+  const { principal, fees } = props.order;
+
+  const amount = formatBigNumber(fees.contract.plus(fees.ui), principal?.metadata?.decimals);
+  const name = shortenString(principal?.metadata?.name || principal?.tokenId, 10);
+  return `${amount} ${name}`;
+});
+
+const blocks = computed(() => {
+  if (!props.order) return "";
+  return `${props.order.term.blocks.toLocaleString()} blocks`;
+});
 
 function randMax(max: number): number {
   return Math.floor(Math.random() * max);
@@ -65,19 +96,26 @@ function randMax(max: number): number {
 
 async function cancelOrder() {
   const box = props.order?.box;
-  if (!box) {
-    return;
-  }
+  if (!box) return;
 
   await sendTransaction(async () => {
     return await TransactionFactory.cancelOrder(toRaw(box));
   }, cancelling);
 }
+
+async function closeOrder() {
+  const box = props.order?.box;
+  if (!box) return;
+
+  await sendTransaction(async () => {
+    return await TransactionFactory.closeOrder(toRaw(box));
+  }, closing);
+}
 </script>
 
 <template>
   <div
-    class="stats flex flex-col bg-base-100 stats-vertical shadow relative"
+    class="stats flex flex-col bg-base-100 stats-vertical shadow-xl relative"
     :class="{ skeleton: loadingBox }"
   >
     <img
@@ -86,21 +124,25 @@ async function cancelOrder() {
       class="h-full absolute opacity-20 object-cover z-0 dark:opacity-10"
     />
     <div class="stat">
-      <div class="stat-title skeleton-placeholder">
-        {{ order?.term.value }} {{ order?.term.interval }} loan
-      </div>
-      <div class="stat-value text-success flex items-center gap-1">
-        <div class="flex-grow">
-          <asset-row
-            mode="amount-then-ticker"
-            :max-name-len="15"
-            :asset="order?.principal"
-            root-class="items-baseline"
-            name-class="text-sm"
-          />
+      <div class="flex justify-between align-middle">
+        <div>
+          <div class="stat-title skeleton-placeholder">Loan request</div>
+          <div class="stat-value text-success flex items-center gap-1">
+            <div class="flex-grow">
+              <asset-row
+                mode="amount-then-ticker"
+                :max-name-len="15"
+                :asset="order?.principal"
+                root-class="items-baseline"
+                name-class="text-sm"
+                hide-price
+              />
+            </div>
+          </div>
         </div>
-        <div v-if="loadingBox || !order" class="skeleton-fixed h-10 w-10 skeleton-circular"></div>
-        <asset-icon v-else custom-class="h-10 w-10" :token-id="order.principal.tokenId" />
+
+        <div v-if="loadingBox || !order" class="skeleton-fixed h-12 w-12 skeleton-circular"></div>
+        <asset-icon v-else custom-class="h-12 w-12" :token-id="order.principal.tokenId" />
       </div>
     </div>
 
@@ -149,21 +191,51 @@ async function cancelOrder() {
     <div class="flex-grow opacity-0"></div>
 
     <div class="stat">
-      <div class="stat-title">Interest</div>
-      <div class="flex gap-2">
-        <div class="stat-value skeleton-placeholder flex-grow">{{ order?.interest?.percent }}%</div>
-        <asset-row
-          hide-price
-          mode="amount-then-ticker"
-          :asset="order?.interest"
-          name-class="text-xs"
-          class="text-right"
-          root-class="items-baseline"
-        />
+      <div class="flex justify-between">
+        <div class="flex-grow">
+          <div class="stat-title skeleton-placeholder">Term</div>
+          <div class="stat-value skeleton-placeholder flex-grow">
+            {{ order?.term.value }} {{ order?.term.interval }}
+            <sig-tooltip :tip="blocks">
+              <info-icon />
+            </sig-tooltip>
+          </div>
+        </div>
       </div>
-      <div class="stat-desc skeleton-placeholder">
-        {{ formatBigNumber(order?.interest?.apr, 2) }}% APR
+    </div>
+
+    <div class="stat">
+      <div class="flex gap-2 justify-between">
+        <div>
+          <div class="stat-title">Interest</div>
+          <div class="stat-value skeleton-placeholder">
+            {{ order?.interest?.percent }}%
+            <sig-tooltip :tip="interest">
+              <info-icon />
+            </sig-tooltip>
+          </div>
+          <div class="stat-desc skeleton-placeholder">
+            {{ formatBigNumber(order?.interest?.apr, 2) }}% APR
+          </div>
+        </div>
+
+        <div>
+          <div class="stat-title">Borrower</div>
+          <a
+            :href="addressUrlFor(order?.borrower)"
+            class="link link-hover text-sm skeleton-placeholder"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {{ shortenString(order?.borrower, 10) }}
+            <external-link-icon class="inline pb-1 p-0 m-0" />
+          </a>
+        </div>
       </div>
+    </div>
+    <div class="stat">
+      <div class="stat-desc skeleton-placeholder text-center">Service Fee: {{ fees }}</div>
+
       <div class="stat-actions text-center flex gap-2">
         <button
           v-if="order?.cancellable"
@@ -175,11 +247,15 @@ async function cancelOrder() {
           Cancel
         </button>
         <button
-          class="btn btn-sm btn-primary flex-grow"
-          :disabled="!wallet.connected || loadingBox"
-          @click="openModal()"
+          class="btn btn-sm btn-outline flex-grow"
+          :class="{ loading: closing || loadingBox }"
+          :disabled="!closable"
+          @click="closeOrder()"
         >
-          Lend
+          <span v-if="closable">Lend</span>
+          <span v-else-if="loadingBox">Loading</span>
+          <span v-else-if="!wallet.connected">Wallet not connected</span>
+          <span v-else>Insufficient funds</span>
         </button>
       </div>
     </div>

@@ -61,3 +61,7 @@
 .skeleton-placeholder.skeleton-circular {
   @apply rounded-full;
 }
+
+.tabs-boxed .tab-active:not(.tab-disabled):not([disabled]) {
+  @apply bg-neutral text-neutral-content dark:invert;
+}
