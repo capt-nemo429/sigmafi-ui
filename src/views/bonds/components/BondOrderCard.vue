@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { isEmpty } from "@fleet-sdk/common";
+import { decimalize, isEmpty } from "@fleet-sdk/common";
 import { ExternalLinkIcon, InfoIcon } from "@zhuowenli/vue-feather-icons";
 import { computed, PropType, ref, toRaw } from "vue";
 import AssetIcon from "@/components/AssetIcon.vue";
 import AssetRow from "@/components/AssetRow.vue";
 import BondRatioBadge from "@/components/BondRatioBadge.vue";
 import SigTooltip from "@/components/SigTooltip.vue";
+import { ERG_TOKEN_ID, MIN_FEE } from "@/constants";
 import { TransactionFactory } from "@/offchain/transactionFactory";
 import { useWalletStore } from "@/stories/walletStore";
 import { AssetType } from "@/types";
 import { addressUrlFor, shortenString } from "@/utils";
 import { formatBigNumber, Order, sendTransaction } from "@/utils";
-import { ERG_TOKEN_ID, MIN_FEE } from "@/constants";
 
 const IPFS_PROTOCOL_PREFIX = "ipfs://";
 const IPFS_GENERAL_GATEWAY = "https://cloudflare-ipfs.com/ipfs/";
@@ -59,10 +59,11 @@ const closable = computed(() => {
   if (!principalBalance) return false;
 
   return props.order.principal.amount.lte(
-    String(
+    decimalize(
       principalBalance.tokenId === ERG_TOKEN_ID
-        ? principalBalance.amount - MIN_FEE
-        : principalBalance.amount
+        ? principalBalance.amount + MIN_FEE
+        : principalBalance.amount,
+      principal.metadata?.decimals
     )
   );
 });
