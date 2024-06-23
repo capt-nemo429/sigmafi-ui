@@ -129,14 +129,20 @@ async function setLoading(state: boolean) {
 }
 
 function loadRequests() {
-  return loadData("orders", [{ where: { ergoTrees: orderContracts } }], orderBoxes, (box) =>
-    orderContracts.includes(box.ergoTree)
+  return loadData(
+    "orders",
+    [{ where: { ergoTrees: orderContracts } }],
+    orderBoxes,
+    (box) => orderContracts.includes(box.ergoTree) && some(box.additionalRegisters)
   );
 }
 
 function loadOngoingLoans() {
-  return loadData("ongoing", [{ where: { ergoTrees: loanContracts } }], ongoingBoxes, (box) =>
-    loanContracts.includes(box.ergoTree)
+  return loadData(
+    "ongoing",
+    [{ where: { ergoTrees: loanContracts } }],
+    ongoingBoxes,
+    (box) => loanContracts.includes(box.ergoTree) && some(box.additionalRegisters)
   );
 }
 
