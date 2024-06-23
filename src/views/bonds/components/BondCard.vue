@@ -168,7 +168,7 @@ async function repay() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            {{ shortenString(bond?.lender, 10) }}
+            {{ shortenString(bond?.borrower, 10) }}
             <external-link-icon class="inline pb-1" />
           </a>
         </div>
