@@ -15,7 +15,7 @@ const wallet = useWalletStore();
 
 const props = defineProps({
   bond: { type: Object as PropType<Bond>, required: false, default: undefined },
-  displayLenderAndBorrower: { type: Boolean, default: false },
+  displayLenderAndBorrower: { type: Boolean, default: true },
   loadingBox: { type: Boolean, default: false },
   loadingMetadata: { type: Boolean, default: false }
 });
@@ -79,7 +79,7 @@ async function repay() {
     :class="{ skeleton: loadingBox }"
   >
     <div class="stat">
-      <div class="stat-title skeleton-placeholder">Repayment</div>
+      <div class="stat-title skeleton-placeholder">Value</div>
       <div class="stat-value text-success flex items-center gap-1">
         <div class="flex-grow">
           <asset-row
@@ -142,7 +142,7 @@ async function repay() {
 
     <div class="stat">
       <div class="flex justify-between">
-        <div v-if="props.displayLenderAndBorrower || bond?.type === 'debit'">
+        <div v-if="props.displayLenderAndBorrower && bond?.lender">
           <div class="stat-title skeleton-placeholder">Lender</div>
           <a
             :href="addressUrlFor(bond?.lender)"
@@ -154,7 +154,7 @@ async function repay() {
             <external-link-icon class="inline pb-1" />
           </a>
         </div>
-        <div v-if="props.displayLenderAndBorrower || bond?.type === 'lend'">
+        <div v-if="props.displayLenderAndBorrower && bond?.borrower">
           <div class="stat-title skeleton-placeholder">Borrower</div>
           <a
             :href="addressUrlFor(bond?.borrower)"
