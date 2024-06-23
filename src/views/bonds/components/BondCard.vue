@@ -79,19 +79,25 @@ async function repay() {
     :class="{ skeleton: loadingBox }"
   >
     <div class="stat">
-      <div class="stat-title skeleton-placeholder">Value</div>
-      <div class="stat-value text-success flex items-center gap-1">
+      <div class="flex">
         <div class="flex-grow">
-          <asset-row
-            :max-name-len="15"
-            :asset="bond?.principal"
-            mode="amount-then-ticker"
-            root-class="items-baseline"
-            name-class="text-sm"
-          />
+          <div class="stat-title skeleton-placeholder">Value</div>
+          <div class="stat-value text-success flex items-center gap-1">
+            <div class="flex-grow">
+              <asset-row
+                :max-name-len="15"
+                :asset="bond?.principal"
+                mode="amount-then-ticker"
+                root-class="items-baseline"
+                name-class="text-sm"
+                hide-price
+              />
+            </div>
+          </div>
         </div>
-        <div v-if="loadingBox || !bond" class="skeleton-fixed h-10 w-10 skeleton-circular"></div>
-        <asset-icon v-else custom-class="h-10 w-10" :token-id="bond.principal.tokenId" />
+
+        <div v-if="loadingBox || !bond" class="skeleton-fixed h-12 w-12 skeleton-circular"></div>
+        <asset-icon v-else custom-class="h-12 w-12" :token-id="bond.principal.tokenId" />
       </div>
     </div>
 

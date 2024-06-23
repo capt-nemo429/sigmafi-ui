@@ -66,6 +66,6 @@
   @apply bg-neutral text-neutral-content dark:bg-slate-300 dark:text-base-100 dark:hover:bg-slate-200;
 }
 
-.btn-cta {
+.btn-cta:not([disabled]) {
   @apply dark:bg-slate-300 dark:text-base-100 dark:hover:bg-slate-200;
 }
