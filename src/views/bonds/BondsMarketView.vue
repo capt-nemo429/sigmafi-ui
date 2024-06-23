@@ -194,7 +194,7 @@ async function loadData(
               'tab-active': selectedTab === 'ongoing'
             }"
             @click="selectedTab = 'ongoing'"
-            >Ongoing loans</a
+            >Active bonds</a
           >
         </div>
 
