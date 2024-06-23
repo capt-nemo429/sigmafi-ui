@@ -12,7 +12,9 @@ import { MIN_FEE } from "@/constants";
 import { useChainStore, useWalletStore } from "@/stories";
 
 export const OPEN_ORDER_UI_FEE = 10000000n;
-const uiFeeAddress = ErgoAddress.fromBase58("9i3g6d958MpZAqWn9hrTHcqbBiY5VPYBBY6vRDszZn4koqnahin");
+const IMPLEMENTOR_ADDRESS = ErgoAddress.fromBase58(
+  "9i3g6d958MpZAqWn9hrTHcqbBiY5VPYBBY6vRDszZn4koqnahin"
+);
 
 export class TransactionFactory {
   public static async openOrder(order: Omit<OpenOrderParams, "borrower">) {
@@ -20,7 +22,6 @@ export class TransactionFactory {
     const unsignedTx = new TransactionBuilder(chain.height)
       .from(inputs)
       .extend(OpenOrderPlugin({ ...order, borrower: changeAddress }))
-      .to(new OutputBuilder(OPEN_ORDER_UI_FEE, uiFeeAddress))
       .payFee(MIN_FEE)
       .sendChangeTo(changeAddress)
       .build()
@@ -51,7 +52,7 @@ export class TransactionFactory {
         CloseOrderPlugin(orderBox, {
           currentHeight: chain.height,
           lender: changeAddress,
-          uiImplementor: uiFeeAddress
+          uiImplementor: IMPLEMENTOR_ADDRESS
         })
       )
       .payFee(MIN_FEE)
