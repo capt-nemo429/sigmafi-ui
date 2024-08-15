@@ -45,5 +45,13 @@ export const VERIFIED_ASSETS: VerifiedAsset[] = [
   {
     tokenId: "7ba2a85fdb302a181578b1f64cb4a533d89b3f8de4159efece75da41041537f9",
     metadata: { name: "GORT", decimals: 0 }
+  },
+  {
+    tokenId: "886b7721bef42f60c6317d37d8752da8aca01898cae7dae61808c4a14225edc8",
+    metadata: { name: "GAU", decimals: 9 }
+  },
+  {
+    tokenId: "9944ff273ff169f32b851b96bbecdbb67f223101c15ae143de82b3e7f75b19d2",
+    metadata: { name: "GAUC", decimals: 9 }
   }
 ];
