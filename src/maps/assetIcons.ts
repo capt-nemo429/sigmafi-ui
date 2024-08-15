@@ -22,5 +22,7 @@ export const ASSET_ICONS: { [tokenId: string]: string } = {
   ["52f4544ce8a420d484ece16f9b984d81c23e46971ef5e37c29382ac50f80d5bd"]: "empty.svg",
   ["8b08cdd5449a9592a9e79711d7d79249d7a03c535d17efaee83e216e80a44c4b"]: "rosen.svg",
   ["e023c5f382b6e96fbd878f6811aac73345489032157ad5affb84aefd4956c297"]: "rsada.svg",
-  ["7a51950e5f548549ec1aa63ffdc38279505b11e7e803d01bcf8347e0123c88b0"]: "rsbtc.svg"
+  ["7a51950e5f548549ec1aa63ffdc38279505b11e7e803d01bcf8347e0123c88b0"]: "rsbtc.svg",
+  ["886b7721bef42f60c6317d37d8752da8aca01898cae7dae61808c4a14225edc8"]: "GAU.png",
+  ["9944ff273ff169f32b851b96bbecdbb67f223101c15ae143de82b3e7f75b19d2"]: "GAUC.png"
 };
