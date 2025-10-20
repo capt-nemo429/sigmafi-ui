@@ -25,7 +25,7 @@ class GraphQLService extends ErgoGraphQLProvider {
   constructor() {
     super(
       getNetworkType() === Network.Mainnet
-        ? "https://gql.ergoplatform.com/"
+        ? "https://explore.sigmaspace.io/api/graphql/"
         : "https://tn-ergo-explorer.anetabtc.io/graphql"
     );
 
